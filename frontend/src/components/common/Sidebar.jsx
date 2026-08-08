@@ -17,7 +17,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 
 export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen }) => {
-  const { user, role, switchRole, logout } = useAuth();
+  const { user, role, logout } = useAuth();
 
   const adminNav = [
     { id: 'dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
@@ -58,63 +58,57 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen }) => {
         }`}
       >
         {/* Brand Logo */}
-        <div className="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 ring-1 ring-white/20">
-            <Building2 className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold bg-gradient-to-r from-white via-sky-100 to-sky-400 bg-clip-text text-transparent">
-              Leaseify
-            </h1>
-            <p className="text-[10px] text-slate-400 font-medium tracking-wide">RENTAL MANAGEMENT</p>
+        <div className="h-16 flex items-center px-4 border-b border-slate-800 gap-3">
+          <img
+            src="/logo.png"
+            alt="Leaseify.co Logo"
+            className="h-10 w-10 rounded-xl object-cover shadow-lg shadow-teal-500/20 ring-1 ring-white/10 shrink-0"
+          />
+          <div className="min-w-0">
+            <div className="flex items-center gap-1">
+              <h1 className="text-base font-black text-white tracking-tight leading-none">
+                Lease<span className="text-[#a3e635]">ify</span><span className="text-xs text-sky-400 font-bold">.co</span>
+              </h1>
+            </div>
+            <p className="text-[10px] text-slate-400 font-medium tracking-wide mt-0.5 truncate">
+              Lease your Luxury
+            </p>
           </div>
         </div>
 
-        {/* Quick Role Switcher Banner */}
-        <div className="mx-4 my-4 p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-xs">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-slate-400 font-medium">Active Persona:</span>
-            <span
-              className={`px-2 py-0.5 rounded-md font-semibold text-[11px] ${
+        {/* Account Status Badge (Read-Only) */}
+        <div className="mx-4 my-4 p-3 rounded-2xl bg-slate-800/40 border border-slate-800 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <div
+              className={`h-7 w-7 rounded-lg flex items-center justify-center font-bold text-xs ${
                 role === 'admin'
                   ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                   : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
               }`}
             >
-              {role === 'admin' ? 'Property Admin' : 'Resident Tenant'}
-            </span>
+              {role === 'admin' ? (
+                <ShieldCheck className="w-4 h-4" />
+              ) : (
+                <UserCheck className="w-4 h-4" />
+              )}
+            </div>
+            <div>
+              <p className="text-[11px] font-bold text-white leading-tight">
+                {role === 'admin' ? 'Property Administrator' : 'Resident Tenant'}
+              </p>
+              <p className="text-[10px] text-slate-400">Authenticated Session</p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5 pt-1">
-            <button
-              onClick={() => {
-                switchRole('admin');
-                if (currentTab === 'tenant-portal') setCurrentTab('dashboard');
-              }}
-              className={`py-1.5 px-2 rounded-lg text-[11px] font-medium transition-all flex items-center justify-center gap-1 ${
-                role === 'admin'
-                  ? 'bg-sky-500 text-white shadow-md shadow-sky-500/25'
-                  : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Admin
-            </button>
-            <button
-              onClick={() => {
-                switchRole('user');
-                setCurrentTab('tenant-portal');
-              }}
-              className={`py-1.5 px-2 rounded-lg text-[11px] font-medium transition-all flex items-center justify-center gap-1 ${
-                role === 'user'
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/25'
-                  : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
-              }`}
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-              Tenant
-            </button>
-          </div>
+          <span
+            className={`px-2 py-0.5 rounded-md font-bold uppercase text-[9px] tracking-wider ${
+              role === 'admin'
+                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+            }`}
+          >
+            {role}
+          </span>
         </div>
 
         {/* Navigation Links */}

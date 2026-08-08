@@ -233,7 +233,7 @@ export const PropertiesTab = ({ isAddModalOpen, setIsAddModalOpen }) => {
                   <Bath className="w-3.5 h-3.5" /> {property.bathrooms} Baths
                 </span>
                 <span className="flex items-center gap-1">
-                  <Square className="w-3.5 h-3.5" /> {property.areaSqFt} sq ft
+                  <Maximize2 className="w-3.5 h-3.5" /> {property.areaSqFt} sq ft
                 </span>
               </div>
             </div>

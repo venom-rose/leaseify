@@ -50,14 +50,18 @@ export const SignupPage = ({ onNavigateToLogin }) => {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10 px-4">
         {/* Brand Logo */}
-        <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 shadow-xl shadow-sky-500/25 ring-1 ring-white/20 mb-4">
-          <Building2 className="w-7 h-7 text-white" />
+        <div className="inline-flex items-center justify-center mb-3">
+          <img
+            src="/logo.png"
+            alt="Leaseify.co Logo"
+            className="h-20 w-20 rounded-3xl object-cover shadow-2xl shadow-teal-500/25 ring-2 ring-white/10"
+          />
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-sky-100 to-sky-400 bg-clip-text text-transparent">
-          Leaseify
+        <h1 className="text-3xl font-extrabold tracking-tight text-white">
+          Lease<span className="text-[#a3e635]">ify</span><span className="text-sky-400">.co</span>
         </h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Create your tenant resident account
+        <p className="mt-1 text-sm text-slate-300 font-medium">
+          Lease your Luxury
         </p>
       </div>
 

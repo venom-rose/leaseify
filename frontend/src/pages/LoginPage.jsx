@@ -22,8 +22,14 @@ export const LoginPage = ({ onNavigateToSignup }) => {
     setLoading(false);
   };
 
-  const handleQuickDemo = (role) => {
-    switchRole(role);
+  const handleQuickFill = (type) => {
+    if (type === 'admin') {
+      setEmail('admin@leaseify.com');
+      setPassword('password123');
+    } else {
+      setEmail('tenant@leaseify.com');
+      setPassword('password123');
+    }
   };
 
   return (
@@ -34,14 +40,18 @@ export const LoginPage = ({ onNavigateToSignup }) => {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10 px-4">
         {/* Brand Logo */}
-        <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 shadow-xl shadow-sky-500/25 ring-1 ring-white/20 mb-4">
-          <Building2 className="w-7 h-7 text-white" />
+        <div className="inline-flex items-center justify-center mb-3">
+          <img
+            src="/logo.png"
+            alt="Leaseify.co Logo"
+            className="h-20 w-20 rounded-3xl object-cover shadow-2xl shadow-teal-500/25 ring-2 ring-white/10"
+          />
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-sky-100 to-sky-400 bg-clip-text text-transparent">
-          Leaseify
+        <h1 className="text-3xl font-extrabold tracking-tight text-white">
+          Lease<span className="text-[#a3e635]">ify</span><span className="text-sky-400">.co</span>
         </h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Smart Rental & Property Management Platform
+        <p className="mt-1 text-sm text-slate-300 font-medium">
+          Lease your Luxury
         </p>
       </div>
 
@@ -54,33 +64,33 @@ export const LoginPage = ({ onNavigateToSignup }) => {
             </p>
           </div>
 
-          {/* Quick 1-Click Demo Login Shortcuts */}
+          {/* Quick Demo Credentials Autofill */}
           <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-              ⚡ Quick 1-Click Demo Login
+              ⚡ Demo Accounts (Autofill Credentials)
             </p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => handleQuickDemo('admin')}
+                onClick={() => handleQuickFill('admin')}
                 className="flex items-center gap-2 p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/25 hover:bg-purple-500/20 text-left transition-all group"
               >
                 <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-white group-hover:text-purple-300 truncate">Manager (Admin)</p>
-                  <p className="text-[10px] text-slate-400 truncate">Full dashboard</p>
+                  <p className="text-[10px] text-slate-400 truncate">admin@leaseify.com</p>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickDemo('user')}
+                onClick={() => handleQuickFill('user')}
                 className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/20 text-left transition-all group"
               >
                 <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white group-hover:text-emerald-300 truncate">Tenant (Alex)</p>
-                  <p className="text-[10px] text-slate-400 truncate">Resident portal</p>
+                  <p className="text-xs font-bold text-white group-hover:text-emerald-300 truncate">Tenant (Resident)</p>
+                  <p className="text-[10px] text-slate-400 truncate">tenant@leaseify.com</p>
                 </div>
               </button>
             </div>
