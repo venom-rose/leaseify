@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Leaseify — Premier Car & Luxury Fleet Rental</title>
-  <meta name="description" content="Experience high-performance supercar, luxury SUV, and electric hypercar rentals with automated escrow deposit reconciliation and real-time operations dashboard.">
+  <meta name="description" content="Experience high-performance supercar, luxury SUV, and electric hypercar rentals with automated escrow deposit reconciliation, pickup & return dispatch management, and real-time operations dashboard.">
   
   <!-- Premium Fonts from Google -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,7 +32,7 @@
             LEASEIFY<span class="brand-gold">.FLEET</span>
           </h1>
           <p class="splash-subtitle">
-            The next-generation luxury automotive rental platform. Seamless cart checkout, transparent deposit escrow, automated return penalty intelligence, and instant invoices.
+            The next-generation luxury automotive rental platform. Seamless cart checkout, offline quotations, escrow deposit vault, route dispatching, and automated diagnostic intake inspections.
           </p>
 
           <div class="splash-car-preview">
@@ -72,17 +72,43 @@
             <i data-lucide="car"></i> Fleet Showroom
           </button>
           <button class="nav-link" id="nav-my-rentals" onclick="app.navigate('my-rentals')">
-            <i data-lucide="key-round"></i> My Bookings & Invoices
+            <i data-lucide="key-round"></i> My Bookings & Passes
             <span class="badge-counter" id="my-rentals-count">0</span>
           </button>
+          
+          <!-- Admin-Only Navigation Suite -->
           <button class="nav-link admin-only" id="nav-admin" onclick="app.navigate('admin')">
-            <i data-lucide="layout-dashboard"></i> Fleet Ops Hub
+            <i data-lucide="layout-dashboard"></i> Operations Hub
+          </button>
+          <button class="nav-link admin-only" id="nav-dispatch" onclick="app.navigate('dispatch')">
+            <i data-lucide="truck"></i> Pickup & Return Hub
+          </button>
+          <button class="nav-link admin-only" id="nav-deposits" onclick="app.navigate('deposits')">
+            <i data-lucide="shield-check"></i> Escrow Vault
+          </button>
+          <button class="nav-link admin-only" id="nav-quotations" onclick="app.navigate('quotations')">
+            <i data-lucide="file-spreadsheet"></i> Quotations
           </button>
           <button class="nav-link admin-only" id="nav-inventory" onclick="app.navigate('inventory')">
-            <i data-lucide="boxes"></i> Vehicle Fleet
+            <i data-lucide="boxes"></i> Vehicles
+          </button>
+          <button class="nav-link admin-only" id="nav-pricelists" onclick="app.navigate('pricelists')">
+            <i data-lucide="tags"></i> Pricelists
+          </button>
+          <button class="nav-link admin-only" id="nav-users" onclick="app.navigate('users')">
+            <i data-lucide="users"></i> Clients
           </button>
           <button class="nav-link admin-only" id="nav-settings" onclick="app.navigate('settings')">
-            <i data-lucide="sliders"></i> Rate & Policies
+            <i data-lucide="sliders"></i> Policies & Late Fees
+          </button>
+          <button class="nav-link admin-only" id="nav-maintenance" onclick="app.navigate('maintenance')">
+            <i data-lucide="wrench"></i> Telemetry & Maintenance
+          </button>
+          <button class="nav-link admin-only" id="nav-reminders" onclick="app.navigate('reminders')">
+            <i data-lucide="bell"></i> Reminders Stream
+          </button>
+          <button class="nav-link admin-only" id="nav-forecasting" onclick="app.navigate('forecasting')">
+            <i data-lucide="line-chart"></i> Forecasting
           </button>
         </nav>
       </div>
@@ -92,6 +118,11 @@
         <button class="btn-cart-nav" onclick="app.openCartModal()" id="btn-nav-cart" title="View Reservation Cart">
           <i data-lucide="shopping-bag"></i>
           <span class="cart-badge-count" id="nav-cart-count">0</span>
+        </button>
+
+        <!-- QR/Barcode Scanner Button -->
+        <button class="btn btn-sm btn-secondary" onclick="app.openScannerModal()" title="Interactive QR / Barcode Scanner">
+          <i data-lucide="qr-code"></i> Code Scanner
         </button>
 
         <!-- Time Machine Simulation Pill -->
@@ -135,11 +166,9 @@
     <main class="main-content" id="main-container" style="display: none;">
       
       <!-- ======================================================== -->
-      <!-- VIEW 1: CONCEPTZILLA / SHAKURO LUXURY SHOWROOM -->
+      <!-- VIEW 1: FLEET SHOWROOM -->
       <!-- ======================================================== -->
       <section id="view-store" class="view-section">
-        
-        <!-- Hero Section with Spotlight Car Showcase -->
         <div class="concept-hero">
           <div class="hero-glow-bg"></div>
           
@@ -165,7 +194,6 @@
             </div>
           </div>
 
-          <!-- Interactive Spotlight Featured Car Card -->
           <div class="hero-spotlight-card">
             <div class="spotlight-header">
               <div>
@@ -178,12 +206,10 @@
               </div>
             </div>
 
-            <!-- Spotlight Car Image with Color Glow -->
             <div class="spotlight-img-container" id="spotlight-img-box">
               <img id="spotlight-car-img" src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200&auto=format&fit=crop&q=80" alt="Porsche 911 GT3 RS" class="spotlight-image">
             </div>
 
-            <!-- Live Performance Telemetry Grid -->
             <div class="spotlight-telemetry-grid">
               <div class="telemetry-item">
                 <span class="tele-val" id="spotlight-accel">3.0s</span>
@@ -203,10 +229,9 @@
               </div>
             </div>
 
-            <!-- Color Customizer & Action Bar -->
-            <div class="spotlight-actions-bar">
-              <div class="color-palette-group">
-                <span class="palette-lbl">Color:</span>
+            <div class="spotlight-actions-bar" style="display: flex; justify-content: space-between; align-items: center;">
+              <div class="color-palette-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Color:</span>
                 <button class="color-dot color-gold active" onclick="app.setHeroColor('#f59e0b', 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200&auto=format&fit=crop&q=80', 'Speed Yellow / Gold')"></button>
                 <button class="color-dot color-red" onclick="app.setHeroColor('#ef4444', 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&auto=format&fit=crop&q=80', 'Guards Red')"></button>
                 <button class="color-dot color-cyan" onclick="app.setHeroColor('#06b6d4', 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=1200&auto=format&fit=crop&q=80', 'Electric Cyan')"></button>
@@ -266,24 +291,17 @@
           </button>
         </div>
 
-        <!-- Category Showcase Filter Pills -->
         <div class="showroom-header-bar">
           <div>
             <span class="section-tag">AVAILABLE FLEET</span>
             <h2 class="section-title">Select Your Vehicle</h2>
           </div>
 
-          <div class="category-pills" id="category-pills-container">
-            <!-- Rendered dynamically -->
-          </div>
+          <div class="category-pills" id="category-pills-container"></div>
         </div>
 
-        <!-- Vehicle Fleet Cards Grid -->
-        <div class="fleet-grid" id="products-grid">
-          <!-- Rendered dynamically -->
-        </div>
+        <div class="fleet-grid" id="products-grid"></div>
 
-        <!-- Trust & Value Badges Strip -->
         <div class="trust-banner-strip">
           <div class="trust-item">
             <div class="trust-icon"><i data-lucide="shield-check"></i></div>
@@ -310,14 +328,14 @@
       </section>
 
       <!-- ======================================================== -->
-      <!-- VIEW 2: CUSTOMER DASHBOARD ("MY BOOKINGS & INVOICES") -->
+      <!-- VIEW 2: CUSTOMER DASHBOARD ("MY BOOKINGS & PASSES") -->
       <!-- ======================================================== -->
       <section id="view-my-rentals" class="view-section">
         <div class="page-header">
           <div>
             <span class="section-tag">CLIENT PORTAL & ORDERS</span>
-            <h1 class="page-title">My Vehicle Bookings & Invoices</h1>
-            <p class="page-subtitle">Track ongoing rentals, initiate store returns with automated deposit settlement, view payment breakdowns, and download official invoices.</p>
+            <h1 class="page-title">My Vehicle Bookings & Pickup Passes</h1>
+            <p class="page-subtitle">Track ongoing rentals, access digital QR pickup passes, view penalty invoices, initiate store returns with automated deposit settlement, and download official invoices.</p>
           </div>
           <div class="header-actions">
             <button class="btn btn-secondary" onclick="app.openProfileModal()">
@@ -329,7 +347,6 @@
           </div>
         </div>
 
-        <!-- Customer Summary Cards -->
         <div class="kpi-grid customer-kpi-grid">
           <div class="stat-card glass-card">
             <div class="stat-icon-wrapper bg-gold">
@@ -362,159 +379,201 @@
           </div>
         </div>
 
-        <!-- Customer Rentals List -->
-        <div class="rentals-list-container" id="customer-rentals-list">
-          <!-- Rendered dynamically -->
-        </div>
+        <div class="rentals-list-container" id="customer-rentals-list"></div>
       </section>
 
       <!-- ======================================================== -->
-      <!-- VIEW 3: ADMIN CENTRAL OPERATIONS DASHBOARD -->
+      <!-- VIEW 3: POWERFUL RENTAL OPERATIONS DASHBOARD (ADMIN) -->
       <!-- ======================================================== -->
       <section id="view-admin" class="view-section">
         <div class="page-header">
           <div>
             <div class="admin-badge-pill">
-              <i data-lucide="shield-check"></i> Executive Fleet Control Center
+              <i data-lucide="activity"></i> Executive Rental Operations Control Center
             </div>
-            <h1 class="page-title">Fleet Operations Dashboard</h1>
-            <p class="page-subtitle">Real-time vehicle telemetry, automated late penalty tracking, multi-stage workflow pipeline, and deposit escrow reconciliation.</p>
+            <h1 class="page-title">Rental Operations Dashboard</h1>
+            <p class="page-subtitle">Real-time daily operations telemetry, urgent overdue alerts, returns due today, upcoming handovers, and escrow collections.</p>
           </div>
           <div class="header-actions">
+            <div class="live-pulse-badge" id="live-sync-indicator">
+              <span class="pulse-dot"></span> Live Ops Active
+            </div>
             <button class="btn btn-secondary" onclick="app.refreshAnalytics()">
               <i data-lucide="refresh-cw"></i> Refresh Telemetry
             </button>
-            <button class="btn btn-gold" onclick="app.navigate('inventory')">
-              <i data-lucide="plus-circle"></i> Add Vehicle to Fleet
+            <button class="btn btn-gold" onclick="app.navigate('dispatch')">
+              <i data-lucide="truck"></i> Pickup & Return Hub
             </button>
           </div>
         </div>
 
-        <!-- Executive KPI Metrics Grid -->
-        <div class="kpi-grid">
-          <div class="stat-card glass-card">
+        <!-- 8 Core Operations KPI Cards -->
+        <div class="kpi-grid operations-8-kpi-grid">
+          <div class="stat-card glass-card" onclick="app.filterAdminTable('ACTIVE')" style="cursor: pointer;">
             <div class="stat-card-header">
-              <span class="stat-label">Active Fleet on Road</span>
-              <div class="stat-icon-wrapper bg-gold">
-                <i data-lucide="activity"></i>
+              <span class="stat-label">Active On-Road Fleet</span>
+              <div class="stat-icon-wrapper bg-emerald">
+                <i data-lucide="car"></i>
               </div>
             </div>
-            <div class="stat-value" id="kpi-active-rentals">0</div>
-            <div class="stat-subtext text-gold">
-              <span id="kpi-ready-pickup">0</span> ready for handover • <span id="kpi-pending-approval">0</span> pending
+            <div class="stat-value text-emerald" id="kpi-active-rentals">0</div>
+            <div class="stat-subtext text-emerald">
+              <span id="kpi-utilization-badge">0% Utilization</span>
             </div>
           </div>
 
-          <div class="stat-card glass-card border-danger-subtle">
+          <div class="stat-card glass-card border-warning-subtle" onclick="app.filterOperationsQueue('DUE_TODAY')" style="cursor: pointer;">
             <div class="stat-card-header">
-              <span class="stat-label">Overdue Returns</span>
+              <span class="stat-label">Rentals Due Today</span>
+              <div class="stat-icon-wrapper bg-amber">
+                <i data-lucide="clock"></i>
+              </div>
+            </div>
+            <div class="stat-value text-amber" id="kpi-due-today">0</div>
+            <div class="stat-subtext text-amber">
+              Scheduled for return intake today
+            </div>
+          </div>
+
+          <div class="stat-card glass-card" onclick="app.navigate('dispatch')" style="cursor: pointer;">
+            <div class="stat-card-header">
+              <span class="stat-label">Upcoming Pickups</span>
+              <div class="stat-icon-wrapper bg-cyan">
+                <i data-lucide="key"></i>
+              </div>
+            </div>
+            <div class="stat-value text-cyan" id="kpi-upcoming-pickups">0</div>
+            <div class="stat-subtext text-muted">
+              Next 48–72h staging queue
+            </div>
+          </div>
+
+          <div class="stat-card glass-card" onclick="app.navigate('dispatch')" style="cursor: pointer;">
+            <div class="stat-card-header">
+              <span class="stat-label">Upcoming Returns</span>
+              <div class="stat-icon-wrapper bg-gold">
+                <i data-lucide="calendar-check"></i>
+              </div>
+            </div>
+            <div class="stat-value text-gold" id="kpi-upcoming-returns">0</div>
+            <div class="stat-subtext text-muted">
+              Returning within 3 days
+            </div>
+          </div>
+
+          <div class="stat-card glass-card border-danger-subtle" onclick="app.filterAdminTable('OVERDUE')" style="cursor: pointer;">
+            <div class="stat-card-header">
+              <span class="stat-label">Overdue Vehicles</span>
               <div class="stat-icon-wrapper bg-rose">
                 <i data-lucide="alert-triangle"></i>
               </div>
             </div>
             <div class="stat-value text-rose" id="kpi-overdue-rentals">0</div>
-            <div class="stat-subtext text-rose" id="kpi-overdue-penalties">
-              $0.00 accrued penalties
+            <div class="stat-subtext text-rose" id="kpi-overdue-subtext">
+              Action required immediately
             </div>
           </div>
 
           <div class="stat-card glass-card">
             <div class="stat-card-header">
-              <span class="stat-label">Gross Revenue</span>
+              <span class="stat-label">Total Gross Revenue</span>
               <div class="stat-icon-wrapper bg-emerald">
                 <i data-lucide="dollar-sign"></i>
               </div>
             </div>
             <div class="stat-value text-emerald" id="kpi-gross-revenue">$0.00</div>
             <div class="stat-subtext text-muted">
-              Base: <span id="kpi-base-rev">$0.00</span> | Penalties: <span id="kpi-penalties-rev">$0.00</span>
+              Base: <span id="kpi-base-rev">$0.00</span> | Logistics: <span id="kpi-deliv-rev">$0.00</span>
             </div>
           </div>
 
-          <div class="stat-card glass-card">
+          <div class="stat-card glass-card" onclick="app.navigate('deposits')" style="cursor: pointer;">
             <div class="stat-card-header">
-              <span class="stat-label">Deposits in Escrow</span>
+              <span class="stat-label">Security Deposits Held</span>
               <div class="stat-icon-wrapper bg-amber">
                 <i data-lucide="lock"></i>
               </div>
             </div>
             <div class="stat-value text-amber" id="kpi-escrow-held">$0.00</div>
             <div class="stat-subtext text-muted">
-              Refunded: <span id="kpi-escrow-refunded">$0.00</span>
+              Escrow locked for on-road fleet
             </div>
           </div>
 
-          <div class="stat-card glass-card">
+          <div class="stat-card glass-card" onclick="app.filterAdminTable('OVERDUE')" style="cursor: pointer;">
             <div class="stat-card-header">
-              <span class="stat-label">Fleet Utilization</span>
-              <div class="stat-icon-wrapper bg-cyan">
-                <i data-lucide="pie-chart"></i>
+              <span class="stat-label">Late Fee Collection</span>
+              <div class="stat-icon-wrapper bg-rose">
+                <i data-lucide="receipt"></i>
               </div>
             </div>
-            <div class="stat-value" id="kpi-utilization-rate">0%</div>
+            <div class="stat-value text-rose" id="kpi-late-fee-collection">$0.00</div>
             <div class="stat-subtext text-muted">
-              <span id="kpi-rented-items">0</span> of <span id="kpi-total-items">0</span> vehicles rented
+              Accrued & collected penalties
             </div>
           </div>
         </div>
 
-        <!-- Overdue Action Alert Banner -->
-        <div class="overdue-banner" id="overdue-alert-banner" style="display: none;">
-          <div class="overdue-banner-icon">
-            <i data-lucide="alert-octagon"></i>
+        <!-- Urgent Action Radar (Overdue Vehicles Callout) -->
+        <div class="urgent-action-radar glass-card" id="urgent-overdue-radar" style="display: none; border-color: var(--rose); margin-bottom: 2rem;">
+          <div class="radar-header">
+            <div class="radar-title">
+              <div class="radar-pulse-icon">
+                <i data-lucide="alert-octagon"></i>
+              </div>
+              <div>
+                <h3 style="color: #fff; font-size: 1.15rem;">Urgent Action Required: <span id="radar-overdue-count">0</span> Overdue Vehicle(s)</h3>
+                <p style="color: #fecdd3; font-size: 0.85rem;">Automatic penalty calculation active. Prioritize intake return inspection and driver contact.</p>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="app.filterAdminTable('OVERDUE')">
+              View All Overdue &rarr;
+            </button>
           </div>
-          <div class="overdue-banner-text">
-            <h4>Attention: <span id="overdue-count-banner">0</span> Vehicles are Currently Overdue</h4>
-            <p>Automated penalty engine has applied late fees based on configured multiplier. Review items below for return intake or customer follow-up.</p>
-          </div>
-          <button class="btn btn-sm btn-danger" onclick="app.filterAdminTable('OVERDUE')">
-            View Overdue Queue
-          </button>
+
+          <div class="urgent-overdue-items-grid" id="urgent-overdue-items-container"></div>
         </div>
 
-        <!-- Charts Grid -->
-        <div class="admin-charts-grid">
+        <!-- Operations Charts Grid -->
+        <div class="admin-charts-grid" style="margin-bottom: 2rem;">
           <div class="glass-card chart-panel">
             <div class="panel-header">
               <div class="panel-title">
-                <i data-lucide="git-merge"></i> Rental Workflow Funnel
+                <i data-lucide="git-merge"></i> Rental Lifecycle Funnel
               </div>
-              <span class="badge-soft">Live Status</span>
+              <span class="badge-soft">Active Pipeline</span>
             </div>
-            <div class="funnel-bars" id="funnel-bars-container">
-              <!-- Rendered dynamically -->
-            </div>
+            <div class="funnel-bars" id="funnel-bars-container"></div>
           </div>
 
           <div class="glass-card chart-panel">
             <div class="panel-header">
               <div class="panel-title">
-                <i data-lucide="bar-chart-3"></i> Fleet Category Share
+                <i data-lucide="pie-chart"></i> Revenue & Fee Composition
               </div>
-              <span class="badge-soft">Fleet Distribution</span>
+              <span class="badge-soft">Financial Ledger</span>
             </div>
-            <div class="category-bars" id="category-distribution-container">
-              <!-- Rendered dynamically -->
-            </div>
+            <div class="revenue-breakdown-bars" id="revenue-composition-container"></div>
           </div>
         </div>
 
-        <!-- Orders Table -->
+        <!-- Operations Dispatch Table -->
         <div class="glass-card table-panel">
           <div class="table-toolbar">
             <div class="table-title-group">
-              <h3>Vehicle Rentals & Lifecycle Pipeline</h3>
-              <span class="badge-count" id="admin-orders-count">0 Orders</span>
+              <h3 id="ops-table-heading">Daily Operations Dispatch & Handover Queue</h3>
+              <span class="badge-count" id="admin-orders-count">0 Bookings</span>
             </div>
 
             <div class="table-filters">
               <div class="status-tabs">
-                <button class="status-tab active" onclick="app.filterAdminTable('ALL')">All</button>
-                <button class="status-tab tab-pending" onclick="app.filterAdminTable('PENDING_APPROVAL')">Pending</button>
-                <button class="status-tab tab-ready" onclick="app.filterAdminTable('READY_FOR_PICKUP')">Ready for Pickup</button>
+                <button class="status-tab active" onclick="app.filterAdminTable('ALL')">All Operations</button>
+                <button class="status-tab" onclick="app.filterOperationsQueue('DUE_TODAY')">⏱️ Due Today</button>
+                <button class="status-tab" onclick="app.filterOperationsQueue('UPCOMING_PICKUPS')">🔑 Upcoming Pickups</button>
+                <button class="status-tab" onclick="app.filterOperationsQueue('UPCOMING_RETURNS')">🔄 Upcoming Returns</button>
+                <button class="status-tab tab-overdue" onclick="app.filterAdminTable('OVERDUE')">🚨 Overdue & Penalties</button>
                 <button class="status-tab tab-active" onclick="app.filterAdminTable('ACTIVE')">Active On Road</button>
-                <button class="status-tab tab-overdue" onclick="app.filterAdminTable('OVERDUE')">Overdue</button>
-                <button class="status-tab tab-return" onclick="app.filterAdminTable('RETURN_SUBMITTED')">Return Intake</button>
+                <button class="status-tab tab-ready" onclick="app.filterAdminTable('READY_FOR_PICKUP')">Ready for Pickup</button>
                 <button class="status-tab tab-completed" onclick="app.filterAdminTable('INSPECTED_COMPLETED')">Completed</button>
               </div>
 
@@ -534,41 +593,442 @@
                   <th>Vehicle & VIN</th>
                   <th>Rental Period</th>
                   <th>Rental Fee / Escrow</th>
-                  <th>Penalty / Damage</th>
+                  <th>Penalty / Delay</th>
                   <th>Status</th>
                   <th class="text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody id="admin-rentals-table-body">
-                <!-- Rendered dynamically -->
-              </tbody>
+              <tbody id="admin-rentals-table-body"></tbody>
             </table>
           </div>
         </div>
 
-        <!-- Live Activity Audit Trail -->
+        <!-- Activity Audit Feed -->
         <div class="glass-card activity-panel">
           <div class="panel-header">
             <div class="panel-title">
-              <i data-lucide="file-clock"></i> Live Fleet Audit Trail & Telemetry Events
+              <i data-lucide="file-clock"></i> Real-Time Operations Log & Telemetry Audit Trail
             </div>
-            <span class="badge-soft">Real-Time</span>
+            <span class="badge-soft">Live Event Stream</span>
           </div>
-          <div class="activity-feed" id="activity-feed-container">
-            <!-- Rendered dynamically -->
+          <div class="activity-feed" id="activity-feed-container"></div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW: PICKUP & RETURN MANAGEMENT HUB (ADMIN) -->
+      <!-- ======================================================== -->
+      <section id="view-dispatch" class="view-section">
+        <div class="page-header">
+          <div>
+            <div class="admin-badge-pill">
+              <i data-lucide="truck"></i> Logistics & Operations Center
+            </div>
+            <h1 class="page-title">Pickup & Return Management Hub</h1>
+            <p class="page-subtitle">Manage daily pickup schedules, route planning, QR scanning handovers, condition inspections, missing items checks, and automated repair work orders.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary" onclick="app.fetchDispatchHub()">
+              <i data-lucide="refresh-cw"></i> Refresh Hub
+            </button>
+          </div>
+        </div>
+
+        <!-- Dispatch Hub Sub-Tabs -->
+        <div class="status-tabs dispatch-subtabs" style="margin-bottom: 1.5rem;">
+          <button class="status-tab active" id="tab-dispatch-pickups" onclick="app.switchDispatchTab('pickups')">
+            <i data-lucide="key"></i> Daily Pickups & Route Dispatch
+          </button>
+          <button class="status-tab" id="tab-dispatch-returns" onclick="app.switchDispatchTab('returns')">
+            <i data-lucide="arrow-down-left"></i> Daily Returns & Intake Diagnostics
+          </button>
+          <button class="status-tab" id="tab-dispatch-repairs" onclick="app.switchDispatchTab('repairs')">
+            <i data-lucide="wrench"></i> Service Bay & Repair Workflows
+          </button>
+        </div>
+
+        <!-- SUBTAB 1: DAILY PICKUPS & ROUTE PLANNING -->
+        <div id="dispatch-subtab-pickups" class="dispatch-subtab-content active">
+          <!-- Pickup Metrics -->
+          <div class="kpi-grid">
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Scheduled Pickups Today</span>
+                <div class="stat-icon-wrapper bg-cyan">
+                  <i data-lucide="calendar"></i>
+                </div>
+              </div>
+              <div class="stat-value text-cyan" id="disp-kpi-total-pickups">0</div>
+              <div class="stat-subtext text-muted">Daily staging queue</div>
+            </div>
+
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Pending Handover</span>
+                <div class="stat-icon-wrapper bg-amber">
+                  <i data-lucide="clock"></i>
+                </div>
+              </div>
+              <div class="stat-value text-amber" id="disp-kpi-pending-pickups">0</div>
+              <div class="stat-subtext text-amber">Ready for QR scan & key handoff</div>
+            </div>
+
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Confirmed on Road</span>
+                <div class="stat-icon-wrapper bg-emerald">
+                  <i data-lucide="check-circle-2"></i>
+                </div>
+              </div>
+              <div class="stat-value text-emerald" id="disp-kpi-confirmed-pickups">0</div>
+              <div class="stat-subtext text-emerald">Active rental handovers</div>
+            </div>
+
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span class="stat-label">White-Glove Deliveries</span>
+                <div class="stat-icon-wrapper bg-gold">
+                  <i data-lucide="truck"></i>
+                </div>
+              </div>
+              <div class="stat-value text-gold" id="disp-kpi-deliveries">0</div>
+              <div class="stat-subtext text-muted">Flatbed route stops</div>
+            </div>
+          </div>
+
+          <!-- Daily Pickups Table -->
+          <div class="glass-card table-panel">
+            <div class="table-toolbar">
+              <div class="table-title-group">
+                <h3>Daily Pickup Schedule & Route Dispatch</h3>
+                <span class="badge-count" id="disp-pickups-count">0 Pickups</span>
+              </div>
+              <div class="table-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="disp-pickup-search" placeholder="Search route, driver, client..." oninput="app.renderPickupsTable()">
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Route & Stop #</th>
+                    <th>Time Slot & Method</th>
+                    <th>Vehicle & VIN</th>
+                    <th>Client Driver</th>
+                    <th>Destination / Hub</th>
+                    <th>QR / Pass Code</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="disp-pickups-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB 2: DAILY RETURNS & INTAKE DIAGNOSTICS -->
+        <div id="dispatch-subtab-returns" class="dispatch-subtab-content" style="display: none;">
+          <!-- Return Metrics -->
+          <div class="kpi-grid">
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Total Inbound Returns</span>
+                <div class="stat-icon-wrapper bg-gold">
+                  <i data-lucide="arrow-down-left"></i>
+                </div>
+              </div>
+              <div class="stat-value text-gold" id="disp-kpi-total-returns">0</div>
+              <div class="stat-subtext text-muted">Inbound fleet vehicles</div>
+            </div>
+
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Due Today</span>
+                <div class="stat-icon-wrapper bg-amber">
+                  <i data-lucide="clock"></i>
+                </div>
+              </div>
+              <div class="stat-value text-amber" id="disp-kpi-due-returns">0</div>
+              <div class="stat-subtext text-amber">Scheduled return today</div>
+            </div>
+
+            <div class="stat-card glass-card border-danger-subtle">
+              <div class="stat-card-header">
+                <span class="stat-label">Overdue Urgent</span>
+                <div class="stat-icon-wrapper bg-rose">
+                  <i data-lucide="alert-triangle"></i>
+                </div>
+              </div>
+              <div class="stat-value text-rose" id="disp-kpi-overdue-returns">0</div>
+              <div class="stat-subtext text-rose">Accruing automated penalties</div>
+            </div>
+
+            <div class="stat-card glass-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Awaiting Inspection</span>
+                <div class="stat-icon-wrapper bg-cyan">
+                  <i data-lucide="clipboard-check"></i>
+                </div>
+              </div>
+              <div class="stat-value text-cyan" id="disp-kpi-submitted-returns">0</div>
+              <div class="stat-subtext text-muted">Parked in intake bays</div>
+            </div>
+          </div>
+
+          <!-- Daily Returns Table -->
+          <div class="glass-card table-panel">
+            <div class="table-toolbar">
+              <div class="table-title-group">
+                <h3>Daily Inbound Returns & Diagnostic Intake Queue</h3>
+                <span class="badge-count" id="disp-returns-count">0 Returns</span>
+              </div>
+              <div class="table-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="disp-returns-search" placeholder="Search car, driver, code..." oninput="app.renderReturnsTable()">
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Order & Return Date</th>
+                    <th>Vehicle & VIN</th>
+                    <th>Client Driver</th>
+                    <th>Rental Window</th>
+                    <th>Escrow Deposit</th>
+                    <th>Penalty / Status</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="disp-returns-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB 3: SERVICE BAY & REPAIR WORKFLOWS -->
+        <div id="dispatch-subtab-repairs" class="dispatch-subtab-content" style="display: none;">
+          <div class="glass-card table-panel">
+            <div class="table-toolbar">
+              <div class="table-title-group">
+                <h3>Service Bay & Automated Repair Work Orders</h3>
+                <span class="badge-count" id="disp-repairs-count">0 Work Orders</span>
+              </div>
+              <div class="badge-soft badge-gold">Auto-Dispatched on Damaged Returns</div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Work Order #</th>
+                    <th>Vehicle / VIN</th>
+                    <th>Related Rental</th>
+                    <th>Damage Description & Parts</th>
+                    <th>Severity</th>
+                    <th>Est. Repair Cost</th>
+                    <th>Service Center</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="disp-repairs-table-body"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- ======================================================== -->
-      <!-- VIEW 4: ADMIN INVENTORY MANAGEMENT -->
+      <!-- VIEW 4: SECURITY DEPOSIT ESCROW VAULT & LEDGER (ADMIN) -->
+      <!-- ======================================================== -->
+      <section id="view-deposits" class="view-section">
+        <div class="page-header">
+          <div>
+            <div class="admin-badge-pill">
+              <i data-lucide="shield-check"></i> Escrow Vault & Financial Protection
+            </div>
+            <h1 class="page-title">Security Deposit Management System</h1>
+            <p class="page-subtitle">Track fixed & percentage deposits, lock deposits in escrow until return, automate on-time 100% refunds, deduct late penalties, and view full audit history.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary" onclick="app.fetchDeposits()">
+              <i data-lucide="refresh-cw"></i> Refresh Vault
+            </button>
+          </div>
+        </div>
+
+        <!-- Escrow Vault KPI Metrics -->
+        <div class="kpi-grid">
+          <div class="stat-card glass-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Active Escrow Locked</span>
+              <div class="stat-icon-wrapper bg-amber">
+                <i data-lucide="lock"></i>
+              </div>
+            </div>
+            <div class="stat-value text-amber" id="vault-escrow-held">$0.00</div>
+            <div class="stat-subtext text-muted">
+              <span id="vault-active-count">0</span> Active vehicles in escrow
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Total Deposits Refunded</span>
+              <div class="stat-icon-wrapper bg-emerald">
+                <i data-lucide="check-circle-2"></i>
+              </div>
+            </div>
+            <div class="stat-value text-emerald" id="vault-total-refunded">$0.00</div>
+            <div class="stat-subtext text-emerald">
+              100% on-time returns released
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Late Penalty Deductions</span>
+              <div class="stat-icon-wrapper bg-rose">
+                <i data-lucide="alert-triangle"></i>
+              </div>
+            </div>
+            <div class="stat-value text-rose" id="vault-penalties-deducted">$0.00</div>
+            <div class="stat-subtext text-rose">
+              Automated late return offsets
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Damage / Detailing Deductions</span>
+              <div class="stat-icon-wrapper bg-gold">
+                <i data-lucide="wrench"></i>
+              </div>
+            </div>
+            <div class="stat-value text-gold" id="vault-damage-deducted">$0.00</div>
+            <div class="stat-subtext text-muted">
+              Inspection diagnostic offsets
+            </div>
+          </div>
+        </div>
+
+        <!-- Escrow Transaction Ledger Table -->
+        <div class="glass-card table-panel">
+          <div class="table-toolbar">
+            <div class="table-title-group">
+              <h3>Security Deposit Transactions & Escrow Audit Ledger</h3>
+              <span class="badge-count" id="vault-tx-count">0 Transactions</span>
+            </div>
+
+            <div class="table-filters">
+              <div class="status-tabs">
+                <button class="status-tab active" onclick="app.filterDepositLedger('ALL')">All Transactions</button>
+                <button class="status-tab" onclick="app.filterDepositLedger('ESCROW_LOCK')">🔒 Escrow Locks</button>
+                <button class="status-tab" onclick="app.filterDepositLedger('FULL_REFUND')">💰 Full Refunds</button>
+                <button class="status-tab" onclick="app.filterDepositLedger('PENALTY_DEDUCTION')">⚠️ Deductions</button>
+              </div>
+
+              <div class="table-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="vault-search-input" placeholder="Search tx #, rental code, client..." oninput="app.renderDepositLedger()">
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Tx Code & Timestamp</th>
+                  <th>Rental Code & Invoice</th>
+                  <th>Client / Driver</th>
+                  <th>Vehicle Quoted</th>
+                  <th>Deposit Rule</th>
+                  <th>Transaction Type</th>
+                  <th>Tx Amount</th>
+                  <th>Escrow Balance</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="deposit-ledger-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 5: ADMIN OFFLINE QUOTATIONS & TEMPLATES -->
+      <!-- ======================================================== -->
+      <section id="view-quotations" class="view-section">
+        <div class="page-header">
+          <div>
+            <span class="section-tag">OFFLINE RENTALS & SALES</span>
+            <h1 class="page-title">Offline Quotations & Templates</h1>
+            <p class="page-subtitle">Draft custom luxury quotations for VIP clients, apply custom pricelists, view printable quotation templates, and convert quotes to active invoices.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="app.openCreateQuotationModal()">
+              <i data-lucide="file-plus"></i> Create Offline Quotation
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card table-panel">
+          <div class="table-toolbar">
+            <div class="table-title-group">
+              <h3>Quotations Ledger</h3>
+              <span class="badge-count" id="admin-quotes-count">0 Quotes</span>
+            </div>
+
+            <div class="table-filters">
+              <div class="status-tabs">
+                <button class="status-tab active" onclick="app.filterQuotesTable('ALL')">All</button>
+                <button class="status-tab" onclick="app.filterQuotesTable('SENT')">Sent / Pending</button>
+                <button class="status-tab" onclick="app.filterQuotesTable('DRAFT')">Draft</button>
+                <button class="status-tab" onclick="app.filterQuotesTable('CONVERTED')">Converted to Invoice</button>
+              </div>
+
+              <div class="table-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="admin-quotes-search" placeholder="Search quote #, client, car..." oninput="app.renderQuotationsTable()">
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Quote Number</th>
+                  <th>VIP Client Info</th>
+                  <th>Vehicle Quoted</th>
+                  <th>Dates & Duration</th>
+                  <th>Quoted Rate & Deposit</th>
+                  <th>Total Quoted</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-quotes-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 6: ADMIN VEHICLE INVENTORY & VARIANTS -->
       <!-- ======================================================== -->
       <section id="view-inventory" class="view-section">
         <div class="page-header">
           <div>
-            <span class="section-tag">FLEET MANAGEMENT</span>
-            <h1 class="page-title">Fleet Vehicles & Stock</h1>
-            <p class="page-subtitle">Add new supercars, manage rates, track maintenance status, and update telemetry specs.</p>
+            <span class="section-tag">FLEET CATALOG & VARIANTS</span>
+            <h1 class="page-title">Fleet Vehicles & Product Variants</h1>
+            <p class="page-subtitle">Manage vehicle attributes (Brand, Manufacturer, Color, Size), configure product variants with rate overrides, and manage showroom stock.</p>
           </div>
           <div class="header-actions">
             <button class="btn btn-gold" onclick="app.openAddProductModal()">
@@ -582,33 +1042,178 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Vehicle / VIN</th>
-                  <th>Category</th>
+                  <th>Vehicle Name & Spec</th>
+                  <th>Brand & Manufacturer</th>
+                  <th>Default Color & Size</th>
+                  <th>Product Variants</th>
                   <th>Daily Rate</th>
-                  <th>Weekly Rate</th>
                   <th>Escrow Deposit</th>
-                  <th>Stock Available</th>
-                  <th>Condition</th>
+                  <th>Available Stock</th>
                   <th class="text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody id="admin-inventory-table-body">
-                <!-- Rendered dynamically -->
-              </tbody>
+              <tbody id="admin-inventory-table-body"></tbody>
             </table>
           </div>
         </div>
       </section>
 
       <!-- ======================================================== -->
-      <!-- VIEW 5: ADMIN CONFIGURATION & POLICIES -->
+      <!-- VIEW 7: ADMIN PRICELISTS & TIME-BASED PRICING -->
+      <!-- ======================================================== -->
+      <section id="view-pricelists" class="view-section">
+        <div class="page-header">
+          <div>
+            <span class="section-tag">DYNAMIC PRICING ENGINE</span>
+            <h1 class="page-title">Pricelists & Time-Based Pricing</h1>
+            <p class="page-subtitle">Configure default pricelist for all fleet vehicles, condition-specific rate schedules (VIP tiers, seasonal demand, weekend surges), and time-based duration discount brackets.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="app.openAddPricelistModal()">
+              <i data-lucide="plus"></i> Create New Pricelist
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card table-panel" style="margin-bottom: 2rem;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i data-lucide="tags"></i> Multi-Condition & Time-Based Pricelist Schedules
+            </div>
+            <span class="badge-soft">Dynamic Pricing Engine</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Pricelist Name & Code</th>
+                  <th>Condition Type</th>
+                  <th>Default</th>
+                  <th>Discount / Multiplier</th>
+                  <th>Time-Based Duration Matrix (1-2d / 3-6d / 7-29d / 30+d)</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-pricelists-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-card table-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i data-lucide="calendar-range"></i> Pre-Defined Rental Period Presets
+            </div>
+            <span class="badge-soft">Duration Packages</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Package Name</th>
+                  <th>Duration</th>
+                  <th>Time-Based Discount</th>
+                  <th>Badge Tag</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody id="admin-presets-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+          <div class="glass-card table-panel" style="margin-bottom: 0;">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i data-lucide="calendar-range"></i> Pre-Defined Rental Periods
+              </div>
+              <span class="badge-soft">Presets</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Package Name</th>
+                    <th>Duration</th>
+                    <th>Discount</th>
+                    <th>Badge</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-presets-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 8: ADMIN USER & CLIENT MANAGEMENT -->
+      <!-- ======================================================== -->
+      <section id="view-users" class="view-section">
+        <div class="page-header">
+          <div>
+            <span class="section-tag">USER ACCOUNTS & ROLES</span>
+            <h1 class="page-title">Client & Staff Accounts</h1>
+            <p class="page-subtitle">Manage client profiles, membership tiers (Black Card, Platinum, Gold), roles, and lifetime spend history.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="app.openCreateUserModal()">
+              <i data-lucide="user-plus"></i> Add User / Client
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card table-panel">
+          <div class="table-toolbar">
+            <div class="table-title-group">
+              <h3>Registered Accounts</h3>
+              <span class="badge-count" id="admin-users-count">0 Users</span>
+            </div>
+
+            <div class="table-filters">
+              <div class="status-tabs">
+                <button class="status-tab active" onclick="app.filterUsersTable('ALL')">All</button>
+                <button class="status-tab" onclick="app.filterUsersTable('customer')">Clients Only</button>
+                <button class="status-tab" onclick="app.filterUsersTable('admin')">Admins Only</button>
+              </div>
+
+              <div class="table-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="admin-users-search" placeholder="Search name, email..." oninput="app.renderUsersTable()">
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Client / Avatar</th>
+                  <th>Email & Phone</th>
+                  <th>Role</th>
+                  <th>Membership Tier</th>
+                  <th>Total Bookings</th>
+                  <th>Lifetime Spend</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 9: ADMIN CONFIGURATION & POLICIES (LATE FEES ENGINE) -->
       <!-- ======================================================== -->
       <section id="view-settings" class="view-section">
         <div class="page-header">
           <div>
-            <span class="section-tag">ENGINE CONFIGURATION</span>
-            <h1 class="page-title">Fleet Policies & Penalty Rules</h1>
-            <p class="page-subtitle">Configure late return penalty multipliers, grace periods, escrow deposit defaults, and hub locations.</p>
+            <span class="section-tag">AUTOMATION & POLICIES</span>
+            <h1 class="page-title">Automated Late Return Fee & Penalty Engine</h1>
+            <p class="page-subtitle">Configure hourly, daily, weekly, and monthly charge modes, grace period buffers, maximum penalty limits, escrow deductions, and auto-generated penalty invoices.</p>
           </div>
         </div>
 
@@ -619,52 +1224,111 @@
                 <i data-lucide="shield-alert"></i>
               </div>
               <div>
-                <h3>Late Return & Penalty Automation Engine</h3>
-                <p>Automate penalty accrual on overdue vehicles.</p>
+                <h3>Automated Late Return Engine Configuration</h3>
+                <p>Detect overdue vehicles, calculate penalties, and enforce policies.</p>
               </div>
             </div>
 
             <form id="settings-form" onsubmit="app.saveSettings(event)" class="settings-form">
+              <!-- Penalty Calculation Mode Selector (Hourly / Daily / Weekly / Monthly) -->
               <div class="form-group">
-                <label for="cfg-late-multiplier">
-                  Late Return Daily Multiplier
-                  <span class="label-help">(Applied on daily rate for every 24h past scheduled return)</span>
+                <label style="font-weight: 700; color: #fff; margin-bottom: 0.5rem; display: block;">
+                  <i data-lucide="calculator"></i> Late Penalty Calculation Mode
                 </label>
-                <div class="range-input-group">
-                  <input type="range" id="cfg-late-multiplier" min="1.0" max="3.0" step="0.1" value="1.5" oninput="document.getElementById('cfg-late-val').innerText = this.value + 'x'">
-                  <span class="range-badge" id="cfg-late-val">1.5x</span>
+                <div class="fee-mode-selector-grid">
+                  <label class="fee-mode-card active" id="mode-card-DAILY" onclick="app.selectFeeMode('DAILY')">
+                    <input type="radio" name="late_fee_mode" value="DAILY" checked>
+                    <div class="fee-mode-title">📅 Daily Multiplier</div>
+                    <div class="fee-mode-desc">Applies multiplier (e.g. 1.5x) on vehicle daily rate per 24h overdue block.</div>
+                  </label>
+
+                  <label class="fee-mode-card" id="mode-card-HOURLY" onclick="app.selectFeeMode('HOURLY')">
+                    <input type="radio" name="late_fee_mode" value="HOURLY">
+                    <div class="fee-mode-title">⏱️ Hourly Charge</div>
+                    <div class="fee-mode-desc">Applies fixed hourly penalty rate per hour past grace period.</div>
+                  </label>
+
+                  <label class="fee-mode-card" id="mode-card-WEEKLY" onclick="app.selectFeeMode('WEEKLY')">
+                    <input type="radio" name="late_fee_mode" value="WEEKLY">
+                    <div class="fee-mode-title">📆 Weekly Surge</div>
+                    <div class="fee-mode-desc">Applies weekly tier penalty for extended unreturned reservations.</div>
+                  </label>
+
+                  <label class="fee-mode-card" id="mode-card-MONTHLY" onclick="app.selectFeeMode('MONTHLY')">
+                    <input type="radio" name="late_fee_mode" value="MONTHLY">
+                    <div class="fee-mode-title">🗓️ Monthly Rate</div>
+                    <div class="fee-mode-desc">Applies monthly enterprise penalty bracket.</div>
+                  </label>
                 </div>
               </div>
 
-              <div class="form-group">
-                <label for="cfg-grace-period">
-                  Grace Period (Hours)
-                  <span class="label-help">(Buffer time before overdue penalty engine engages)</span>
-                </label>
-                <div class="range-input-group">
-                  <input type="range" id="cfg-grace-period" min="0" max="24" step="1" value="4" oninput="document.getElementById('cfg-grace-val').innerText = this.value + ' Hours'">
-                  <span class="range-badge" id="cfg-grace-val">4 Hours</span>
+              <!-- Rate Parameters Inputs -->
+              <div class="form-row" id="row-daily-params">
+                <div class="form-group">
+                  <label for="cfg-late-multiplier">
+                    Daily Rate Multiplier
+                    <span class="label-help">(Applied on daily rate for every 24h past scheduled return)</span>
+                  </label>
+                  <div class="range-input-group">
+                    <input type="range" id="cfg-late-multiplier" min="1.0" max="3.0" step="0.1" value="1.5" oninput="document.getElementById('cfg-late-val').innerText = this.value + 'x'">
+                    <span class="range-badge" id="cfg-late-val">1.5x</span>
+                  </div>
                 </div>
               </div>
 
-              <div class="form-group">
-                <label for="cfg-deposit-percent">
-                  Default Security Deposit Rule (% of Daily Value / Value)
-                </label>
-                <div class="range-input-group">
-                  <input type="range" id="cfg-deposit-percent" min="10" max="50" step="5" value="20" oninput="document.getElementById('cfg-deposit-val').innerText = this.value + '%'">
-                  <span class="range-badge" id="cfg-deposit-val">20%</span>
+              <div class="form-row" id="row-hourly-params" style="display: none;">
+                <div class="form-group">
+                  <label for="cfg-hourly-rate">Hourly Late Fee ($ / hour past grace period)</label>
+                  <input type="number" id="cfg-hourly-rate" min="10" max="500" step="5" value="65" class="form-input">
+                </div>
+              </div>
+
+              <div class="form-row" id="row-weekly-params" style="display: none;">
+                <div class="form-group">
+                  <label for="cfg-weekly-rate">Weekly Surge Fee ($ / week)</label>
+                  <input type="number" id="cfg-weekly-rate" min="500" max="10000" step="100" value="2500" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label for="cfg-monthly-rate">Monthly Tier Fee ($ / month)</label>
+                  <input type="number" id="cfg-monthly-rate" min="2000" max="30000" step="500" value="8500" class="form-input">
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
-                  <label for="cfg-min-days">Min Rental Days</label>
-                  <input type="number" id="cfg-min-days" min="1" max="10" value="1" class="form-input">
+                  <label for="cfg-grace-period">
+                    Grace Period (Hours)
+                    <span class="label-help">(Buffer time before overdue penalty engine engages)</span>
+                  </label>
+                  <div class="range-input-group">
+                    <input type="range" id="cfg-grace-period" min="0" max="24" step="1" value="4" oninput="document.getElementById('cfg-grace-val').innerText = this.value + ' Hours'">
+                    <span class="range-badge" id="cfg-grace-val">4 Hours</span>
+                  </div>
                 </div>
+
                 <div class="form-group">
-                  <label for="cfg-max-days">Max Rental Days</label>
-                  <input type="number" id="cfg-max-days" min="7" max="90" value="30" class="form-input">
+                  <label for="cfg-max-penalty">
+                    Maximum Penalty Fee Limit Cap ($)
+                    <span class="label-help">(Maximum penalty cap, 0 for unlimited)</span>
+                  </label>
+                  <input type="number" id="cfg-max-penalty" min="0" max="25000" step="250" value="5000" class="form-input">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="custom-checkbox-label">
+                  <input type="checkbox" id="cfg-auto-invoice" checked>
+                  <span><strong>Auto-Generate Penalty Invoice & Debit Note</strong> on overdue detection</span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label for="cfg-deposit-percent">
+                  Default Security Deposit Rule (% of Rental Subtotal)
+                </label>
+                <div class="range-input-group">
+                  <input type="range" id="cfg-deposit-percent" min="10" max="50" step="5" value="20" oninput="document.getElementById('cfg-deposit-val').innerText = this.value + '%'">
+                  <span class="range-badge" id="cfg-deposit-val">20%</span>
                 </div>
               </div>
 
@@ -675,7 +1339,7 @@
 
               <div class="form-actions">
                 <button type="submit" class="btn btn-gold">
-                  <i data-lucide="check"></i> Save Rate & Policy Settings
+                  <i data-lucide="check"></i> Save Rate & Penalty Engine Settings
                 </button>
               </div>
             </form>
@@ -688,7 +1352,7 @@
               </div>
               <div>
                 <h3>Interactive Engine Sandbox & Time Machine</h3>
-                <p>Simulate operations and trigger overdue states instantly.</p>
+                <p>Simulate operations and test late return penalties instantly.</p>
               </div>
             </div>
 
@@ -704,16 +1368,16 @@
               <div class="sandbox-step">
                 <div class="step-num">2</div>
                 <div>
-                  <strong>Automatic Penalty Accrual</strong>
-                  <p>Active vehicle rentals crossing their scheduled return + grace period are immediately marked <code>OVERDUE</code> and penalties accrue dynamically.</p>
+                  <strong>Automatic Overdue Detection & Invoicing</strong>
+                  <p>Active vehicle rentals crossing scheduled return + grace period are immediately marked <code>OVERDUE</code> and a penalty invoice (<code>INV-PEN-2026-XXXX</code>) is auto-generated.</p>
                 </div>
               </div>
 
               <div class="sandbox-step">
                 <div class="step-num">3</div>
                 <div>
-                  <strong>Escrow Deposit Reconciliation</strong>
-                  <p>When returning at store, on-time returns receive a 100% deposit refund, while late returns automatically deduct penalties.</p>
+                  <strong>Deposit Deduction & Settlement</strong>
+                  <p>Upon store return, the penalty is automatically deducted from the escrow deposit, and remaining net balance is refunded.</p>
                 </div>
               </div>
             </div>
@@ -730,11 +1394,409 @@
         </div>
       </section>
 
+      <!-- ======================================================== -->
+      <!-- VIEW 10: PREDICTIVE MAINTENANCE & VEHICLE TELEMETRY -->
+      <!-- ======================================================== -->
+      <section id="view-maintenance" class="view-section">
+        <div class="page-header">
+          <div>
+            <span class="section-tag">AI TELEMETRY & WEAR ANALYTICS</span>
+            <h1 class="page-title">Predictive Maintenance & Vehicle Telemetry</h1>
+            <p class="page-subtitle">Real-time wear monitoring for carbon-ceramic brakes, racing tire tread depth, synthetic oil life, and automated service bay work orders.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="app.fetchPredictiveMaintenance()">
+              <i data-lucide="refresh-cw"></i> Refresh Telemetry
+            </button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card glass-card border-danger-subtle">
+            <div class="stat-card-header"><span class="stat-label">Critical Risk Vehicles</span><div class="stat-icon-wrapper bg-rose"><i data-lucide="alert-octagon"></i></div></div>
+            <div class="stat-value text-rose" id="maint-kpi-critical">0</div>
+            <div class="stat-subtext text-rose">Immediate Service Bay Work Order Needed</div>
+          </div>
+          <div class="stat-card glass-card border-warning-subtle">
+            <div class="stat-card-header"><span class="stat-label">Elevated Risk Vehicles</span><div class="stat-icon-wrapper bg-amber"><i data-lucide="alert-triangle"></i></div></div>
+            <div class="stat-value text-amber" id="maint-kpi-elevated">0</div>
+            <div class="stat-subtext text-amber">Schedule inspection within 500 km</div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="stat-card-header"><span class="stat-label">Optimal Fleet Health</span><div class="stat-icon-wrapper bg-emerald"><i data-lucide="check-circle-2"></i></div></div>
+            <div class="stat-value text-emerald" id="maint-kpi-optimal">0</div>
+            <div class="stat-subtext text-emerald">All telemetry parameters nominal</div>
+          </div>
+        </div>
+
+        <div class="glass-card table-panel" style="margin-top: 1.5rem;">
+          <div class="panel-header">
+            <div class="panel-title"><i data-lucide="cpu"></i> Telemetry & Wear Barometer</div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Vehicle Name & Spec</th>
+                  <th>Odometer & Engine Hours</th>
+                  <th>Brake Wear %</th>
+                  <th>Tire Tread mm</th>
+                  <th>Oil Life %</th>
+                  <th>Risk Rating</th>
+                  <th>Recommended Service</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="maint-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 11: AUTOMATED CUSTOMER REMINDERS LOG STREAM -->
+      <!-- ======================================================== -->
+      <section id="view-reminders" class="view-section">
+        <div class="page-header">
+          <div>
+            <span class="section-tag">CUSTOMER ENGAGEMENT ENGINE</span>
+            <h1 class="page-title">Automated Reminders & Notifications Log</h1>
+            <p class="page-subtitle">Track automated 24h/2h SMS & Email staging notifications, pre-return schedules, overdue alerts, and deposit release confirmations.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="app.triggerAutoRemindersSweep()">
+              <i data-lucide="zap"></i> Run Auto Sweep
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card table-panel">
+          <div class="panel-header">
+            <div class="panel-title"><i data-lucide="bell-ring"></i> Live Communication Log Stream</div>
+          </div>
+          <div id="reminders-stream-list" style="display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem 0;"></div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 12: PRODUCT AVAILABILITY & DEMAND FORECASTING -->
+      <!-- ======================================================== -->
+      <section id="view-forecasting" class="view-section">
+        <div class="page-header">
+          <div>
+            <span class="section-tag">PREDICTIVE CAPACITY & PRICING SURGE</span>
+            <h1 class="page-title">Product Availability & Demand Forecasting</h1>
+            <p class="page-subtitle">Project fleet utilization across 7-day, 30-day, and 90-day future horizons with dynamic surge pricing suggestions.</p>
+          </div>
+          <div class="header-actions">
+            <select id="forecast-horizon-select" class="form-select" onchange="app.fetchForecasting(this.value)" style="width: auto;">
+              <option value="7">7-Day Horizon</option>
+              <option value="30" selected>30-Day Horizon</option>
+              <option value="90">90-Day Horizon</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="forecasting-category-grid" class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;"></div>
+      </section>
+
     </main>
 
     <!-- ======================================================== -->
-    <!-- MODAL: CART & CHECKOUT FLOW (STEPS 4, 5, 6, 7) -->
+    <!-- MODAL: DIGITAL QR CODE PICKUP SCANNER & CHECKLIST -->
     <!-- ======================================================== -->
+    <div id="pickup-scanner-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-cyan">QR / Barcode Check-in Terminal</span>
+            <h2 id="pickup-modal-title">Pickup Pass Scan & Pre-Handover Checklist</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('pickup-scanner-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body" id="pickup-scanner-content"></div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: ADVANCED DIAGNOSTIC RETURN TERMINAL & DAMAGE WORKFLOW -->
+    <!-- ======================================================== -->
+    <div id="return-diagnostic-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Fleet Intake Terminal</span>
+            <h2 id="return-diag-title">Vehicle Return Diagnostic & Escrow Settlement</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('return-diagnostic-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body" id="return-diagnostic-content"></div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: CUSTOMER DIGITAL PICKUP PASS & QR CODE -->
+    <!-- ======================================================== -->
+    <div id="pickup-pass-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Official Executive Pickup Pass</span>
+            <h2>Digital Handover Pass</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('pickup-pass-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body" id="pickup-pass-content"></div>
+      </div>
+    </div>
+
+    <!-- MODAL: AUTO-GENERATED LATE RETURN PENALTY INVOICE -->
+    <div id="penalty-invoice-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-rose">Official Late Return Penalty Debit Note</span>
+            <h2 id="pen-inv-doc-title">Penalty Invoice #INV-PEN-2026-0000</h2>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-sm btn-gold" onclick="window.print()">
+              <i data-lucide="printer"></i> Print / Save PDF
+            </button>
+            <button class="modal-close-btn" onclick="app.closeModal('penalty-invoice-modal')">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-body printable-invoice-body" id="penalty-invoice-printable-content"></div>
+      </div>
+    </div>
+
+    <!-- MODAL: DEPOSIT REFUND RECEIPT & ESCROW AUDIT -->
+    <div id="deposit-receipt-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Official Escrow Settlement</span>
+            <h2 id="receipt-doc-title">Deposit Refund Receipt</h2>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-sm btn-gold" onclick="window.print()">
+              <i data-lucide="printer"></i> Print / Save PDF
+            </button>
+            <button class="modal-close-btn" onclick="app.closeModal('deposit-receipt-modal')">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-body printable-invoice-body" id="deposit-receipt-printable-content"></div>
+      </div>
+    </div>
+
+    <!-- Modal: Create Offline Quotation -->
+    <div id="quote-create-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Sales & Operations</span>
+            <h2>Create Offline Luxury Quotation</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('quote-create-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <form id="quote-create-form" onsubmit="app.saveQuotation(event)" class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quote-cust-name">Client Full Name *</label>
+              <input type="text" id="quote-cust-name" required class="form-input" placeholder="e.g. Lord Charles Kensington">
+            </div>
+            <div class="form-group">
+              <label for="quote-cust-email">Client Email Address *</label>
+              <input type="email" id="quote-cust-email" required class="form-input" placeholder="charles@mayfair.co.uk">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quote-cust-phone">Client Phone Number</label>
+              <input type="text" id="quote-cust-phone" class="form-input" placeholder="+1 (555) 789-0123">
+            </div>
+            <div class="form-group">
+              <label for="quote-cust-address">Billing & Delivery Address</label>
+              <input type="text" id="quote-cust-address" class="form-input" placeholder="Beverly Hills Hotel, Suite 100">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quote-product-select">Vehicle Fleet Select *</label>
+              <select id="quote-product-select" class="form-select" required onchange="app.syncQuotationMath()"></select>
+            </div>
+            <div class="form-group">
+              <label for="quote-pricelist-select">Applied Pricelist / Discount Tier</label>
+              <select id="quote-pricelist-select" class="form-select" onchange="app.syncQuotationMath()"></select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quote-start-date">Rental Start Date *</label>
+              <input type="date" id="quote-start-date" required class="form-input" onchange="app.syncQuotationMath()">
+            </div>
+            <div class="form-group">
+              <label for="quote-end-date">Rental End Date *</label>
+              <input type="date" id="quote-end-date" required class="form-input" onchange="app.syncQuotationMath()">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quote-custom-rate">Custom Daily Rate ($) <span class="label-help">(Optional override)</span></label>
+              <input type="number" id="quote-custom-rate" step="10" class="form-input" placeholder="Leave blank to use catalog rate" oninput="app.syncQuotationMath()">
+            </div>
+            <div class="form-group">
+              <label for="quote-valid-until">Quotation Valid Until</label>
+              <input type="date" id="quote-valid-until" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quote-fulfillment">Handover Method</label>
+              <select id="quote-fulfillment" class="form-select" onchange="app.syncQuotationMath()">
+                <option value="PICKUP">VIP Store Hub Pickup ($0.00)</option>
+                <option value="DELIVERY">White-Glove Flatbed Delivery (+$150.00)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="quote-notes">Quotation Terms & Concierge Notes</label>
+              <input type="text" id="quote-notes" class="form-input" placeholder="e.g. VIP diplomatic escort package, track pass included...">
+            </div>
+          </div>
+
+          <div class="price-ledger" style="margin: 1rem 0;">
+            <div class="ledger-row">
+              <span class="ledger-lbl">Estimated Duration:</span>
+              <span class="ledger-val" id="quote-preview-duration">1 Day(s)</span>
+            </div>
+            <div class="ledger-row">
+              <span class="ledger-lbl">Effective Daily Rate:</span>
+              <span class="ledger-val text-gold" id="quote-preview-rate">$0.00 / day</span>
+            </div>
+            <div class="ledger-row">
+              <span class="ledger-lbl">Base Rental Subtotal:</span>
+              <span class="ledger-val" id="quote-preview-base">$0.00</span>
+            </div>
+            <div class="ledger-row">
+              <span class="ledger-lbl">Logistics / Delivery:</span>
+              <span class="ledger-val" id="quote-preview-deliv">$0.00</span>
+            </div>
+            <div class="ledger-row">
+              <span class="ledger-lbl text-amber">Escrow Security Deposit:</span>
+              <span class="ledger-val text-amber" id="quote-preview-deposit">$0.00</span>
+            </div>
+            <div class="ledger-divider"></div>
+            <div class="ledger-row ledger-total">
+              <span>Total Quotation Amount:</span>
+              <span class="total-amount text-gold" id="quote-preview-total">$0.00</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="app.closeModal('quote-create-modal')">Cancel</button>
+            <button type="submit" class="btn btn-gold">
+              <i data-lucide="check"></i> Issue Offline Quotation
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Printable VIP Quotation Template -->
+    <div id="quote-template-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Official Quotation Proposal</span>
+            <h2 id="quote-doc-title">Quotation #QUO-2026-0000</h2>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-sm btn-gold" onclick="window.print()">
+              <i data-lucide="printer"></i> Print / Download PDF
+            </button>
+            <button class="modal-close-btn" onclick="app.closeModal('quote-template-modal')">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-body printable-invoice-body" id="quote-printable-content"></div>
+
+        <div class="modal-footer" id="quote-template-footer" style="padding: 1.25rem 1.75rem; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;"></div>
+      </div>
+    </div>
+
+    <!-- Modal: Convert Quotation to Invoice & Collect Payment -->
+    <div id="quote-convert-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Quotation Conversion</span>
+            <h2>Convert Quotation to Invoice</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('quote-convert-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <form id="quote-convert-form" onsubmit="app.executeQuotationConversion(event)" class="modal-body">
+          <input type="hidden" id="convert-quote-id">
+          <div id="convert-quote-summary-box" style="background: rgba(10, 14, 23, 0.6); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: 1.25rem;"></div>
+
+          <div class="form-group">
+            <label for="convert-pay-method">Payment Collection Channel *</label>
+            <select id="convert-pay-method" class="form-select" required>
+              <option value="CREDIT_CARD">Credit / Debit Card Terminal (Terminal Handover)</option>
+              <option value="WIRE_TRANSFER">Direct Corporate Wire / ACH</option>
+              <option value="CASH_ESCROW">Direct Cash Handover & Escrow Lock</option>
+              <option value="CRYPTO">Crypto / USDT / BTC</option>
+              <option value="APPLE_PAY">Apple Pay Concierge</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="convert-actor-name">Operating Staff / Concierge Officer</label>
+            <input type="text" id="convert-actor-name" class="form-input" value="Sarah Connor (Fleet Director)">
+          </div>
+
+          <div class="form-group">
+            <label for="convert-custom-notes">Additional Invoice Notes</label>
+            <input type="text" id="convert-custom-notes" class="form-input" placeholder="e.g. Identity verified via passport, security deposit locked in escrow bay.">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="app.closeModal('quote-convert-modal')">Cancel</button>
+            <button type="submit" class="btn btn-gold">
+              <i data-lucide="receipt"></i> Collect Payment & Generate Invoice
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Cart & Checkout Stepper -->
     <div id="cart-modal" class="modal-overlay">
       <div class="modal-card modal-lg">
         <div class="modal-header">
@@ -767,9 +1829,7 @@
 
           <!-- Step 1: Vehicle & Dates Review -->
           <div id="checkout-step-1" class="checkout-step-content active">
-            <div class="cart-product-hero" id="cart-product-summary">
-              <!-- Rendered dynamically -->
-            </div>
+            <div class="cart-product-hero" id="cart-product-summary"></div>
 
             <div class="form-row" style="margin-top: 1.25rem;">
               <div class="form-group">
@@ -825,7 +1885,6 @@
               </label>
             </div>
 
-            <!-- Delivery Address Form (shown if Delivery is chosen) -->
             <div id="delivery-address-form" style="display: none; margin-top: 1.25rem;" class="glass-card">
               <h4 style="color: var(--gold); font-size: 0.95rem; margin-bottom: 0.75rem;">
                 <i data-lucide="map-pin"></i> Shipping & Delivery Details
@@ -845,7 +1904,7 @@
                 </div>
               </div>
               <div class="form-group">
-                <label for="deliv-instructions">Delivery Access Instructions (Gates / Concierge)</label>
+                <label for="deliv-instructions">Delivery Access Instructions</label>
                 <input type="text" id="deliv-instructions" class="form-input" placeholder="Call upon arrival, leave with concierge...">
               </div>
             </div>
@@ -917,7 +1976,7 @@
                   <div class="ledger-row">
                     <span class="ledger-lbl">
                       Security Deposit (Escrow):
-                      <span class="badge-escrow">100% Refundable</span>
+                      <span class="badge-escrow" id="cart-ledger-dep-rule">100% Refundable</span>
                     </span>
                     <span class="ledger-val text-amber" id="cart-ledger-deposit">$0.00</span>
                   </div>
@@ -942,9 +2001,7 @@
       </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- MODAL: PRINTABLE OFFICIAL TAX INVOICE (STEP 7) -->
-    <!-- ======================================================== -->
+    <!-- Modal: Printable Official Tax Invoice -->
     <div id="invoice-modal" class="modal-overlay">
       <div class="modal-card modal-lg">
         <div class="modal-header">
@@ -962,15 +2019,11 @@
           </div>
         </div>
 
-        <div class="modal-body printable-invoice-body" id="printable-invoice-content">
-          <!-- Rendered dynamically -->
-        </div>
+        <div class="modal-body printable-invoice-body" id="printable-invoice-content"></div>
       </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- MODAL: STORE RETURN CONFIRMATION & ESCROW SETTLEMENT -->
-    <!-- ======================================================== -->
+    <!-- Modal: Store Return Confirmation -->
     <div id="return-store-modal" class="modal-overlay">
       <div class="modal-card">
         <div class="modal-header">
@@ -982,17 +2035,401 @@
             <i data-lucide="x"></i>
           </button>
         </div>
-        <div class="modal-body" id="return-store-content">
-          <!-- Rendered dynamically -->
+        <div class="modal-body" id="return-store-content"></div>
+      </div>
+    </div>
+
+    <!-- Modal: Pricelist Creator & Multi-Condition Configurator -->
+    <div id="pricelist-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Dynamic Pricing Engine</span>
+            <h2>Create Custom Pricelist Schedule</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('pricelist-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <form id="pricelist-form" onsubmit="app.savePricelist(event)" class="modal-body">
+          <input type="hidden" id="pl-id">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pl-name">Pricelist Name *</label>
+              <input type="text" id="pl-name" required class="form-input" placeholder="e.g. Summer Peak Coastal Surge">
+            </div>
+            <div class="form-group">
+              <label for="pl-code">Unique Code *</label>
+              <input type="text" id="pl-code" required class="form-input" placeholder="e.g. SUMMER_SURGE_2026">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pl-condition-type">Applicable Condition Rule *</label>
+              <select id="pl-condition-type" class="form-select">
+                <option value="GENERAL">General Fleet (Default Universal Rules)</option>
+                <option value="CUSTOMER_TIER">Customer Tier (VIP Black Card / Concierge)</option>
+                <option value="SEASONAL_DEMAND">Seasonal Demand (Summer Peak / Off-Peak)</option>
+                <option value="WEEKEND_TRACK">Weekend Surge & Track Packages</option>
+                <option value="CORPORATE_FLEET">Corporate Executive Multi-Week Agreement</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pl-category-filter">Category Restriction</label>
+              <select id="pl-category-filter" class="form-select">
+                <option value="">All Vehicle Categories</option>
+                <option value="supercars">Supercars & Exotics</option>
+                <option value="electric">Electric Performance</option>
+                <option value="luxury-suv">Luxury & Armored SUVs</option>
+                <option value="grand-touring">Grand Tourers & Coupes</option>
+                <option value="executive">Executive Luxury Sedans</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pl-discount">Base Condition Discount (% or negative for surge)</label>
+              <input type="number" id="pl-discount" min="-50" max="80" value="0" class="form-input" placeholder="0 for standard, 15 for 15% off, -15 for 15% surge">
+            </div>
+            <div class="form-group">
+              <label for="pl-weekend">Weekend Multiplier (Fri-Sun)</label>
+              <input type="number" id="pl-weekend" min="1.0" max="2.5" step="0.05" value="1.0" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="pl-min-days">Minimum Duration (Days)</label>
+              <input type="number" id="pl-min-days" min="1" max="30" value="1" class="form-input">
+            </div>
+          </div>
+
+          <!-- Time-Based Pricing Duration Matrix -->
+          <div style="background: rgba(0,0,0,0.25); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin: 0.75rem 0;">
+            <h4 style="color: var(--gold); font-size: 0.9rem; margin-bottom: 0.75rem;">
+              <i data-lucide="clock"></i> Time-Based Duration Discount Matrix
+            </h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="pl-tier-1d">1–2 Days Discount (%)</label>
+                <input type="number" id="pl-tier-1d" min="0" max="50" value="0" class="form-input">
+              </div>
+              <div class="form-group">
+                <label for="pl-tier-3d">3–6 Days Discount (%)</label>
+                <input type="number" id="pl-tier-3d" min="0" max="50" value="5" class="form-input">
+              </div>
+              <div class="form-group">
+                <label for="pl-tier-7d">7–29 Days Weekly (%)</label>
+                <input type="number" id="pl-tier-7d" min="0" max="70" value="15" class="form-input">
+              </div>
+              <div class="form-group">
+                <label for="pl-tier-30d">30+ Days Monthly (%)</label>
+                <input type="number" id="pl-tier-30d" min="0" max="80" value="25" class="form-input">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="custom-checkbox-label">
+              <input type="checkbox" id="pl-is-default">
+              <span><strong>Set as Default Pricelist</strong> (Universally applied to all vehicles across showroom)</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="pl-desc">Description & Terms</label>
+            <input type="text" id="pl-desc" class="form-input" placeholder="Eligible client tier, seasonal window, or promotional conditions">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="app.closeModal('pricelist-modal')">Cancel</button>
+            <button type="submit" class="btn btn-gold">
+              <i data-lucide="check"></i> Save Pricelist Schedule
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Product Variants Manager -->
+    <div id="variants-manager-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Product Variant Customizer</span>
+            <h2 id="var-mgr-title">Vehicle Variants & Specifications</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('variants-manager-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div id="var-mgr-product-hero" class="cart-product-hero" style="margin-bottom: 1.25rem;"></div>
+
+          <div class="table-toolbar" style="margin-bottom: 0.75rem;">
+            <h4 style="color: #fff; font-size: 1rem;">Configured Color & Spec Variants</h4>
+            <button class="btn btn-sm btn-gold" onclick="app.openAddVariantForm()">
+              <i data-lucide="plus"></i> Add New Variant
+            </button>
+          </div>
+
+          <!-- Add/Edit Variant Subform -->
+          <form id="variant-subform" style="display: none; background: rgba(0,0,0,0.3); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: 1.25rem;" onsubmit="app.saveProductVariant(event)">
+            <input type="hidden" id="subvar-id">
+            <input type="hidden" id="subvar-product-id">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="subvar-name">Variant Name *</label>
+                <input type="text" id="subvar-name" required class="form-input" placeholder="e.g. ClubSport Racing Spec (Guards Red)">
+              </div>
+              <div class="form-group">
+                <label for="subvar-sku">SKU Code</label>
+                <input type="text" id="subvar-sku" class="form-input" placeholder="Auto-generated if empty">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="subvar-color">Color Name *</label>
+                <input type="text" id="subvar-color" required class="form-input" placeholder="e.g. Guards Red">
+              </div>
+              <div class="form-group">
+                <label for="subvar-color-hex">Color Swatch Hex</label>
+                <input type="color" id="subvar-color-hex" value="#ef4444" class="form-input" style="height: 42px; padding: 2px;">
+              </div>
+              <div class="form-group">
+                <label for="subvar-size">Size / Body Spec *</label>
+                <input type="text" id="subvar-size" required class="form-input" placeholder="e.g. Track Widebody (2-Door)">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="subvar-trim">Trim / Performance Package</label>
+                <input type="text" id="subvar-trim" class="form-input" placeholder="e.g. Weissach Package & Carbon Aero">
+              </div>
+              <div class="form-group">
+                <label for="subvar-rate">Daily Rate Override ($)</label>
+                <input type="number" id="subvar-rate" min="1" step="10" class="form-input" placeholder="Leave blank to use base rate">
+              </div>
+              <div class="form-group">
+                <label for="subvar-deposit">Deposit Override ($)</label>
+                <input type="number" id="subvar-deposit" min="1" step="50" class="form-input" placeholder="Leave blank to use base deposit">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="subvar-image">Variant Photo URL</label>
+              <input type="url" id="subvar-image" class="form-input" placeholder="https://images.unsplash.com/...">
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('variant-subform').style.display = 'none'">Cancel</button>
+              <button type="submit" class="btn btn-gold btn-sm">Save Variant</button>
+            </div>
+          </form>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Variant Name & SKU</th>
+                  <th>Color Swatch</th>
+                  <th>Size / Body</th>
+                  <th>Trim Package</th>
+                  <th>Daily Rate Override</th>
+                  <th>Deposit Override</th>
+                  <th>Stock</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="variants-table-body"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- MODALS: AUTH & PROFILE MODALS -->
-    <!-- ======================================================== -->
-    
-    <!-- Modal: Login -->
+    <!-- Modal: User Management -->
+    <div id="admin-user-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Account Management</span>
+            <h2 id="admin-user-modal-title">Add Client Account</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('admin-user-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <form id="admin-user-form" onsubmit="app.saveAdminUser(event)" class="modal-body">
+          <input type="hidden" id="admin-u-id">
+          <div class="form-group">
+            <label for="admin-u-name">Full Legal Name *</label>
+            <input type="text" id="admin-u-name" required class="form-input" placeholder="e.g. Jordan Sterling">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin-u-email">Email Address *</label>
+              <input type="email" id="admin-u-email" required class="form-input" placeholder="jordan@domain.com">
+            </div>
+            <div class="form-group">
+              <label for="admin-u-phone">Phone Number</label>
+              <input type="text" id="admin-u-phone" class="form-input" placeholder="+1 (555) 000-0000">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="admin-u-role">Account Role *</label>
+              <select id="admin-u-role" class="form-select">
+                <option value="customer">Customer / Client</option>
+                <option value="admin">Administrator / Operations Director</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="admin-u-tier">Membership Tier</label>
+              <select id="admin-u-tier" class="form-select">
+                <option value="Standard Driver">Standard Driver</option>
+                <option value="Gold Member">Gold Member</option>
+                <option value="Platinum Driver">Platinum Driver</option>
+                <option value="Black Card Elite">Black Card Elite</option>
+                <option value="Executive Fleet Director">Executive Fleet Director</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" id="admin-u-pass-box">
+            <label for="admin-u-pass">Password</label>
+            <input type="password" id="admin-u-pass" class="form-input" placeholder="••••••••">
+          </div>
+          <div class="form-group">
+            <label for="admin-u-address">Billing & Delivery Address</label>
+            <input type="text" id="admin-u-address" class="form-input" placeholder="e.g. 742 Evergreen Terrace, Beverly Hills, CA">
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="app.closeModal('admin-user-modal')">Cancel</button>
+            <button type="submit" class="btn btn-gold">Save Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Add/Edit Product (with Brand, Manufacturer, Color, Size Attributes) -->
+    <div id="product-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Fleet Inventory</span>
+            <h2 id="product-modal-title">Add Vehicle to Fleet</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('product-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <form id="product-form" onsubmit="app.saveProduct(event)" class="modal-body">
+          <input type="hidden" id="prod-id">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-name">Vehicle Name *</label>
+              <input type="text" id="prod-name" required class="form-input" placeholder="e.g. Porsche 911 GT3 RS (992)">
+            </div>
+            <div class="form-group">
+              <label for="prod-category">Category *</label>
+              <select id="prod-category" class="form-select" required>
+                <option value="supercars">Supercars & Exotics</option>
+                <option value="electric">Electric Performance</option>
+                <option value="luxury-suv">Luxury & Armored SUVs</option>
+                <option value="grand-touring">Grand Tourers & Coupes</option>
+                <option value="executive">Executive Luxury Sedans</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Attributes: Brand, Manufacturer, Color, Size -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-brand">Brand *</label>
+              <input type="text" id="prod-brand" required class="form-input" placeholder="e.g. Porsche / Ferrari / Rolls-Royce">
+            </div>
+            <div class="form-group">
+              <label for="prod-manufacturer">Manufacturer *</label>
+              <input type="text" id="prod-manufacturer" required class="form-input" placeholder="e.g. Dr. Ing. h.c. F. Porsche AG (Stuttgart)">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-color">Default Paintwork Color *</label>
+              <input type="text" id="prod-color" required class="form-input" placeholder="e.g. Speed Yellow / Weissach Carbon">
+            </div>
+            <div class="form-group">
+              <label for="prod-size">Size / Body Spec *</label>
+              <input type="text" id="prod-size" required class="form-input" placeholder="e.g. Track Widebody (2-Door Coupe)">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-daily-rate">Daily Rate ($) *</label>
+              <input type="number" id="prod-daily-rate" required min="1" step="10" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="prod-weekly-rate">Weekly Rate ($)</label>
+              <input type="number" id="prod-weekly-rate" required min="1" step="10" class="form-input">
+            </div>
+          </div>
+
+          <!-- Deposit Rule Selector (Fixed vs Percentage) -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-deposit-type">Security Deposit Rule</label>
+              <select id="prod-deposit-type" class="form-select" onchange="app.toggleProductDepositTypeUI()">
+                <option value="FIXED">Fixed Amount ($)</option>
+                <option value="PERCENTAGE">Percentage of Rental Subtotal (%)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="prod-deposit-rate" id="lbl-deposit-rate">Deposit Amount ($) / Rate (%)</label>
+              <input type="number" id="prod-deposit-rate" required min="1" step="5" class="form-input" value="1500">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-stock">Total Fleet Units</label>
+              <input type="number" id="prod-stock" required min="1" value="2" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="prod-condition">Condition Rating</label>
+              <select id="prod-condition" class="form-select">
+                <option value="Pristine" selected>Pristine</option>
+                <option value="Excellent">Excellent</option>
+                <option value="Good">Good</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prod-image">Showroom Image URL</label>
+            <input type="url" id="prod-image" class="form-input" value="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200">
+          </div>
+
+          <div class="form-group">
+            <label for="prod-desc">Vehicle Description & Specifications</label>
+            <textarea id="prod-desc" rows="2" class="form-textarea" placeholder="Engine, horsepower, aerodynamics, and bespoke luxury options..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="app.closeModal('product-modal')">Cancel</button>
+            <button type="submit" class="btn btn-gold">
+              <i data-lucide="check"></i> Save Vehicle
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modals: Login & Signup -->
     <div id="login-modal" class="modal-overlay">
       <div class="modal-card auth-modal-card">
         <div class="modal-header">
@@ -1038,7 +2475,6 @@
       </div>
     </div>
 
-    <!-- Modal: Signup -->
     <div id="signup-modal" class="modal-overlay">
       <div class="modal-card auth-modal-card">
         <div class="modal-header">
@@ -1150,94 +2586,82 @@
       </div>
     </div>
 
-    <!-- ======================================================== -->
-    <!-- MODAL: ADD/EDIT VEHICLE MODAL (ADMIN) -->
-    <!-- ======================================================== -->
-    <div id="product-modal" class="modal-overlay">
+    <!-- Modal: Dashboard Widget Customizer -->
+    <div id="widget-customizer-modal" class="modal-overlay">
       <div class="modal-card">
         <div class="modal-header">
-          <h2 id="product-modal-title">Add Vehicle to Fleet</h2>
-          <button class="modal-close-btn" onclick="app.closeModal('product-modal')">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Operations Layout</span>
+            <h2>Customize Admin Dashboard Widgets</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('widget-customizer-modal')">
             <i data-lucide="x"></i>
           </button>
         </div>
-        <form id="product-form" onsubmit="app.saveProduct(event)" class="modal-body">
-          <input type="hidden" id="prod-id">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="prod-name">Vehicle Name</label>
-              <input type="text" id="prod-name" required class="form-input" placeholder="e.g. McLaren 720S Spider">
-            </div>
-            <div class="form-group">
-              <label for="prod-category">Category</label>
-              <select id="prod-category" class="form-select" required>
-                <option value="supercars">Supercars & Exotics</option>
-                <option value="electric">Electric Performance</option>
-                <option value="luxury-suv">Luxury & Armored SUVs</option>
-                <option value="grand-touring">Grand Tourers & Coupes</option>
-                <option value="executive">Executive Luxury Sedans</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="prod-brand">Brand</label>
-              <input type="text" id="prod-brand" required class="form-input" placeholder="e.g. McLaren / Porsche">
-            </div>
-            <div class="form-group">
-              <label for="prod-model">Model</label>
-              <input type="text" id="prod-model" class="form-input" placeholder="e.g. 720S">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="prod-daily-rate">Daily Rate ($)</label>
-              <input type="number" id="prod-daily-rate" required min="1" step="10" class="form-input">
-            </div>
-            <div class="form-group">
-              <label for="prod-weekly-rate">Weekly Rate ($)</label>
-              <input type="number" id="prod-weekly-rate" required min="1" step="10" class="form-input">
-            </div>
-            <div class="form-group">
-              <label for="prod-deposit">Deposit Amount ($)</label>
-              <input type="number" id="prod-deposit" required min="1" step="10" class="form-input">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="prod-stock">Total Fleet Units</label>
-              <input type="number" id="prod-stock" required min="1" value="2" class="form-input">
-            </div>
-            <div class="form-group">
-              <label for="prod-condition">Condition Rating</label>
-              <select id="prod-condition" class="form-select">
-                <option value="Pristine" selected>Pristine</option>
-                <option value="Excellent">Excellent</option>
-                <option value="Good">Good</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="prod-image">Image URL</label>
-            <input type="url" id="prod-image" class="form-input" value="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200">
-          </div>
-
-          <div class="form-group">
-            <label for="prod-desc">Vehicle Description & Specifications</label>
-            <textarea id="prod-desc" rows="2" class="form-textarea" placeholder="Engine, horsepower, aerodynamics, and bespoke luxury options..."></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn btn-secondary" onclick="app.closeModal('product-modal')">Cancel</button>
-            <button type="submit" class="btn btn-gold">Save Vehicle</button>
-          </div>
-        </form>
+        <div class="modal-body" id="widget-customizer-body"></div>
+        <div class="modal-footer" style="padding: 1rem 1.5rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button class="btn btn-secondary" onclick="app.closeModal('widget-customizer-modal')">Cancel</button>
+          <button class="btn btn-gold" onclick="app.saveWidgetLayout()"><i data-lucide="check"></i> Save Preferences</button>
+        </div>
       </div>
     </div>
+
+    <!-- Modal: Interactive QR / Barcode Scanner -->
+    <div id="qr-barcode-scanner-modal" class="modal-overlay">
+      <div class="modal-card modal-md">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-cyan">Interactive Barcode & QR Scanner</span>
+            <h2>Scan Staging Pass / VIN Barcode</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('qr-barcode-scanner-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="modal-body text-center">
+          <div style="position: relative; width: 100%; max-width: 380px; margin: 0 auto 1.25rem; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid var(--cyan);">
+            <video id="scanner-video" style="width: 100%; height: 200px; object-fit: cover; display: block;"></video>
+            <div class="scanner-viewfinder">
+              <div class="scanner-laser"></div>
+            </div>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">Point camera at QR code pass or enter barcode token below:</p>
+
+          <div class="form-group">
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" id="manual-barcode-input" class="form-input" placeholder="e.g. QR-PKUP-7419-1 or VIN-P911GT3RS-001" onkeydown="if(event.key==='Enter'){app.processScannedCode(this.value);}">
+              <button class="btn btn-cyan" onclick="app.processScannedCode(document.getElementById('manual-barcode-input').value)">
+                <i data-lucide="search"></i> Process
+              </button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.75rem;">
+            <button class="btn btn-sm btn-secondary" onclick="app.processScannedCode('QR-PKUP-7419-1')">Sample QR Pass</button>
+            <button class="btn btn-sm btn-secondary" onclick="app.processScannedCode('RNT-7419')">Sample RNT-7419</button>
+            <button class="btn btn-sm btn-secondary" onclick="app.processScannedCode('VIN-SCA664S43M-9011')">Sample VIN</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Bottom Tab Navigation -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+      <button class="mobile-tab-btn active" id="mtab-store" onclick="app.navigate('store')">
+        <i data-lucide="car"></i> Fleet
+      </button>
+      <button class="mobile-tab-btn" id="mtab-my-rentals" onclick="app.navigate('my-rentals')">
+        <i data-lucide="key-round"></i> Bookings
+      </button>
+      <button class="mobile-tab-btn admin-only" id="mtab-admin" onclick="app.navigate('admin')">
+        <i data-lucide="layout-dashboard"></i> Ops
+      </button>
+      <button class="mobile-tab-btn admin-only" id="mtab-reminders" onclick="app.navigate('reminders')">
+        <i data-lucide="bell"></i> Alerts
+      </button>
+      <button class="mobile-tab-btn" id="mtab-profile" onclick="app.openProfileModal()">
+        <i data-lucide="user"></i> Profile
+      </button>
+    </nav>
 
     <!-- Toast Notification Container -->
     <div id="toast-container" class="toast-container"></div>

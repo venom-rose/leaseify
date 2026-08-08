@@ -1,19 +1,22 @@
 {
   "name": "leaseify",
-  "version": "1.0.0",
-  "description": "Full-Stack Enterprise Rental & Operations Management Web Application",
-  "main": "server/server.js",
+  "version": "2.0.0",
+  "description": "Leaseify — Premier Car & Luxury Fleet Rental Full-Stack Platform",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node server/server.js",
-    "test": "node -e \"const { db } = require('./server/db'); console.log('Products:', db.prepare('SELECT count(*) as c FROM products').get().c);\""
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "seed": "node backend/seed.js",
+    "test": "node -e \"console.log('Use automated test scripts')\""
   },
   "keywords": [
+    "car-rental",
+    "supercar-fleet",
     "rental-management",
-    "deposit-escrow",
-    "late-penalty-automation",
-    "inventory-tracking",
-    "equipment-booking"
+    "escrow-deposit",
+    "jwt-auth",
+    "invoices"
   ],
-  "author": "Leaseify Core Team",
+  "author": "Leaseify Engineering Team",
   "license": "MIT"
 }
