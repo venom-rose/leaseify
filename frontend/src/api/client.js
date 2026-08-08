@@ -710,25 +710,78 @@ export const api = {
 
   // Products (Rental Inventory)
   getProducts: async (filters = {}) => {
-    const params = new URLSearchParams(filters).toString();
+    const cleanFilters = {};
+    Object.keys(filters).forEach((key) => {
+      if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') {
+        cleanFilters[key] = filters[key];
+      }
+    });
+    const params = new URLSearchParams(cleanFilters).toString();
     return safeFetch(`/products?${params}`, { method: 'GET' }, () => {
       let data = [...initialMockData.products];
-      if (filters.category && filters.category !== 'all') {
-        data = data.filter((p) => p.category === filters.category);
+
+      // 1. Category Filter
+      if (cleanFilters.category && cleanFilters.category !== 'all') {
+        data = data.filter((p) => p.category === cleanFilters.category);
       }
-      if (filters.search) {
-        const s = filters.search.toLowerCase();
+
+      // 2. Search Filter
+      if (cleanFilters.search) {
+        const s = cleanFilters.search.toLowerCase();
         data = data.filter(
           (p) =>
-            p.name.toLowerCase().includes(s) ||
-            p.description.toLowerCase().includes(s) ||
-            p.category.toLowerCase().includes(s)
+            (p.name && p.name.toLowerCase().includes(s)) ||
+            (p.title && p.title.toLowerCase().includes(s)) ||
+            (p.location && p.location.toLowerCase().includes(s)) ||
+            (p.description && p.description.toLowerCase().includes(s))
         );
       }
-      if (filters.maxPrice) {
-        data = data.filter((p) => p.pricePerDay <= Number(filters.maxPrice));
+
+      // 3. Price Filter (minPrice / maxPrice)
+      if (cleanFilters.minPrice) {
+        data = data.filter((p) => (p.pricePerDay || 0) >= Number(cleanFilters.minPrice));
       }
-      return { success: true, count: data.length, data };
+      if (cleanFilters.maxPrice) {
+        data = data.filter((p) => (p.pricePerDay || 0) <= Number(cleanFilters.maxPrice));
+      }
+
+      // 4. Location Filter
+      if (cleanFilters.location) {
+        const loc = cleanFilters.location.toLowerCase();
+        data = data.filter((p) => p.location && p.location.toLowerCase().includes(loc));
+      }
+
+      // 5. Sorting
+      const sort = cleanFilters.sort || 'createdAt';
+      const order = cleanFilters.order === 'asc' ? 1 : -1;
+      data.sort((a, b) => {
+        let fieldA = sort === 'price' ? (a.pricePerDay || 0) : (a[sort] || '');
+        let fieldB = sort === 'price' ? (b.pricePerDay || 0) : (b[sort] || '');
+
+        if (sort === 'createdAt') {
+          fieldA = new Date(a.createdAt || 0).getTime();
+          fieldB = new Date(b.createdAt || 0).getTime();
+        }
+
+        if (fieldA < fieldB) return -1 * order;
+        if (fieldA > fieldB) return 1 * order;
+        return 0;
+      });
+
+      // 6. Pagination
+      const page = parseInt(cleanFilters.page) || 1;
+      const limit = parseInt(cleanFilters.limit) || 10;
+      const total = data.length;
+      const skip = (page - 1) * limit;
+      const paginatedData = data.slice(skip, skip + limit);
+
+      return {
+        success: true,
+        data: paginatedData,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+      };
     });
   },
 

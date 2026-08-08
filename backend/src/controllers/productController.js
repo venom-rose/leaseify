@@ -6,44 +6,77 @@ const Product = require('../models/Product');
 // @access  Public
 exports.getProducts = async (req, res, next) => {
   try {
-    let queryObj = {};
+    // 1. Extract query:
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "";
+    const sort = req.query.sort || "createdAt";
+    const order = req.query.order === "asc" ? 1 : -1;
 
-    // Filter by category
-    if (req.query.category && req.query.category !== 'all') {
-      queryObj.category = req.query.category;
-    }
+    // 2. Create filter object:
+    let filter = {};
 
-    // Filter by availability
-    if (req.query.availability === 'available') {
-      queryObj.isAvailable = true;
-      queryObj.stockQuantity = { $gt: 0 };
-    }
-
-    // Search query
-    if (req.query.search) {
-      const regex = new RegExp(req.query.search, 'i');
-      queryObj.$or = [
-        { name: regex },
-        { description: regex },
-        { category: regex },
-        { location: regex },
-        { 'specifications.brand': regex },
+    // 3. Add search logic:
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { title: { $regex: search, $options: "i" } },
+        { location: { $regex: search, $options: "i" } }
       ];
     }
 
-    // Price range filtering
-    if (req.query.minPrice || req.query.maxPrice) {
-      queryObj.pricePerDay = {};
-      if (req.query.minPrice) queryObj.pricePerDay.$gte = Number(req.query.minPrice);
-      if (req.query.maxPrice) queryObj.pricePerDay.$lte = Number(req.query.maxPrice);
+    // 4. Add filters:
+    if (req.query.category && req.query.category !== 'all') {
+      filter.category = req.query.category;
     }
 
-    const products = await Product.find(queryObj).sort({ createdAt: -1 });
+    if (req.query.minPrice || req.query.maxPrice) {
+      filter.price = {};
+      if (req.query.minPrice) filter.price.$gte = Number(req.query.minPrice);
+      if (req.query.maxPrice) filter.price.$lte = Number(req.query.maxPrice);
+    }
 
-    res.status(200).json({
+    if (req.query.location) {
+      filter.location = { $regex: req.query.location, $options: "i" };
+    }
+
+    // STEP 8: DEBUGGING logs
+    console.log('[DEBUG - QUERY]:', req.query);
+    console.log('[DEBUG - FILTER]:', filter);
+
+    // Map filter.price to filter.pricePerDay for Product schema compatibility
+    let dbFilter = { ...filter };
+    if (dbFilter.price) {
+      dbFilter.pricePerDay = dbFilter.price;
+      delete dbFilter.price;
+    }
+
+    // Map sort field 'price' to 'pricePerDay' for Product schema
+    let dbSort = sort;
+    if (dbSort === 'price') {
+      dbSort = 'pricePerDay';
+    }
+
+    // STEP 3: PAGINATION LOGIC
+    // 1. Calculate skip:
+    const skip = (page - 1) * limit;
+
+    // 2. Fetch data:
+    const products = await Product.find(dbFilter)
+      .sort({ [dbSort]: order })
+      .skip(skip)
+      .limit(limit);
+
+    // 3. Count total:
+    const total = await Product.countDocuments(dbFilter);
+
+    // STEP 4: RESPONSE FORMAT
+    res.json({
       success: true,
-      count: products.length,
       data: products,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total
     });
   } catch (err) {
     console.error('[GET PRODUCTS ERROR]:', err);
