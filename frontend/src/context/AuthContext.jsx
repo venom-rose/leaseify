@@ -24,16 +24,16 @@ const DEFAULT_TENANT = {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(() => localStorage.getItem('leaseify_token') || 'demo-jwt-admin-token');
+  const [token, setToken] = useState(() => localStorage.getItem('leaseify_token') || null);
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem('leaseify_user');
-      return saved ? JSON.parse(saved) : DEFAULT_ADMIN;
+      return saved ? JSON.parse(saved) : null;
     } catch {
-      return DEFAULT_ADMIN;
+      return null;
     }
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(() => true);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('leaseify_token'));
   const [isBackendConnected, setIsBackendConnected] = useState(false);
   const [currentTab, setCurrentTab] = useState(() => {
     try {
