@@ -92,17 +92,17 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
 
   if (cartItems.length === 0 && !completedOrder) {
     return (
-      <div className="glass-panel rounded-3xl border border-slate-800 p-12 text-center max-w-xl mx-auto my-12 space-y-4">
-        <div className="h-16 w-16 rounded-3xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-500">
+      <div className="glass-panel rounded-3xl border border-warm-200 p-12 text-center max-w-xl mx-auto my-12 space-y-4">
+        <div className="h-16 w-16 rounded-3xl bg-white border border-warm-200 flex items-center justify-center mx-auto text-warm-400">
           <ShoppingBag className="w-8 h-8" />
         </div>
-        <h3 className="text-xl font-bold text-white">Your Rental Cart is Empty</h3>
-        <p className="text-xs text-slate-400 max-w-sm mx-auto">
+        <h3 className="text-xl font-bold text-warm-900">Your Rental Cart is Empty</h3>
+        <p className="text-xs text-warm-500 max-w-sm mx-auto">
           Browse our inventory of furniture, high-end electronics, appliances, and tools to reserve items for your unit.
         </p>
         <button
           onClick={onNavigateToProducts}
-          className="mt-4 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-semibold shadow-lg shadow-sky-500/25 transition-all inline-flex items-center gap-2"
+          className="mt-4 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-sky-400 text-warm-900 text-xs font-semibold shadow-lg shadow-amber transition-all inline-flex items-center gap-2"
         >
           <Package className="w-4 h-4" />
           Browse Rental Catalog
@@ -118,19 +118,19 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
         <div>
           <button
             onClick={onNavigateToProducts}
-            className="text-xs text-sky-400 hover:underline flex items-center gap-1 mb-1.5"
+            className="text-xs text-amber-600 hover:underline flex items-center gap-1 mb-1.5"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Products Catalog
           </button>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Rental Cart & Checkout</h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h2 className="text-2xl font-bold text-warm-900 tracking-tight">Rental Cart & Checkout</h2>
+          <p className="text-xs text-warm-500 mt-0.5">
             Review rental periods, refundable deposits, and complete your reservation.
           </p>
         </div>
 
         <button
           onClick={clearCart}
-          className="text-xs text-rose-400 hover:text-rose-300 hover:underline flex items-center gap-1"
+          className="text-xs text-red-500 hover:text-red-400 hover:underline flex items-center gap-1"
         >
           <Trash2 className="w-3.5 h-3.5" /> Clear Cart
         </button>
@@ -142,25 +142,25 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
           {cartItems.map((item) => (
             <div
               key={item.product._id}
-              className="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              className="glass-panel p-5 rounded-2xl border border-warm-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
             >
               {/* Product Thumbnail & Details */}
               <div className="flex items-center gap-4 min-w-0">
                 <img
                   src={item.product.images?.[0]}
                   alt={item.product.name}
-                  className="h-20 w-20 rounded-xl object-cover border border-slate-800 bg-slate-950 shrink-0"
+                  className="h-20 w-20 rounded-xl object-cover border border-warm-200 bg-warm-50 shrink-0"
                 />
                 <div className="min-w-0">
-                  <span className="text-[10px] uppercase font-bold text-sky-400">
+                  <span className="text-[10px] uppercase font-bold text-amber-600">
                     {item.product.category}
                   </span>
-                  <h4 className="text-sm font-bold text-white truncate max-w-sm">
+                  <h4 className="text-sm font-bold text-warm-900 truncate max-w-sm">
                     {item.product.name}
                   </h4>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-warm-500 mt-0.5">
                     ₹{Number(item.product.pricePerDay || 0).toLocaleString('en-IN')} / day •{' '}
-                    <span className="text-amber-400">
+                    <span className="text-amber-600">
                       ₹{Number(item.product.securityDeposit || 0).toLocaleString('en-IN')} Deposit
                     </span>
                   </p>
@@ -168,18 +168,18 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
               </div>
 
               {/* Rental Dates & Calculation */}
-              <div className="flex items-center justify-between w-full sm:w-auto sm:gap-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-800">
+              <div className="flex items-center justify-between w-full sm:w-auto sm:gap-6 border-t sm:border-t-0 pt-3 sm:pt-0 border-warm-200">
                 <div className="text-left sm:text-right">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-300">
-                    <Calendar className="w-3.5 h-3.5 text-sky-400" />
+                  <div className="flex items-center gap-1.5 text-xs text-warm-600">
+                    <Calendar className="w-3.5 h-3.5 text-amber-600" />
                     <span>{item.days} Days Duration</span>
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-warm-400">
                     {item.startDate} to {item.endDate}
                   </p>
-                  <p className="text-sm font-bold text-emerald-400 mt-1">
+                  <p className="text-sm font-bold text-emerald-600 mt-1">
                     ₹{Number(item.subtotal || 0).toLocaleString('en-IN')}{' '}
-                    <span className="text-[11px] font-normal text-slate-400">
+                    <span className="text-[11px] font-normal text-warm-500">
                       (+₹{Number(item.deposit || 0).toLocaleString('en-IN')} dep)
                     </span>
                   </p>
@@ -187,7 +187,7 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
 
                 <button
                   onClick={() => removeFromCart(item.product._id)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                  className="p-2 rounded-xl text-warm-500 hover:text-red-500 hover:bg-warm-100 transition-colors"
                   title="Remove item"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -198,32 +198,32 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
         </div>
 
         {/* Right Column: Order Summary & Checkout Card */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-5 h-fit">
-          <h3 className="text-base font-bold text-white tracking-tight">Reservation Summary</h3>
+        <div className="glass-panel p-6 rounded-3xl border border-warm-200 space-y-5 h-fit">
+          <h3 className="text-base font-bold text-warm-900 tracking-tight">Reservation Summary</h3>
 
           <div className="space-y-2.5 text-xs">
-            <div className="flex justify-between text-slate-300">
+            <div className="flex justify-between text-warm-600">
               <span>Total Items:</span>
-              <span className="font-semibold text-white">{totalItemCount} Units</span>
+              <span className="font-semibold text-warm-900">{totalItemCount} Units</span>
             </div>
-            <div className="flex justify-between text-slate-300">
+            <div className="flex justify-between text-warm-600">
               <span>Rental Charges:</span>
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-warm-900">
                 ₹{Number(subtotal || 0).toLocaleString('en-IN')}
               </span>
             </div>
-            <div className="flex justify-between text-slate-300">
+            <div className="flex justify-between text-warm-600">
               <span className="flex items-center gap-1">
                 Refundable Security Deposit:
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
               </span>
-              <span className="font-semibold text-amber-400">
+              <span className="font-semibold text-amber-600">
                 +₹{Number(depositTotal || 0).toLocaleString('en-IN')}
               </span>
             </div>
-            <div className="border-t border-slate-800 pt-3 flex justify-between text-base font-bold">
-              <span className="text-white">Total Due Today:</span>
-              <span className="text-emerald-400">
+            <div className="border-t border-warm-200 pt-3 flex justify-between text-base font-bold">
+              <span className="text-warm-900">Total Due Today:</span>
+              <span className="text-emerald-600">
                 ₹{Number(grandTotal || 0).toLocaleString('en-IN')}
               </span>
             </div>
@@ -231,13 +231,13 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
 
           {/* Payment Method Selector */}
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+            <label className="block text-xs font-semibold text-warm-700 mb-1.5">
               Payment Gateway Simulation
             </label>
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-sky-500 cursor-pointer"
+              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:outline-none focus:border-amber-500 cursor-pointer"
             >
               <option value="Credit Card">Credit Card / Debit Card (Instant Online)</option>
               <option value="UPI">UPI / QR Code (PhonePe, Google Pay, Paytm)</option>
@@ -248,7 +248,7 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
 
           {/* Delivery Note */}
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+            <label className="block text-xs font-semibold text-warm-700 mb-1.5">
               Delivery Destination / Unit
             </label>
             <input
@@ -256,20 +256,20 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
               value={deliveryNotes}
               onChange={(e) => setDeliveryNotes(e.target.value)}
               placeholder="e.g. 742 Evergreen Terrace, Suite 44B"
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-sky-500"
+              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:outline-none focus:border-amber-500"
             />
           </div>
 
           <button
             onClick={handleCheckout}
             disabled={isSimulatingPayment}
-            className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-xl text-sm shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-emerald-400 hover:to-teal-500 text-warm-900 font-semibold rounded-xl text-sm shadow-lg shadow-amber transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Lock className="w-4 h-4" />
             <span>Pay & Reserve Items (₹{Number(grandTotal || 0).toLocaleString('en-IN')})</span>
           </button>
 
-          <p className="text-[11px] text-center text-slate-500">
+          <p className="text-[11px] text-center text-warm-400">
             🔒 Escrow Protected: Security deposit of ₹{Number(depositTotal || 0).toLocaleString('en-IN')} is held and automatically refunded upon on-time return.
           </p>
         </div>
@@ -283,27 +283,27 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
         maxWidth="max-w-md"
       >
         <div className="p-6 text-center space-y-5">
-          <div className="h-16 w-16 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center mx-auto animate-pulse">
+          <div className="h-16 w-16 rounded-full bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center mx-auto animate-pulse">
             <CreditCard className="w-8 h-8" />
           </div>
 
           <div>
-            <h4 className="text-base font-bold text-white">Simulating Online Transaction</h4>
-            <p className="text-xs text-slate-400 mt-1">
+            <h4 className="text-base font-bold text-warm-900">Simulating Online Transaction</h4>
+            <p className="text-xs text-warm-500 mt-1">
               Processing ₹{Number(grandTotal || 0).toLocaleString('en-IN')} via {paymentMethod}...
             </p>
           </div>
 
-          <div className="space-y-2 text-left text-xs bg-slate-950 p-4 rounded-2xl border border-slate-800">
-            <div className={`flex items-center gap-2 ${simStep >= 1 ? 'text-emerald-400' : 'text-slate-500'}`}>
+          <div className="space-y-2 text-left text-xs bg-warm-50 p-4 rounded-2xl border border-warm-200">
+            <div className={`flex items-center gap-2 ${simStep >= 1 ? 'text-emerald-600' : 'text-warm-400'}`}>
               <CheckCircle2 className="w-4 h-4" />
               <span>Verifying tokenized payment & account details</span>
             </div>
-            <div className={`flex items-center gap-2 ${simStep >= 2 ? 'text-emerald-400' : 'text-slate-500'}`}>
+            <div className={`flex items-center gap-2 ${simStep >= 2 ? 'text-emerald-600' : 'text-warm-400'}`}>
               <CheckCircle2 className="w-4 h-4" />
               <span>Authorizing rental fee (₹{Number(subtotal || 0).toLocaleString('en-IN')}) & deposit (₹{Number(depositTotal || 0).toLocaleString('en-IN')})</span>
             </div>
-            <div className={`flex items-center gap-2 ${simStep >= 3 ? 'text-emerald-400' : 'text-slate-500'}`}>
+            <div className={`flex items-center gap-2 ${simStep >= 3 ? 'text-emerald-600' : 'text-warm-400'}`}>
               {simStep >= 3 ? <CheckCircle2 className="w-4 h-4" /> : <Loader2 className="w-4 h-4 animate-spin" />}
               <span>Generating invoice & issuing confirmation</span>
             </div>
@@ -320,35 +320,35 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
           maxWidth="max-w-lg"
         >
           <div className="text-center space-y-4 py-2">
-            <div className="h-16 w-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
+            <div className="h-16 w-16 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-8 h-8" />
             </div>
 
             <div>
-              <h4 className="text-lg font-bold text-white">Order #{completedOrder.transactionId}</h4>
-              <p className="text-xs text-slate-400 mt-1">
+              <h4 className="text-lg font-bold text-warm-900">Order #{completedOrder.transactionId}</h4>
+              <p className="text-xs text-warm-500 mt-1">
                 Payment successful! Security deposit of ₹{Number(completedOrder.depositTotal || 0).toLocaleString('en-IN')} held in escrow.
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-left space-y-2 text-xs">
+            <div className="p-4 rounded-2xl bg-warm-50 border border-warm-200 text-left space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-400">Total Items:</span>
-                <span className="text-white font-medium">{completedOrder.items?.length} items</span>
+                <span className="text-warm-500">Total Items:</span>
+                <span className="text-warm-900 font-medium">{completedOrder.items?.length} items</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Duration:</span>
-                <span className="text-white font-medium">{completedOrder.totalDays} Days</span>
+                <span className="text-warm-500">Duration:</span>
+                <span className="text-warm-900 font-medium">{completedOrder.totalDays} Days</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Security Deposit:</span>
-                <span className="text-amber-400 font-medium">
+                <span className="text-warm-500">Security Deposit:</span>
+                <span className="text-amber-600 font-medium">
                   ₹{Number(completedOrder.depositTotal || 0).toLocaleString('en-IN')}
                 </span>
               </div>
-              <div className="flex justify-between border-t border-slate-800 pt-2 font-bold">
-                <span className="text-white">Amount Paid:</span>
-                <span className="text-emerald-400">
+              <div className="flex justify-between border-t border-warm-200 pt-2 font-bold">
+                <span className="text-warm-900">Amount Paid:</span>
+                <span className="text-emerald-600">
                   ₹{Number(completedOrder.grandTotal || 0).toLocaleString('en-IN')}
                 </span>
               </div>
@@ -357,7 +357,7 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
             <div className="grid grid-cols-2 gap-2 pt-2">
               <button
                 onClick={() => handleViewInvoice(completedOrder._id)}
-                className="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-sky-400 transition-colors flex items-center justify-center gap-1.5"
+                className="py-2.5 rounded-xl bg-warm-100 hover:bg-warm-200 text-xs font-semibold text-amber-600 transition-colors flex items-center justify-center gap-1.5"
               >
                 <FileText className="w-4 h-4" />
                 View Full Invoice
@@ -367,7 +367,7 @@ export const CartPage = ({ onNavigateToProducts, onNavigateToRentals }) => {
                   setCompletedOrder(null);
                   if (onNavigateToRentals) onNavigateToRentals();
                 }}
-                className="py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-semibold shadow-md shadow-sky-500/20 transition-all"
+                className="py-2.5 rounded-xl bg-amber-500 hover:bg-sky-400 text-warm-900 text-xs font-semibold shadow-md shadow-amber transition-all"
               >
                 Go to My Rentals
               </button>

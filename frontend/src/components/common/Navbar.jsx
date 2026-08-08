@@ -8,25 +8,25 @@ export const Navbar = ({ onMenuClick, onNewPropertyClick, onCartClick, onNotific
   const { totalItemCount } = useCart();
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 flex items-center justify-between">
+    <header className="sticky top-0 z-30 h-16 bg-white/90 backdrop-blur-md border-b border-warm-200 px-4 sm:px-6 flex items-center justify-between shadow-sm">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="lg:hidden p-2 rounded-lg text-warm-500 hover:text-warm-900 hover:bg-warm-100 transition-colors"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2">
           {isBackendConnected ? (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-medium">
               <Wifi className="w-3.5 h-3.5" />
               <span>Backend Connected</span>
             </div>
           ) : (
             <div
               title="Running on interactive client demo mode"
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600 text-xs font-medium"
             >
               <WifiOff className="w-3.5 h-3.5" />
               <span>Standalone Demo Mode</span>
@@ -39,12 +39,12 @@ export const Navbar = ({ onMenuClick, onNewPropertyClick, onCartClick, onNotific
         {/* Smart Notifications Bell */}
         <button
           onClick={onNotificationClick}
-          className="relative p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-600 transition-all flex items-center justify-center text-xs font-semibold"
+          className="relative p-2 rounded-xl bg-warm-100 border border-warm-200 text-warm-600 hover:text-amber-700 hover:border-amber-300 transition-all flex items-center justify-center text-xs font-semibold"
           title="Smart Notifications & Alerts"
         >
-          <span className="w-2 h-2 rounded-full bg-rose-500 absolute top-1.5 right-1.5 animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-red-500 absolute top-1.5 right-1.5 animate-pulse" />
           <svg
-            className="w-4 h-4 text-sky-400"
+            className="w-4 h-4 text-amber-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -61,13 +61,13 @@ export const Navbar = ({ onMenuClick, onNewPropertyClick, onCartClick, onNotific
         {/* Rental Cart Trigger */}
         <button
           onClick={onCartClick}
-          className="relative p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-600 transition-all flex items-center gap-1.5 text-xs font-semibold"
+          className="relative p-2 rounded-xl bg-warm-100 border border-warm-200 text-warm-600 hover:text-amber-700 hover:border-amber-300 transition-all flex items-center gap-1.5 text-xs font-semibold"
           title="View Rental Cart"
         >
-          <ShoppingBag className="w-4 h-4 text-sky-400" />
+          <ShoppingBag className="w-4 h-4 text-amber-500" />
           <span className="hidden sm:inline">Cart</span>
           {totalItemCount > 0 && (
-            <span className="px-1.5 py-0.2 rounded-full bg-sky-500 text-white text-[10px] font-bold">
+            <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-warm-900 text-[10px] font-bold">
               {totalItemCount}
             </span>
           )}
@@ -76,7 +76,7 @@ export const Navbar = ({ onMenuClick, onNewPropertyClick, onCartClick, onNotific
         {role === 'admin' && onNewPropertyClick && (
           <button
             onClick={onNewPropertyClick}
-            className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-lg shadow-sky-500/20 transition-all active:scale-95"
+            className="hidden sm:flex items-center gap-2 btn-amber text-xs px-3.5 py-2 rounded-xl active:scale-95"
           >
             <Plus className="w-4 h-4" />
             Add Property
@@ -85,23 +85,23 @@ export const Navbar = ({ onMenuClick, onNewPropertyClick, onCartClick, onNotific
 
         <button
           onClick={logout}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700 hover:bg-rose-500/10 hover:border-rose-500/30 hover:text-rose-400 text-slate-300 text-xs font-medium transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-warm-100 border border-warm-200 hover:bg-red-50 hover:border-red-200 hover:text-red-500 text-warm-600 text-xs font-medium transition-all"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Sign Out</span>
         </button>
 
-        <div className="h-8 w-px bg-slate-800 mx-1 hidden sm:block" />
+        <div className="h-8 w-px bg-warm-200 mx-1 hidden sm:block" />
 
         <div className="flex items-center gap-2.5 pl-1">
           <img
             src={user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'}
             alt={user?.name || 'User Avatar'}
-            className="h-8 w-8 rounded-full object-cover border border-slate-700 ring-2 ring-sky-500/20"
+            className="h-8 w-8 rounded-full object-cover border border-warm-300 ring-2 ring-amber-200/40"
           />
           <div className="hidden md:block text-left">
-            <p className="text-xs font-semibold text-white leading-none">{user?.name?.split(' ')[0] || 'User'}</p>
-            <p className="text-[10px] text-slate-400 capitalize">{role}</p>
+            <p className="text-xs font-semibold text-warm-900 leading-none">{user?.name?.split(' ')[0] || 'User'}</p>
+            <p className="text-[10px] text-warm-500 capitalize">{role}</p>
           </div>
         </div>
       </div>

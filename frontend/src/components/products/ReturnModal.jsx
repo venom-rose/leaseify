@@ -114,42 +114,42 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
     >
       <div className="space-y-4">
         {/* Header Summary & Escrow Pill */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 space-y-2 text-xs">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-warm-200 space-y-2 text-xs">
           <div className="flex items-center justify-between">
             <div>
-              <span className="text-slate-400">Order ID:</span>
-              <p className="text-sm font-bold text-white font-mono mt-0.5">
+              <span className="text-warm-500">Order ID:</span>
+              <p className="text-sm font-bold text-warm-900 font-mono mt-0.5">
                 #{rental.transactionId || 'RNT-DEMO'}
               </p>
             </div>
             <div className="text-right">
-              <span className="text-slate-400">Security Deposit in Escrow:</span>
-              <p className="text-sm font-bold text-amber-400 mt-0.5">
+              <span className="text-warm-500">Security Deposit in Escrow:</span>
+              <p className="text-sm font-bold text-amber-600 mt-0.5">
                 ₹{Number(rental.depositTotal || 0).toLocaleString('en-IN')}
               </p>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="pt-2 border-t border-warm-200 flex items-center justify-between text-[11px] text-warm-500">
             <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-sky-400" />
+              <Clock className="w-3.5 h-3.5 text-amber-600" />
               Grace Period: {gracePeriodDays} Day(s) Buffer
             </span>
-            <span className="text-slate-300">
+            <span className="text-warm-600">
               Late Fee Rate: <strong>₹{Number(lateFeePerDay || 0).toLocaleString('en-IN')}/day</strong>
             </span>
           </div>
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-500 text-xs">
             {error}
           </div>
         )}
 
         {/* 1. Actual Return Date & Presets */}
         <div className="space-y-2">
-          <label className="block text-xs font-semibold text-slate-200">
+          <label className="block text-xs font-semibold text-warm-700">
             1. Return Date (Test & Simulation Presets)
           </label>
 
@@ -159,8 +159,8 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
               onClick={() => handleSimulatePreset(0, 'excellent')}
               className={`py-2 px-1 text-[11px] font-semibold rounded-xl border transition-all ${
                 !isOverdue
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500'
-                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-emerald-50 text-emerald-600 border-emerald-500'
+                  : 'bg-warm-50 border-warm-200 text-warm-500 hover:text-warm-900'
               }`}
             >
               ✅ On-Time
@@ -170,8 +170,8 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
               onClick={() => handleSimulatePreset(1, 'excellent')}
               className={`py-2 px-1 text-[11px] font-semibold rounded-xl border transition-all ${
                 rawOverdueDays === 0 && actualReturn > scheduledEnd
-                  ? 'bg-sky-500/20 text-sky-300 border-sky-500'
-                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-amber-500/20 text-amber-500 border-sky-500'
+                  : 'bg-warm-50 border-warm-200 text-warm-500 hover:text-warm-900'
               }`}
             >
               ⏳ In Grace Period
@@ -181,8 +181,8 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
               onClick={() => handleSimulatePreset(3, 'excellent')}
               className={`py-2 px-1 text-[11px] font-semibold rounded-xl border transition-all ${
                 rawOverdueDays > 0
-                  ? 'bg-rose-500/20 text-rose-300 border-rose-500'
-                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-red-500/20 text-red-400 border-rose-500'
+                  : 'bg-warm-50 border-warm-200 text-warm-500 hover:text-warm-900'
               }`}
             >
               🚨 3 Days Overdue
@@ -193,13 +193,13 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
             type="date"
             value={returnDateStr}
             onChange={(e) => setReturnDateStr(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-sky-500"
+            className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:outline-none focus:border-amber-500"
           />
         </div>
 
         {/* 2. Product Physical Condition Inspection */}
         <div className="space-y-2">
-          <label className="block text-xs font-semibold text-slate-200">
+          <label className="block text-xs font-semibold text-warm-700">
             2. Physical Inspection & Condition Assessment
           </label>
 
@@ -220,13 +220,13 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
                 className={`p-2 rounded-xl border text-left text-xs transition-all ${
                   itemCondition === cond.id
                     ? cond.id.includes('damage')
-                      ? 'bg-rose-500/20 border-rose-500 text-rose-300 font-bold'
-                      : 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-bold'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                      ? 'bg-red-500/20 border-rose-500 text-red-400 font-bold'
+                      : 'bg-emerald-50 border-emerald-500 text-emerald-600 font-bold'
+                    : 'bg-warm-50 border-warm-200 text-warm-500 hover:text-warm-900'
                 }`}
               >
                 <span className="block truncate text-[11px]">{cond.label}</span>
-                <span className="text-[10px] text-slate-400 font-normal">
+                <span className="text-[10px] text-warm-500 font-normal">
                   {cond.fee > 0 ? `Deducts ₹${cond.fee}` : '100% Refund'}
                 </span>
               </button>
@@ -238,7 +238,7 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
             placeholder="Inspection remarks (e.g. Lens and sensors checked, full accessories verified)"
             value={conditionNotes}
             onChange={(e) => setConditionNotes(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+            className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 placeholder-warm-400 focus:outline-none focus:border-amber-500"
           />
         </div>
 
@@ -246,12 +246,12 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
         <div
           className={`p-4 rounded-2xl border transition-all ${
             totalDeduction > 0
-              ? 'bg-rose-500/10 border-rose-500/30'
-              : 'bg-emerald-500/10 border-emerald-500/30'
+              ? 'bg-red-50 border-red-200'
+              : 'bg-emerald-50 border-emerald-200'
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            <span className="text-xs font-bold uppercase tracking-wider text-warm-600">
               Escrow Settlement Breakdown
             </span>
             <Badge variant={totalDeduction > 0 ? 'urgent' : 'resolved'}>
@@ -259,38 +259,38 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
             </Badge>
           </div>
 
-          <div className="space-y-1.5 text-xs text-slate-300 pt-1">
+          <div className="space-y-1.5 text-xs text-warm-600 pt-1">
             <div className="flex justify-between">
               <span>Security Deposit in Escrow:</span>
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-warm-900">
                 ₹{Number(rental.depositTotal || 0).toLocaleString('en-IN')}
               </span>
             </div>
 
             {latePenalty > 0 && (
-              <div className="flex justify-between text-rose-400 font-semibold">
+              <div className="flex justify-between text-red-500 font-semibold">
                 <span>Late Return Penalty ({rawOverdueDays} days past grace):</span>
                 <span>-₹{Number(latePenalty || 0).toLocaleString('en-IN')}</span>
               </div>
             )}
 
             {damageFee > 0 && (
-              <div className="flex justify-between text-rose-400 font-semibold">
+              <div className="flex justify-between text-red-500 font-semibold">
                 <span>Condition Damage Deduction:</span>
                 <span>-₹{Number(damageFee || 0).toLocaleString('en-IN')}</span>
               </div>
             )}
 
             {totalDeduction === 0 && (
-              <div className="flex justify-between text-emerald-400">
+              <div className="flex justify-between text-emerald-600">
                 <span>Deductions / Fees:</span>
                 <span>₹0 (On-time & Excellent Condition)</span>
               </div>
             )}
 
-            <div className="border-t border-slate-800 pt-2 flex justify-between text-sm font-bold text-white">
+            <div className="border-t border-warm-200 pt-2 flex justify-between text-sm font-bold text-warm-900">
               <span>Net Deposit Refunded to Renter:</span>
-              <span className="text-emerald-400">
+              <span className="text-emerald-600">
                 ₹{Number(refundAmount || 0).toLocaleString('en-IN')}
               </span>
             </div>
@@ -302,7 +302,7 @@ export const ReturnModal = ({ isOpen, onClose, rental, onReturnSuccess, onOpenQR
           type="button"
           disabled={loading}
           onClick={handleConfirmReturn}
-          className="w-full py-3 bg-gradient-to-r from-emerald-500 via-teal-600 to-sky-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full py-3 bg-gradient-to-r from-emerald-500 via-teal-600 to-sky-600 hover:from-emerald-400 hover:to-teal-500 text-warm-900 font-bold rounded-xl text-xs shadow-lg shadow-amber transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <RotateCcw className="w-4 h-4" />
           <span>

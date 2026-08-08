@@ -77,8 +77,8 @@ export const LateFeeSettingsModal = ({ isOpen, onClose, onSettingsUpdated }) => 
     >
       <form onSubmit={handleSave} className="space-y-5">
         {/* Header explanation banner */}
-        <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-400 space-y-1">
-          <div className="flex items-center gap-1.5 text-amber-400 font-semibold">
+        <div className="p-4 rounded-2xl bg-warm-50 border border-warm-200 text-xs text-warm-500 space-y-1">
+          <div className="flex items-center gap-1.5 text-amber-600 font-semibold">
             <ShieldAlert className="w-4 h-4" />
             <span>Automatic Penalty & Deposit Protection</span>
           </div>
@@ -88,7 +88,7 @@ export const LateFeeSettingsModal = ({ isOpen, onClose, onSettingsUpdated }) => 
         </div>
 
         {successMsg && (
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2 animate-in fade-in">
+          <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs flex items-center gap-2 animate-in fade-in">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{successMsg}</span>
           </div>
@@ -97,28 +97,28 @@ export const LateFeeSettingsModal = ({ isOpen, onClose, onSettingsUpdated }) => 
         <div className="space-y-4">
           {/* Late Fee Rate Per Day */}
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+            <label className="block text-xs font-semibold text-warm-700 mb-1.5">
               Late Fee Rate Per Overdue Day (₹)
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold">₹</span>
+              <span className="absolute left-3.5 top-2.5 text-warm-500 font-bold">₹</span>
               <input
                 type="number"
                 min="0"
                 required
                 value={settings.lateFeePerDay}
                 onChange={(e) => setSettings({ ...settings, lateFeePerDay: Number(e.target.value) })}
-                className="w-full pl-8 pr-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500"
+                className="w-full pl-8 pr-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 focus:outline-none focus:border-amber-500"
               />
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-warm-400 mt-1">
               Charged daily in Indian Rupees (₹) once scheduled rental duration and grace period expire.
             </p>
           </div>
 
           {/* Grace Period (Days) */}
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+            <label className="block text-xs font-semibold text-warm-700 mb-1.5">
               Grace Period (Days Before Penalties Begin)
             </label>
             <div className="relative">
@@ -129,23 +129,23 @@ export const LateFeeSettingsModal = ({ isOpen, onClose, onSettingsUpdated }) => 
                 required
                 value={settings.gracePeriodDays}
                 onChange={(e) => setSettings({ ...settings, gracePeriodDays: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500"
+                className="w-full px-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 focus:outline-none focus:border-amber-500"
               />
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-warm-400 mt-1">
               e.g. Set to <strong>1 day</strong> for 24-hour courtesy buffer before deducting penalties.
             </p>
           </div>
 
           {/* Calculation Mode */}
           <div>
-            <label className="block text-xs font-semibold text-slate-200 mb-1.5">
+            <label className="block text-xs font-semibold text-warm-700 mb-1.5">
               Penalty Model
             </label>
             <select
               value={settings.feeCalculationType}
               onChange={(e) => setSettings({ ...settings, feeCalculationType: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-sky-500"
+              className="w-full px-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:outline-none focus:border-amber-500"
             >
               <option value="flat_rate">Standard Flat Rate per Day (₹{Number(settings.lateFeePerDay || 0).toLocaleString('en-IN')}/day)</option>
               <option value="daily_rate_multiplier">1.5× Daily Item Rental Rate</option>
@@ -154,14 +154,14 @@ export const LateFeeSettingsModal = ({ isOpen, onClose, onSettingsUpdated }) => 
         </div>
 
         {/* Action Controls */}
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800">
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-warm-200">
           <button
             type="button"
             disabled={syncing}
             onClick={handleSyncOverdue}
-            className="w-full sm:w-auto px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors flex items-center justify-center gap-1.5"
+            className="w-full sm:w-auto px-3.5 py-2 bg-warm-100 hover:bg-warm-200 text-warm-600 text-xs font-semibold rounded-xl transition-colors flex items-center justify-center gap-1.5"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${syncing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-amber-600 ${syncing ? 'animate-spin' : ''}`} />
             <span>{syncing ? 'Sweeping...' : 'Run Overdue Audit'}</span>
           </button>
 
@@ -169,14 +169,14 @@ export const LateFeeSettingsModal = ({ isOpen, onClose, onSettingsUpdated }) => 
             <button
               type="button"
               onClick={onClose}
-              className="w-1/2 sm:w-auto px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+              className="w-1/2 sm:w-auto px-4 py-2 bg-warm-100 hover:bg-warm-200 text-warm-600 text-xs font-semibold rounded-xl transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="w-1/2 sm:w-auto px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-sky-500/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="w-1/2 sm:w-auto px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 text-warm-900 text-xs font-bold rounded-xl shadow-lg shadow-amber transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               <span>{loading ? 'Saving...' : 'Save Policy Settings'}</span>
             </button>

@@ -60,15 +60,15 @@ export const PaymentsTab = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Payments & Invoicing</h2>
-          <p className="text-sm text-slate-400 mt-1">
+          <h2 className="text-2xl font-bold text-warm-900 tracking-tight">Payments & Invoicing</h2>
+          <p className="text-sm text-warm-500 mt-1">
             Track rent collections, incoming deposits, and pending tenant balances.
           </p>
         </div>
 
         <button
           onClick={() => setIsPayModalOpen(true)}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-semibold shadow-lg shadow-sky-500/25 transition-all flex items-center justify-center gap-2"
+          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 text-warm-900 text-xs font-semibold shadow-lg shadow-amber transition-all flex items-center justify-center gap-2"
         >
           <Plus className="w-4 h-4" />
           {role === 'admin' ? 'Record Payment' : 'Pay Rent Now'}
@@ -76,10 +76,10 @@ export const PaymentsTab = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+      <div className="glass-panel p-4 rounded-2xl border border-warm-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-400" />
-          <span className="text-xs text-slate-400 font-medium">Filter by Status:</span>
+          <Filter className="w-4 h-4 text-warm-500" />
+          <span className="text-xs text-warm-500 font-medium">Filter by Status:</span>
         </div>
         <div className="flex gap-2">
           {['all', 'paid', 'pending', 'overdue'].map((s) => (
@@ -88,8 +88,8 @@ export const PaymentsTab = () => {
               onClick={() => setStatusFilter(s)}
               className={`px-3 py-1.5 rounded-xl text-xs font-medium capitalize transition-all ${
                 statusFilter === s
-                  ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
-                  : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                  ? 'bg-amber-500 text-warm-900 shadow-md shadow-amber'
+                  : 'bg-warm-50 border border-warm-200 text-warm-500 hover:text-warm-900'
               }`}
             >
               {s}
@@ -99,10 +99,10 @@ export const PaymentsTab = () => {
       </div>
 
       {/* Payments Table */}
-      <div className="glass-panel rounded-2xl border border-slate-800 overflow-hidden">
+      <div className="glass-panel rounded-2xl border border-warm-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/60 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+            <thead className="bg-warm-50/60 border-b border-warm-200 text-warm-500 uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="px-6 py-4">Transaction ID</th>
                 <th className="px-6 py-4">Property / Tenant</th>
@@ -114,23 +114,23 @@ export const PaymentsTab = () => {
             </thead>
             <tbody className="divide-y divide-slate-800/80">
               {payments.map((p) => (
-                <tr key={p._id} className="hover:bg-slate-800/30 transition-colors">
-                  <td className="px-6 py-4 font-mono font-medium text-slate-300">
+                <tr key={p._id} className="hover:bg-warm-100/30 transition-colors">
+                  <td className="px-6 py-4 font-mono font-medium text-warm-600">
                     {p.transactionId || 'TXN-DEFAULT'}
                   </td>
                   <td className="px-6 py-4">
-                    <p className="font-semibold text-white">{p.property?.title || 'Apartment Unit'}</p>
-                    <p className="text-slate-400 text-[11px]">{p.tenant?.name || 'Alex Rivera'}</p>
+                    <p className="font-semibold text-warm-900">{p.property?.title || 'Apartment Unit'}</p>
+                    <p className="text-warm-500 text-[11px]">{p.tenant?.name || 'Alex Rivera'}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="font-medium text-slate-200">{p.type || 'Rent'}</span>
-                    <p className="text-[11px] text-slate-400">{p.paymentMethod || 'Bank Transfer'}</p>
+                    <span className="font-medium text-warm-700">{p.type || 'Rent'}</span>
+                    <p className="text-[11px] text-warm-500">{p.paymentMethod || 'Bank Transfer'}</p>
                   </td>
-                  <td className="px-6 py-4 text-slate-300">
+                  <td className="px-6 py-4 text-warm-600">
                     {new Date(p.dueDate).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm font-bold text-emerald-400">
+                    <span className="text-sm font-bold text-emerald-600">
                       ₹{p.amount?.toLocaleString('en-IN')}
                     </span>
                   </td>
@@ -153,22 +153,22 @@ export const PaymentsTab = () => {
       >
         <form onSubmit={handlePaySubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Amount (₹)</label>
+            <label className="block text-xs font-medium text-warm-600 mb-1">Amount (₹)</label>
             <input
               type="number"
               required
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Payment Method</label>
+            <label className="block text-xs font-medium text-warm-600 mb-1">Payment Method</label>
             <select
               value={formData.paymentMethod}
               onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
             >
               <option value="Bank Transfer">Bank Transfer (ACH)</option>
               <option value="Credit Card">Credit Card / Debit Card</option>
@@ -178,11 +178,11 @@ export const PaymentsTab = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Payment Type</label>
+            <label className="block text-xs font-medium text-warm-600 mb-1">Payment Type</label>
             <select
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
             >
               <option value="Rent">Monthly Rent</option>
               <option value="Deposit">Security Deposit</option>
@@ -192,7 +192,7 @@ export const PaymentsTab = () => {
 
           <button
             type="submit"
-            className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold rounded-xl text-xs shadow-lg shadow-emerald-500/25 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-emerald-400 hover:to-teal-500 text-warm-900 font-semibold rounded-xl text-xs shadow-lg shadow-amber transition-all"
           >
             Confirm & Process Payment
           </button>

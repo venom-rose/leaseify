@@ -41,18 +41,18 @@ import {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="p-3 bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl shadow-2xl text-xs space-y-1">
-        <p className="font-bold text-white mb-1.5">{label}</p>
+      <div className="p-3 bg-warm-50/95 backdrop-blur-md border border-warm-200 rounded-xl shadow-xl text-xs space-y-1">
+        <p className="font-bold text-warm-900 mb-1.5">{label}</p>
         {payload.map((item, idx) => (
           <div key={idx} className="flex items-center justify-between gap-4">
-            <span className="flex items-center gap-1.5 text-slate-300">
+            <span className="flex items-center gap-1.5 text-warm-600">
               <span
                 className="w-2.5 h-2.5 rounded-full inline-block"
                 style={{ backgroundColor: item.color }}
               />
               {item.name}:
             </span>
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-warm-900">
               {typeof item.value === 'number' && item.name?.toLowerCase().includes('revenue') || item.name?.toLowerCase().includes('deposit')
                 ? `₹${item.value.toLocaleString('en-IN')}`
                 : item.value}
@@ -141,35 +141,35 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Top Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-sky-950/40 border border-slate-800 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-sky-950/40 border border-warm-200 relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-96 h-96 bg-amber-50 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-400 font-semibold text-[11px] uppercase tracking-wider flex items-center gap-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-600 font-semibold text-[11px] uppercase tracking-wider flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Admin Operations Hub
             </span>
-            <span className="text-xs text-slate-400">Live Aggregation Engine</span>
+            <span className="text-xs text-warm-500">Live Aggregation Engine</span>
           </div>
-          <h2 className="text-2xl lg:text-3xl font-black text-white tracking-tight">
+          <h2 className="text-2xl lg:text-3xl font-black text-warm-900 tracking-tight">
             Rental Executive Dashboard
           </h2>
-          <p className="text-xs text-slate-300 max-w-xl">
+          <p className="text-xs text-warm-600 max-w-xl">
             Real-time analytics for active leases, upcoming returns, overdue penalties, and escrowed security deposits.
           </p>
         </div>
 
         <div className="relative z-10 flex flex-wrap items-center gap-2.5">
           {/* Quick Time Range Selector */}
-          <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+          <div className="flex items-center bg-warm-50 p-1 rounded-xl border border-warm-200 text-xs">
             {['7d', '30d', '90d', 'ytd'].map((t) => (
               <button
                 key={t}
                 onClick={() => setTimeRange(t)}
                 className={`px-2.5 py-1 rounded-lg uppercase font-semibold text-[10px] transition-all ${
                   timeRange === t
-                    ? 'bg-sky-500 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-amber-500 text-warm-900 shadow-sm'
+                    : 'text-warm-500 hover:text-warm-900'
                 }`}
               >
                 {t}
@@ -180,16 +180,16 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
           <button
             onClick={handleSyncOverdue}
             disabled={syncing}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition-all flex items-center gap-1.5 disabled:opacity-60"
+            className="px-3.5 py-2 rounded-xl bg-warm-100 hover:bg-warm-200 border border-warm-200 text-warm-700 text-xs font-semibold transition-all flex items-center gap-1.5 disabled:opacity-60"
             title="Trigger automatic overdue check"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${syncing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-amber-600 ${syncing ? 'animate-spin' : ''}`} />
             <span>Audit Overdue</span>
           </button>
 
           <button
             onClick={() => onNavigateTab('products')}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-semibold shadow-lg shadow-sky-500/25 transition-all flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 text-warm-900 text-xs font-semibold shadow-lg shadow-amber transition-all flex items-center gap-1.5"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>Manage Catalog</span>
@@ -202,22 +202,22 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
         {/* 1. Active Rentals */}
         <div
           onClick={() => onNavigateTab('rentals')}
-          className="glass-panel p-5 rounded-2xl border border-slate-800 hover:border-sky-500/50 transition-all cursor-pointer group space-y-3 bg-gradient-to-b from-sky-500/5 to-transparent"
+          className="glass-panel p-5 rounded-2xl border border-warm-200 hover:border-sky-500/50 transition-all cursor-pointer group space-y-3 bg-gradient-to-b from-sky-500/5 to-transparent"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-warm-500 uppercase tracking-wider">
               Active Rentals
             </span>
-            <div className="h-9 w-9 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="h-9 w-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <PackageCheck className="w-5 h-5" />
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-white">{metrics.activeRentals}</span>
-              <span className="text-xs text-slate-400 font-medium">Bookings</span>
+              <span className="text-3xl font-black text-warm-900">{metrics.activeRentals}</span>
+              <span className="text-xs text-warm-500 font-medium">Bookings</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-sky-400 mt-1 font-medium">
+            <div className="flex items-center gap-1.5 text-xs text-amber-600 mt-1 font-medium">
               <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
               <span>In active circulation</span>
             </div>
@@ -240,7 +240,7 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-amber-300">{metrics.dueTodayRentals}</span>
-              <span className="text-xs text-amber-400/80 font-medium">Units Due</span>
+              <span className="text-xs text-amber-600/80 font-medium">Units Due</span>
             </div>
             <p className="text-xs text-amber-300/80 mt-1 font-medium flex items-center gap-1">
               <span>Expected return &lt;24h</span>
@@ -254,63 +254,63 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
           className="glass-panel p-5 rounded-2xl border border-rose-500/40 hover:border-rose-500 transition-all cursor-pointer group space-y-3 bg-gradient-to-b from-rose-500/10 to-transparent shadow-lg shadow-rose-950/30"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-rose-300 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">
               Overdue Rentals
             </span>
-            <div className="h-9 w-9 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center group-hover:scale-110 transition-transform animate-pulse">
+            <div className="h-9 w-9 rounded-xl bg-red-500/20 border border-red-200 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform animate-pulse">
               <AlertTriangle className="w-5 h-5" />
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-rose-400">{metrics.overdueRentals}</span>
-              <span className="text-xs text-rose-300/80 font-medium">Delayed</span>
+              <span className="text-3xl font-black text-red-500">{metrics.overdueRentals}</span>
+              <span className="text-xs text-red-400/80 font-medium">Delayed</span>
             </div>
-            <p className="text-xs text-rose-300/90 mt-1 font-medium truncate">
+            <p className="text-xs text-red-400/90 mt-1 font-medium truncate">
               -₹{Number(metrics.totalPenalties || 1200).toLocaleString('en-IN')} penalties
             </p>
           </div>
         </div>
 
         {/* 4. Total Revenue */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 hover:border-emerald-500/40 transition-all group space-y-3 bg-gradient-to-b from-emerald-500/5 to-transparent">
+        <div className="glass-panel p-5 rounded-2xl border border-warm-200 hover:border-emerald-500/40 transition-all group space-y-3 bg-gradient-to-b from-emerald-500/5 to-transparent">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-warm-500 uppercase tracking-wider">
               Total Revenue
             </span>
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="h-9 w-9 rounded-xl bg-emerald-50 border border-emerald-500/20 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl xl:text-3xl font-black text-white truncate">
+              <span className="text-2xl xl:text-3xl font-black text-warm-900 truncate">
                 ₹{Number(metrics.revenue || 0).toLocaleString('en-IN')}
               </span>
             </div>
-            <p className="text-xs text-emerald-400 mt-1 font-medium flex items-center gap-1">
+            <p className="text-xs text-emerald-600 mt-1 font-medium flex items-center gap-1">
               <ArrowUpRight className="w-3.5 h-3.5" /> +16.8% MoM Growth
             </p>
           </div>
         </div>
 
         {/* 5. Security Deposits Held */}
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 hover:border-purple-500/40 transition-all group space-y-3 bg-gradient-to-b from-purple-500/5 to-transparent">
+        <div className="glass-panel p-5 rounded-2xl border border-warm-200 hover:border-purple-500/40 transition-all group space-y-3 bg-gradient-to-b from-purple-500/5 to-transparent">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-warm-500 uppercase tracking-wider">
               Deposits in Escrow
             </span>
-            <div className="h-9 w-9 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <div className="h-9 w-9 rounded-xl bg-amber-50 border border-purple-500/20 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
               <ShieldCheck className="w-5 h-5" />
             </div>
           </div>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl xl:text-3xl font-black text-amber-400 truncate">
+              <span className="text-2xl xl:text-3xl font-black text-amber-600 truncate">
                 ₹{Number(metrics.securityDepositsHeld || 0).toLocaleString('en-IN')}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-warm-500 mt-1">
               Safeguarded 100% in escrow
             </p>
           </div>
@@ -320,21 +320,21 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
       {/* Primary Analytics Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Chart: Revenue & Escrow Deposits Growth (2 Columns) */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-slate-800 space-y-4 flex flex-col justify-between">
+        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-warm-200 space-y-4 flex flex-col justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">
+              <h3 className="text-base font-bold text-warm-900 tracking-tight">
                 Rental Revenue & Security Deposit Growth
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-warm-500">
                 Monthly collection trends & active escrow deposits in Indian Rupees (₹)
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5 text-slate-300">
+              <span className="flex items-center gap-1.5 text-warm-600">
                 <span className="w-3 h-3 rounded-full bg-sky-400" /> Revenue
               </span>
-              <span className="flex items-center gap-1.5 text-slate-300">
+              <span className="flex items-center gap-1.5 text-warm-600">
                 <span className="w-3 h-3 rounded-full bg-amber-400" /> Escrow Deposits
               </span>
             </div>
@@ -386,8 +386,8 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
             </ResponsiveContainer>
           </div>
 
-          <div className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
-            <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+          <div className="pt-3 border-t border-warm-200 flex flex-wrap items-center justify-between text-xs text-warm-500 gap-2">
+            <span className="flex items-center gap-1.5 text-emerald-600 font-semibold">
               <TrendingUp className="w-4 h-4" /> 100% on-time deposit settlements
             </span>
             <span>Total Lifetime Refunds: ₹{Number(metrics.totalDepositsRefunded || 12400).toLocaleString('en-IN')}</span>
@@ -395,10 +395,10 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
         </div>
 
         {/* Secondary Chart: Rental Status Donut */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4 flex flex-col justify-between">
+        <div className="glass-panel p-6 rounded-3xl border border-warm-200 space-y-4 flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-bold text-white tracking-tight">Rental Status Breakdown</h3>
-            <p className="text-xs text-slate-400">Current fleet booking state distribution</p>
+            <h3 className="text-base font-bold text-warm-900 tracking-tight">Rental Status Breakdown</h3>
+            <p className="text-xs text-warm-500">Current fleet booking state distribution</p>
           </div>
 
           {/* Recharts Pie Donut Chart */}
@@ -424,22 +424,22 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
             
             {/* Center Donut Metric */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black text-white">
+              <span className="text-2xl font-black text-warm-900">
                 {charts.statusDistribution.reduce((acc, curr) => acc + curr.value, 0)}
               </span>
-              <span className="text-[10px] text-slate-400 uppercase font-semibold">Total Fleet</span>
+              <span className="text-[10px] text-warm-500 uppercase font-semibold">Total Fleet</span>
             </div>
           </div>
 
           {/* Status Breakdown Legend */}
-          <div className="space-y-2 pt-2 border-t border-slate-800">
+          <div className="space-y-2 pt-2 border-t border-warm-200">
             {charts.statusDistribution.map((s, idx) => (
               <div key={idx} className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 text-slate-300">
+                <span className="flex items-center gap-2 text-warm-600">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
                   {s.name}
                 </span>
-                <span className="font-bold text-white">{s.value} units</span>
+                <span className="font-bold text-warm-900">{s.value} units</span>
               </div>
             ))}
           </div>
@@ -449,10 +449,10 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
       {/* Category Performance & Operations Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Category Revenue Bar Chart */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
+        <div className="glass-panel p-6 rounded-3xl border border-warm-200 space-y-4">
           <div>
-            <h3 className="text-base font-bold text-white tracking-tight">Category Rental Demand</h3>
-            <p className="text-xs text-slate-400">Revenue generation by product category</p>
+            <h3 className="text-base font-bold text-warm-900 tracking-tight">Category Rental Demand</h3>
+            <p className="text-xs text-warm-500">Revenue generation by product category</p>
           </div>
 
           <div className="h-64 pt-2">
@@ -474,20 +474,20 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
         </div>
 
         {/* Priority Action Table: Due Today & Overdue Rentals */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
+        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-warm-200 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-amber-400" />
-                <h3 className="text-base font-bold text-white tracking-tight">
+                <ShieldAlert className="w-4 h-4 text-amber-600" />
+                <h3 className="text-base font-bold text-warm-900 tracking-tight">
                   High-Priority Returns & Overdue Queue
                 </h3>
               </div>
-              <p className="text-xs text-slate-400">Immediate settlement actions required</p>
+              <p className="text-xs text-warm-500">Immediate settlement actions required</p>
             </div>
             <button
               onClick={() => onNavigateTab('rentals')}
-              className="text-xs text-sky-400 hover:underline flex items-center gap-1 font-semibold"
+              className="text-xs text-amber-600 hover:underline flex items-center gap-1 font-semibold"
             >
               View All Orders <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -495,31 +495,31 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
 
           <div className="space-y-3">
             {/* Overdue Card */}
-            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-2xl bg-red-50 border border-red-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0 animate-pulse">
+                <div className="h-10 w-10 rounded-xl bg-red-500/20 text-red-500 flex items-center justify-center shrink-0 animate-pulse">
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-white text-xs">Overdue Notice • Order #RNT-6842</span>
-                    <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-bold uppercase">
+                    <span className="font-bold text-warm-900 text-xs">Overdue Notice • Order #RNT-6842</span>
+                    <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-bold uppercase">
                       3 Days Late
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-300 mt-0.5">
+                  <p className="text-[11px] text-warm-600 mt-0.5">
                     Alex Rivera • Sony Alpha A7 IV Camera • Security Deposit: ₹450
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-left sm:text-right">
-                  <span className="text-[11px] text-rose-300 font-medium">Late Penalty Accruing</span>
-                  <p className="text-sm font-black text-rose-400">-₹60 deducted</p>
+                  <span className="text-[11px] text-red-400 font-medium">Late Penalty Accruing</span>
+                  <p className="text-sm font-black text-red-500">-₹60 deducted</p>
                 </div>
                 <button
                   onClick={() => onNavigateTab('rentals')}
-                  className="px-3.5 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-semibold shadow-md shadow-rose-500/20 transition-all flex items-center gap-1"
+                  className="px-3.5 py-1.5 rounded-xl bg-red-500 hover:bg-rose-400 text-warm-900 text-xs font-semibold shadow-md shadow-rose-500/20 transition-all flex items-center gap-1"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   Settle
@@ -528,27 +528,27 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
             </div>
 
             {/* Due Today Card */}
-            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
                   <Clock className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-white text-xs">Return Due Today • Order #RNT-3190</span>
+                    <span className="font-bold text-warm-900 text-xs">Return Due Today • Order #RNT-3190</span>
                     <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold uppercase">
                       Expires 11:59 PM
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-300 mt-0.5">
+                  <p className="text-[11px] text-warm-600 mt-0.5">
                     Elena Rostova • LG 65" OLED 4K TV • Escrow Deposit: ₹2,000
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-left sm:text-right">
-                  <span className="text-[11px] text-emerald-400 font-medium">Eligible 100% Refund</span>
-                  <p className="text-sm font-black text-white">₹2,000 Refund</p>
+                  <span className="text-[11px] text-emerald-600 font-medium">Eligible 100% Refund</span>
+                  <p className="text-sm font-black text-warm-900">₹2,000 Refund</p>
                 </div>
                 <button
                   onClick={() => onNavigateTab('rentals')}

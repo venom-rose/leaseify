@@ -39,18 +39,18 @@ import {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="p-3 bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-xl shadow-2xl text-xs space-y-1">
-        <p className="font-bold text-white mb-1.5">{label}</p>
+      <div className="p-3 bg-warm-50/95 backdrop-blur-md border border-warm-200 rounded-xl shadow-xl text-xs space-y-1">
+        <p className="font-bold text-warm-900 mb-1.5">{label}</p>
         {payload.map((item, idx) => (
           <div key={idx} className="flex items-center justify-between gap-4">
-            <span className="flex items-center gap-1.5 text-slate-300">
+            <span className="flex items-center gap-1.5 text-warm-600">
               <span
                 className="w-2.5 h-2.5 rounded-full inline-block"
                 style={{ backgroundColor: item.color }}
               />
               {item.name}:
             </span>
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-warm-900">
               {typeof item.value === 'number' && item.name?.toLowerCase().includes('revenue') || item.name?.toLowerCase().includes('predicted') || item.name?.toLowerCase().includes('actual')
                 ? `₹${item.value.toLocaleString('en-IN')}`
                 : item.value}
@@ -223,18 +223,18 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-warm-200">
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-semibold text-[11px] uppercase tracking-wider flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Predictive AI & Inventory Intelligence
             </span>
-            <span className="text-xs text-slate-400">Risk Assessment Engine</span>
+            <span className="text-xs text-warm-500">Risk Assessment Engine</span>
           </div>
-          <h2 className="text-2xl font-black text-white tracking-tight mt-1">
+          <h2 className="text-2xl font-black text-warm-900 tracking-tight mt-1">
             Overdue Risk Predictions & Inventory Utilization
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-warm-500 mt-1">
             AI-driven probability models to predict late returns, trigger automated email reminders, and optimize product availability.
           </p>
         </div>
@@ -242,35 +242,35 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
         <button
           onClick={loadPredictions}
           disabled={loading}
-          className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition-all flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-4 py-2 rounded-xl bg-warm-100 hover:bg-warm-200 border border-warm-200 text-warm-700 text-xs font-semibold transition-all flex items-center gap-1.5 self-start sm:self-auto"
         >
-          <RefreshCw className={`w-3.5 h-3.5 text-sky-400 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 text-amber-600 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh Analysis</span>
         </button>
       </div>
 
       {/* KPI Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="glass-panel p-5 rounded-2xl border border-warm-200 space-y-2">
+          <span className="text-xs font-semibold text-warm-500 uppercase tracking-wider">
             Monitored Active Bookings
           </span>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">{predictions.length}</span>
-            <span className="text-xs text-emerald-400 font-semibold">100% Real-Time</span>
+            <span className="text-3xl font-black text-warm-900">{predictions.length}</span>
+            <span className="text-xs text-emerald-600 font-semibold">100% Real-Time</span>
           </div>
-          <p className="text-[11px] text-slate-500">Active fleet currently on rent</p>
+          <p className="text-[11px] text-warm-400">Active fleet currently on rent</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-rose-500/30 bg-rose-500/5 space-y-2">
-          <span className="text-xs font-semibold text-rose-300 uppercase tracking-wider">
+        <div className="glass-panel p-5 rounded-2xl border border-red-200 bg-red-500/5 space-y-2">
+          <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">
             High Risk of Overdue
           </span>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-rose-400">{summary.highRiskCount}</span>
-            <span className="text-xs text-rose-300 font-semibold">Urgent Action</span>
+            <span className="text-3xl font-black text-red-500">{summary.highRiskCount}</span>
+            <span className="text-xs text-red-400 font-semibold">Urgent Action</span>
           </div>
-          <p className="text-[11px] text-slate-400">Score &gt;70% or overdue</p>
+          <p className="text-[11px] text-warm-500">Score &gt;70% or overdue</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border border-amber-500/30 bg-amber-500/5 space-y-2">
@@ -279,37 +279,37 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
           </span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-black text-amber-300">{summary.mediumRiskCount}</span>
-            <span className="text-xs text-amber-400 font-semibold">Send Reminder</span>
+            <span className="text-xs text-amber-600 font-semibold">Send Reminder</span>
           </div>
-          <p className="text-[11px] text-slate-400">Courtesy buffer running</p>
+          <p className="text-[11px] text-warm-500">Courtesy buffer running</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="glass-panel p-5 rounded-2xl border border-warm-200 space-y-2">
+          <span className="text-xs font-semibold text-warm-500 uppercase tracking-wider">
             Avg Fleet Utilization
           </span>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-sky-400">{summary.avgFleetUtilization}%</span>
-            <span className="text-xs text-emerald-400 font-semibold">+14% MoM</span>
+            <span className="text-3xl font-black text-amber-600">{summary.avgFleetUtilization}%</span>
+            <span className="text-xs text-emerald-600 font-semibold">+14% MoM</span>
           </div>
-          <p className="text-[11px] text-slate-500">Inventory active on revenue cycle</p>
+          <p className="text-[11px] text-warm-400">Inventory active on revenue cycle</p>
         </div>
       </div>
 
       {/* Analytics Charts (Predictive Revenue + Risk Donut) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 6-Month Predictive Revenue Forecast */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
+        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-warm-200 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight">
+              <h3 className="text-base font-bold text-warm-900 tracking-tight">
                 6-Month Predictive Revenue Forecast
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-warm-500">
                 Machine learning forecast based on active leases, reservations & seasonal demand (₹)
               </p>
             </div>
-            <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+            <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-200 text-emerald-600 text-xs font-semibold">
               92% Model Confidence
             </span>
           </div>
@@ -346,10 +346,10 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
         </div>
 
         {/* Risk Distribution Donut */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4 flex flex-col justify-between">
+        <div className="glass-panel p-6 rounded-3xl border border-warm-200 space-y-4 flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-bold text-white tracking-tight">Overdue Risk Distribution</h3>
-            <p className="text-xs text-slate-400">Active fleet risk categorization</p>
+            <h3 className="text-base font-bold text-warm-900 tracking-tight">Overdue Risk Distribution</h3>
+            <p className="text-xs text-warm-500">Active fleet risk categorization</p>
           </div>
 
           <div className="h-48 relative flex items-center justify-center">
@@ -373,14 +373,14 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
             </ResponsiveContainer>
           </div>
 
-          <div className="space-y-2 border-t border-slate-800 pt-3 text-xs">
+          <div className="space-y-2 border-t border-warm-200 pt-3 text-xs">
             {riskDistribution.map((r, idx) => (
               <div key={idx} className="flex items-center justify-between">
-                <span className="flex items-center gap-2 text-slate-300">
+                <span className="flex items-center gap-2 text-warm-600">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: r.color }} />
                   {r.name}
                 </span>
-                <span className="font-bold text-white">{r.count} Bookings</span>
+                <span className="font-bold text-warm-900">{r.count} Bookings</span>
               </div>
             ))}
           </div>
@@ -388,26 +388,26 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
       </div>
 
       {/* 1. Overdue Risk Predictor Matrix Table */}
-      <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
+      <div className="glass-panel p-6 rounded-3xl border border-warm-200 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-bold text-white tracking-tight">
+            <h3 className="text-base font-bold text-warm-900 tracking-tight">
               AI Overdue Risk Scoring & Smart Actions
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-warm-500">
               Proactive intervention triggers based on time remaining and rental duration
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
+          <div className="flex items-center gap-1.5 bg-warm-50 p-1 rounded-xl border border-warm-200 text-xs">
             {['all', 'high_risk', 'medium_risk', 'low_risk'].map((f) => (
               <button
                 key={f}
                 onClick={() => setActiveFilter(f)}
                 className={`px-3 py-1 rounded-lg uppercase text-[10px] font-bold transition-all ${
                   activeFilter === f
-                    ? 'bg-sky-500 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-amber-500 text-warm-900 shadow-sm'
+                    : 'text-warm-500 hover:text-warm-900'
                 }`}
               >
                 {f.replace('_', ' ')}
@@ -418,7 +418,7 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/60 text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+            <thead className="bg-warm-50/60 text-warm-500 uppercase tracking-wider text-[10px] border-b border-warm-200">
               <tr>
                 <th className="px-4 py-3">Order & Tenant</th>
                 <th className="px-4 py-3">Rented Product</th>
@@ -434,39 +434,39 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
                 const isMedium = rental.riskLevel === 'Medium';
 
                 return (
-                  <tr key={rental._id} className="hover:bg-slate-800/20 transition-colors">
+                  <tr key={rental._id} className="hover:bg-warm-100/20 transition-colors">
                     <td className="px-4 py-3.5">
-                      <p className="font-bold text-white">#{rental.transactionId}</p>
-                      <p className="text-slate-400 text-[11px]">{rental.user?.name || 'Alex Rivera'}</p>
+                      <p className="font-bold text-warm-900">#{rental.transactionId}</p>
+                      <p className="text-warm-500 text-[11px]">{rental.user?.name || 'Alex Rivera'}</p>
                     </td>
 
                     <td className="px-4 py-3.5">
-                      <p className="font-medium text-slate-200 truncate max-w-[200px]">
+                      <p className="font-medium text-warm-700 truncate max-w-[200px]">
                         {rental.items?.[0]?.name || 'Rental Item'}
                       </p>
-                      <span className="text-amber-400 text-[10px]">₹{rental.depositTotal} Escrow</span>
+                      <span className="text-amber-600 text-[10px]">₹{rental.depositTotal} Escrow</span>
                     </td>
 
                     <td className="px-4 py-3.5">
-                      <p className="text-slate-200">{new Date(rental.endDate).toLocaleDateString('en-IN')}</p>
-                      <span className={`text-[10px] font-semibold ${rental.isLate ? 'text-rose-400' : 'text-slate-400'}`}>
+                      <p className="text-warm-700">{new Date(rental.endDate).toLocaleDateString('en-IN')}</p>
+                      <span className={`text-[10px] font-semibold ${rental.isLate ? 'text-red-500' : 'text-warm-500'}`}>
                         {rental.isLate ? 'Past Deadline' : `${rental.hoursRemaining}h remaining`}
                       </span>
                     </td>
 
                     <td className="px-4 py-3.5">
                       <div className="flex flex-col items-center gap-1">
-                        <div className="w-24 bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                        <div className="w-24 bg-warm-50 h-2 rounded-full overflow-hidden border border-warm-200">
                           <div
                             style={{ width: `${rental.riskScore}%` }}
                             className={`h-full ${
-                              isHigh ? 'bg-rose-500' : isMedium ? 'bg-amber-500' : 'bg-emerald-500'
+                              isHigh ? 'bg-red-500' : isMedium ? 'bg-amber-500' : 'bg-emerald-500'
                             }`}
                           />
                         </div>
                         <span
                           className={`text-[10px] font-bold uppercase ${
-                            isHigh ? 'text-rose-400' : isMedium ? 'text-amber-400' : 'text-emerald-400'
+                            isHigh ? 'text-red-500' : isMedium ? 'text-amber-600' : 'text-emerald-600'
                           }`}
                         >
                           {rental.riskScore}% ({rental.riskLevel})
@@ -475,8 +475,8 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
                     </td>
 
                     <td className="px-4 py-3.5">
-                      <span className="text-[11px] text-slate-300 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-sky-400 shrink-0" />
+                      <span className="text-[11px] text-warm-600 flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
                         {rental.suggestedAction}
                       </span>
                     </td>
@@ -485,7 +485,7 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setSelectedRentalForEmail(rental)}
-                          className="px-2.5 py-1 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-[11px] font-semibold transition-all flex items-center gap-1"
+                          className="px-2.5 py-1 rounded-xl bg-amber-50 hover:bg-amber-500/25 border border-amber-200 text-amber-500 text-[11px] font-semibold transition-all flex items-center gap-1"
                           title="Send Email Reminder"
                         >
                           <Mail className="w-3 h-3" />
@@ -493,7 +493,7 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
                         </button>
                         <button
                           onClick={() => setSelectedRentalForReturn(rental)}
-                          className="px-2.5 py-1 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold transition-all flex items-center gap-1"
+                          className="px-2.5 py-1 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-200 text-emerald-600 text-[11px] font-semibold transition-all flex items-center gap-1"
                           title="Inspect and Return"
                         >
                           <RotateCcw className="w-3 h-3" />
@@ -510,12 +510,12 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
       </div>
 
       {/* 2. Product Inventory Availability Heatmap */}
-      <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
+      <div className="glass-panel p-6 rounded-3xl border border-warm-200 space-y-4">
         <div>
-          <h3 className="text-base font-bold text-white tracking-tight">
+          <h3 className="text-base font-bold text-warm-900 tracking-tight">
             Live Product Availability & Stock Fleet Tracking
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-warm-500">
             Real-time ratio of units in warehouse vs units actively generating daily revenue
           </p>
         </div>
@@ -528,23 +528,23 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
             return (
               <div
                 key={p._id}
-                className={`p-4 rounded-2xl border space-y-3 bg-slate-950/70 transition-all ${
+                className={`p-4 rounded-2xl border space-y-3 bg-warm-50/70 transition-all ${
                   isFullyLeased
-                    ? 'border-rose-500/30 bg-rose-500/5'
+                    ? 'border-red-200 bg-red-500/5'
                     : isLowStock
                     ? 'border-amber-500/30 bg-amber-500/5'
-                    : 'border-slate-800'
+                    : 'border-warm-200'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold text-sky-400">{p.category}</span>
+                  <span className="text-[10px] uppercase font-bold text-amber-600">{p.category}</span>
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                       isFullyLeased
-                        ? 'bg-rose-500/20 text-rose-300'
+                        ? 'bg-red-500/20 text-red-400'
                         : isLowStock
                         ? 'bg-amber-500/20 text-amber-300'
-                        : 'bg-emerald-500/20 text-emerald-300'
+                        : 'bg-emerald-50 text-emerald-600'
                     }`}
                   >
                     {p.statusTag}
@@ -552,21 +552,21 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-bold text-white truncate max-w-[220px]">{p.name}</h4>
-                  <p className="text-[11px] text-emerald-400 mt-0.5">₹{p.pricePerDay} / day rate</p>
+                  <h4 className="text-xs font-bold text-warm-900 truncate max-w-[220px]">{p.name}</h4>
+                  <p className="text-[11px] text-emerald-600 mt-0.5">₹{p.pricePerDay} / day rate</p>
                 </div>
 
                 {/* Utilization Progress Bar */}
                 <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-slate-400">
+                  <div className="flex justify-between text-[10px] text-warm-500">
                     <span>In Stock: {p.inStock}</span>
                     <span>Rented: {p.rentedUnits} / {p.totalInventory}</span>
                   </div>
-                  <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                  <div className="w-full h-2 bg-white rounded-full overflow-hidden border border-warm-200">
                     <div
                       style={{ width: `${p.utilizationRate}%` }}
                       className={`h-full ${
-                        isFullyLeased ? 'bg-rose-500' : isLowStock ? 'bg-amber-500' : 'bg-sky-500'
+                        isFullyLeased ? 'bg-red-500' : isLowStock ? 'bg-amber-500' : 'bg-amber-500'
                       }`}
                     />
                   </div>

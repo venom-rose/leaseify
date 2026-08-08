@@ -134,23 +134,23 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden z-10 my-8 animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative w-full max-w-xl bg-white border border-warm-200 rounded-3xl shadow-xl overflow-hidden z-10 my-8 animate-in fade-in zoom-in-95 duration-150">
         {/* Step Progress Header */}
-        <div className="p-6 border-b border-slate-800 bg-slate-900/80">
+        <div className="p-6 border-b border-warm-200 bg-white/90">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">
+              <h3 className="text-lg font-bold text-warm-900 tracking-tight">
                 Add Rental Product
               </h3>
-              <p className="text-xs text-slate-400">Step {currentStep} of 3</p>
+              <p className="text-xs text-warm-500">Step {currentStep} of 3</p>
             </div>
 
             <button
               onClick={onClose}
-              className="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-slate-800"
+              className="text-xs text-warm-500 hover:text-warm-900 px-2.5 py-1 rounded-lg bg-warm-100"
             >
               Cancel
             </button>
@@ -171,10 +171,10 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                   key={step.num}
                   className={`flex items-center gap-1.5 p-2 rounded-xl border text-[11px] font-semibold transition-all ${
                     isActive
-                      ? 'bg-sky-500/15 border-sky-500 text-sky-300 shadow-sm'
+                      ? 'bg-amber-50 border-sky-500 text-amber-500 shadow-sm'
                       : isCompleted
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                      : 'bg-slate-950/60 border-slate-800 text-slate-500'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                      : 'bg-warm-50/60 border-warm-200 text-warm-400'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -187,7 +187,7 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
 
         {/* Error Alert */}
         {error && (
-          <div className="mx-6 mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
+          <div className="mx-6 mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-500 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -199,8 +199,8 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
           {currentStep === 1 && (
             <div className="space-y-4 animate-in fade-in duration-200">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Product Name <span className="text-rose-400">*</span>
+                <label className="block text-xs font-semibold text-warm-600 mb-1.5">
+                  Product Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -209,19 +209,19 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                   placeholder="e.g. Ultra-Comfort Modular Velvet Sectional Sofa"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+                  className="w-full px-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 placeholder-warm-400 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Category <span className="text-rose-400">*</span>
+                <label className="block text-xs font-semibold text-warm-600 mb-1.5">
+                  Category <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500"
+                  className="w-full px-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 focus:outline-none focus:border-amber-500"
                 >
                   <option value="Furniture">Furniture</option>
                   <option value="Appliances">Appliances</option>
@@ -234,7 +234,7 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-warm-600 mb-1.5">
                   Description (Optional)
                 </label>
                 <textarea
@@ -243,7 +243,7 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                   placeholder="Brief description of product features, dimensions, or accessories..."
                   value={formData.description}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+                  className="w-full px-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 placeholder-warm-400 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
@@ -251,7 +251,7 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                 <button
                   type="button"
                   onClick={handleNextToStep2}
-                  className="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs rounded-xl shadow-lg shadow-sky-500/20 transition-all flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-amber-500 hover:bg-sky-400 text-warm-900 font-semibold text-xs rounded-xl shadow-lg shadow-amber transition-all flex items-center gap-1.5"
                 >
                   <span>Continue to Step 2</span>
                   <ArrowRight className="w-4 h-4" />
@@ -264,11 +264,11 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
           {currentStep === 2 && (
             <div className="space-y-4 animate-in fade-in duration-200">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Price Per Day (₹) <span className="text-rose-400">*</span>
+                <label className="block text-xs font-semibold text-warm-600 mb-1.5">
+                  Price Per Day (₹) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold">₹</span>
+                  <span className="absolute left-3.5 top-2.5 text-warm-500 font-bold">₹</span>
                   <input
                     type="number"
                     name="price"
@@ -277,20 +277,20 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                     placeholder="499"
                     value={formData.price}
                     onChange={handleChange}
-                    className="w-full pl-8 pr-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500"
+                    className="w-full pl-8 pr-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 focus:outline-none focus:border-amber-500"
                   />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-warm-400 mt-1">
                   Daily rental rate in Indian Rupees (₹) billed for the chosen duration.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Security Deposit (₹) <span className="text-slate-500">(100% Refundable)</span>
+                <label className="block text-xs font-semibold text-warm-600 mb-1.5">
+                  Security Deposit (₹) <span className="text-warm-400">(100% Refundable)</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold">₹</span>
+                  <span className="absolute left-3.5 top-2.5 text-warm-500 font-bold">₹</span>
                   <input
                     type="number"
                     name="deposit"
@@ -298,10 +298,10 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                     placeholder="2000"
                     value={formData.deposit}
                     onChange={handleChange}
-                    className="w-full pl-8 pr-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500"
+                    className="w-full pl-8 pr-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 focus:outline-none focus:border-amber-500"
                   />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-warm-400 mt-1">
                   Held in escrow and refunded in full upon on-time return.
                 </p>
               </div>
@@ -310,7 +310,7 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(1)}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-warm-100 hover:bg-warm-200 text-warm-600 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back to Step 1</span>
@@ -319,7 +319,7 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                 <button
                   type="button"
                   onClick={handleNextToStep3}
-                  className="px-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs rounded-xl shadow-lg shadow-sky-500/20 transition-all flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-amber-500 hover:bg-sky-400 text-warm-900 font-semibold text-xs rounded-xl shadow-lg shadow-amber transition-all flex items-center gap-1.5"
                 >
                   <span>Continue to Step 3</span>
                   <ArrowRight className="w-4 h-4" />
@@ -332,8 +332,8 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
           {currentStep === 3 && (
             <div className="space-y-4 animate-in fade-in duration-200">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Inventory Location <span className="text-rose-400">*</span>
+                <label className="block text-xs font-semibold text-warm-600 mb-1.5">
+                  Inventory Location <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -342,14 +342,14 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                   placeholder="e.g. Mumbai Central Hub / Bangalore Warehouse B"
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+                  className="w-full px-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 placeholder-warm-400 focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Stock Quantity <span className="text-rose-400">*</span>
+                  <label className="block text-xs font-semibold text-warm-600 mb-1.5">
+                    Stock Quantity <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -359,12 +359,12 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                     placeholder="5"
                     value={formData.stock}
                     onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500"
+                    className="w-full px-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 focus:outline-none focus:border-amber-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-warm-600 mb-1.5">
                     Image URL (Optional)
                   </label>
                   <input
@@ -373,31 +373,31 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                     placeholder="https://..."
                     value={formData.image}
                     onChange={handleChange}
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-sky-500"
+                    className="w-full px-3.5 py-2.5 bg-warm-50 border border-warm-200 rounded-xl text-sm text-warm-900 focus:outline-none focus:border-amber-500"
                   />
                 </div>
               </div>
 
               {/* Review Combined Data Summary */}
-              <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs space-y-1.5 text-slate-300">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+              <div className="p-3.5 rounded-2xl bg-warm-50 border border-warm-200 text-xs space-y-1.5 text-warm-600">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-warm-400 block mb-1">
                   Summary Preview
                 </span>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Product:</span>
-                  <span className="font-semibold text-white truncate max-w-[220px]">
+                  <span className="text-warm-500">Product:</span>
+                  <span className="font-semibold text-warm-900 truncate max-w-[220px]">
                     {formData.name || 'Untitled'} ({formData.category})
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Price & Deposit:</span>
-                  <span className="font-semibold text-emerald-400">
+                  <span className="text-warm-500">Price & Deposit:</span>
+                  <span className="font-semibold text-emerald-600">
                     ₹{Number(formData.price || 0).toLocaleString('en-IN')}/day • ₹{Number(formData.deposit || 0).toLocaleString('en-IN')} deposit
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Location & Stock:</span>
-                  <span className="font-semibold text-slate-200">
+                  <span className="text-warm-500">Location & Stock:</span>
+                  <span className="font-semibold text-warm-700">
                     {formData.location || 'N/A'} • {formData.stock} units
                   </span>
                 </div>
@@ -407,7 +407,7 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2.5 bg-warm-100 hover:bg-warm-200 text-warm-600 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Back to Step 2</span>
@@ -417,7 +417,7 @@ export const MultiStepProductForm = ({ isOpen, onClose, onProductCreated }) => {
                   type="button"
                   disabled={loading}
                   onClick={handleFinalSubmit}
-                  className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/25 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-emerald-400 hover:to-teal-500 text-warm-900 font-bold text-xs rounded-xl shadow-lg shadow-amber transition-all flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>{loading ? 'Saving to Database...' : 'Save Product to MongoDB'}</span>

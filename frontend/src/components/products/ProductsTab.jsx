@@ -65,12 +65,12 @@ export const ProductsTab = ({ onNavigateToCart }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-white tracking-tight">Rental Store & Products</h2>
-            <span className="px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-semibold">
+            <h2 className="text-2xl font-bold text-warm-900 tracking-tight">Rental Store & Products</h2>
+            <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-600 text-xs font-semibold">
               Daily Rentals
             </span>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-warm-500 mt-1">
             Rent high-end furniture, home appliances, consumer electronics, and professional tools.
           </p>
         </div>
@@ -78,7 +78,7 @@ export const ProductsTab = ({ onNavigateToCart }) => {
         {role === 'admin' && (
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-semibold shadow-lg shadow-sky-500/25 transition-all flex items-center justify-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 text-warm-900 text-xs font-semibold shadow-lg shadow-amber transition-all flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Rental Product (3-Step Form)
@@ -87,17 +87,17 @@ export const ProductsTab = ({ onNavigateToCart }) => {
       </div>
 
       {/* Filter & Category Pills Bar */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-800 space-y-4">
+      <div className="glass-panel p-4 rounded-2xl border border-warm-200 space-y-4">
         <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
           {/* Search */}
           <div className="relative w-full md:w-80">
-            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-warm-500" />
             <input
               type="text"
               placeholder="Search products by title, location, category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+              className="w-full pl-10 pr-4 py-2 bg-black/20 border border-warm-200 rounded-xl text-xs text-warm-900 placeholder-warm-400 focus:outline-none focus:border-amber-500"
             />
           </div>
 
@@ -109,8 +109,8 @@ export const ProductsTab = ({ onNavigateToCart }) => {
                 onClick={() => setCategoryFilter(cat)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-medium capitalize transition-all ${
                   categoryFilter === cat
-                    ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
-                    : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                    ? 'bg-amber-500 text-warm-900 shadow-md shadow-amber'
+                    : 'bg-warm-50 border border-warm-200 text-warm-500 hover:text-warm-900'
                 }`}
               >
                 {cat}
@@ -126,10 +126,10 @@ export const ProductsTab = ({ onNavigateToCart }) => {
           <div
             key={product._id}
             onClick={() => setSelectedProduct(product)}
-            className="group glass-panel rounded-2xl overflow-hidden border border-slate-800/90 hover:border-slate-700 hover:shadow-2xl transition-all flex flex-col cursor-pointer"
+            className="group glass-panel rounded-2xl overflow-hidden border border-warm-200/90 hover:border-warm-200 hover:shadow-xl transition-all flex flex-col cursor-pointer"
           >
             {/* Product Image */}
-            <div className="relative h-52 w-full overflow-hidden bg-slate-950">
+            <div className="relative h-52 w-full overflow-hidden bg-warm-50">
               <img
                 src={product.images?.[0]}
                 alt={product.name}
@@ -138,7 +138,7 @@ export const ProductsTab = ({ onNavigateToCart }) => {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
 
               <div className="absolute top-3 left-3">
-                <span className="px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-white/10 text-xs font-semibold text-white">
+                <span className="px-2.5 py-1 rounded-lg bg-black/20 backdrop-blur-md border border-white/10 text-xs font-semibold text-warm-900">
                   {product.category}
                 </span>
               </div>
@@ -151,7 +151,7 @@ export const ProductsTab = ({ onNavigateToCart }) => {
                   <button
                     onClick={(e) => handleDelete(product._id, e)}
                     title="Delete product"
-                    className="p-1.5 rounded-lg bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:bg-rose-500 hover:text-white transition-all"
+                    className="p-1.5 rounded-lg bg-red-500/20 border border-red-200 text-red-500 hover:bg-red-500 hover:text-warm-900 transition-all"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -160,12 +160,12 @@ export const ProductsTab = ({ onNavigateToCart }) => {
 
               <div className="absolute bottom-3 left-3 right-3 flex items-baseline justify-between">
                 <div>
-                  <span className="text-2xl font-black text-white tracking-tight">
+                  <span className="text-2xl font-black text-warm-900 tracking-tight">
                     ₹{Number(product.pricePerDay || 0).toLocaleString('en-IN')}
                   </span>
-                  <span className="text-xs text-slate-300"> / day</span>
+                  <span className="text-xs text-warm-600"> / day</span>
                 </div>
-                <div className="flex items-center gap-1 text-[11px] text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/20">
+                <div className="flex items-center gap-1 text-[11px] text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-200">
                   <ShieldCheck className="w-3 h-3" />
                   <span>₹{Number(product.securityDeposit || 0).toLocaleString('en-IN')} Dep.</span>
                 </div>
@@ -175,21 +175,21 @@ export const ProductsTab = ({ onNavigateToCart }) => {
             {/* Product Body */}
             <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
               <div>
-                <h3 className="text-base font-bold text-white group-hover:text-sky-400 transition-colors line-clamp-1">
+                <h3 className="text-base font-bold text-warm-900 group-hover:text-amber-600 transition-colors line-clamp-1">
                   {product.name}
                 </h3>
                 {product.location && (
-                  <div className="flex items-center gap-1 text-xs text-slate-400 mt-1">
-                    <MapPin className="w-3 h-3 text-sky-400 shrink-0" />
+                  <div className="flex items-center gap-1 text-xs text-warm-500 mt-1">
+                    <MapPin className="w-3 h-3 text-amber-600 shrink-0" />
                     <span className="truncate">{product.location}</span>
                   </div>
                 )}
-                <p className="mt-1.5 text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                <p className="mt-1.5 text-xs text-warm-500 line-clamp-2 leading-relaxed">
                   {product.description}
                 </p>
               </div>
 
-              <div className="space-y-3 pt-2 border-t border-slate-800">
+              <div className="space-y-3 pt-2 border-t border-warm-200">
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -197,9 +197,9 @@ export const ProductsTab = ({ onNavigateToCart }) => {
                       e.stopPropagation();
                       setSelectedProduct(product);
                     }}
-                    className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center justify-center gap-1.5"
+                    className="w-full py-2 rounded-xl bg-warm-100 hover:bg-warm-200 text-xs font-semibold text-warm-700 transition-colors flex items-center justify-center gap-1.5"
                   >
-                    <Eye className="w-3.5 h-3.5 text-sky-400" />
+                    <Eye className="w-3.5 h-3.5 text-amber-600" />
                     Details
                   </button>
 
@@ -210,7 +210,7 @@ export const ProductsTab = ({ onNavigateToCart }) => {
                       addToCart(product, undefined, undefined, 7);
                       if (onNavigateToCart) onNavigateToCart();
                     }}
-                    className="w-full py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-semibold shadow-md shadow-sky-500/20 transition-all flex items-center justify-center gap-1.5"
+                    className="w-full py-2 rounded-xl bg-amber-500 hover:bg-sky-400 text-warm-900 text-xs font-semibold shadow-md shadow-amber transition-all flex items-center justify-center gap-1.5"
                   >
                     <ShoppingBag className="w-3.5 h-3.5" />
                     Rent

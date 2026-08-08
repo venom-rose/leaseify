@@ -83,8 +83,8 @@ export const LeasesTab = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Lease Agreements</h2>
-          <p className="text-sm text-slate-400 mt-1">
+          <h2 className="text-2xl font-bold text-warm-900 tracking-tight">Lease Agreements</h2>
+          <p className="text-sm text-warm-500 mt-1">
             Manage legal tenancies, rental terms, and active renewal dates.
           </p>
         </div>
@@ -92,7 +92,7 @@ export const LeasesTab = () => {
         {role === 'admin' && (
           <button
             onClick={() => setIsNewLeaseModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white text-xs font-semibold shadow-lg shadow-sky-500/25 transition-all flex items-center justify-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 text-warm-900 text-xs font-semibold shadow-lg shadow-amber transition-all flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Create New Lease
@@ -104,35 +104,35 @@ export const LeasesTab = () => {
         {leases.map((lease) => (
           <div
             key={lease._id}
-            className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4 hover:border-slate-700 transition-all flex flex-col justify-between"
+            className="glass-panel p-6 rounded-2xl border border-warm-200 space-y-4 hover:border-warm-200 transition-all flex flex-col justify-between"
           >
             <div>
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center justify-between pb-3 border-b border-warm-200">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-sky-400" />
-                  <span className="text-sm font-bold text-white">Lease Agreement</span>
+                  <FileText className="w-5 h-5 text-amber-600" />
+                  <span className="text-sm font-bold text-warm-900">Lease Agreement</span>
                 </div>
                 <Badge variant={lease.status}>{lease.status}</Badge>
               </div>
 
               <div className="mt-4 space-y-3">
                 <div>
-                  <p className="text-xs text-slate-400">Rented Unit</p>
-                  <h3 className="text-base font-semibold text-white mt-0.5">
+                  <p className="text-xs text-warm-500">Rented Unit</p>
+                  <h3 className="text-base font-semibold text-warm-900 mt-0.5">
                     {lease.property?.title || 'Skyline Luxury Penthouse'}
                   </h3>
                 </div>
 
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-warm-50/60 border border-warm-200 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-slate-800 flex items-center justify-center">
-                      <User className="w-4 h-4 text-sky-400" />
+                    <div className="h-9 w-9 rounded-full bg-warm-100 flex items-center justify-center">
+                      <User className="w-4 h-4 text-amber-600" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-white">
+                      <p className="text-xs font-semibold text-warm-900">
                         {lease.tenant?.name || 'Alex Rivera'}
                       </p>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-warm-500">
                         {lease.tenant?.email || 'tenant@leaseify.com'}
                       </p>
                     </div>
@@ -140,22 +140,22 @@ export const LeasesTab = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <p className="text-slate-400">Monthly Rent</p>
-                    <p className="text-sm font-bold text-emerald-400 mt-0.5">
+                  <div className="p-2.5 rounded-xl bg-warm-50 border border-warm-200">
+                    <p className="text-warm-500">Monthly Rent</p>
+                    <p className="text-sm font-bold text-emerald-600 mt-0.5">
                       ₹{lease.monthlyRent?.toLocaleString('en-IN')} / mo
                     </p>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-                    <p className="text-slate-400">Security Deposit</p>
-                    <p className="text-sm font-bold text-slate-200 mt-0.5">
+                  <div className="p-2.5 rounded-xl bg-warm-50 border border-warm-200">
+                    <p className="text-warm-500">Security Deposit</p>
+                    <p className="text-sm font-bold text-warm-700 mt-0.5">
                       ₹{lease.securityDeposit?.toLocaleString('en-IN')}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-slate-400 pt-1">
-                  <Calendar className="w-4 h-4 text-sky-400" />
+                <div className="flex items-center gap-2 text-xs text-warm-500 pt-1">
+                  <Calendar className="w-4 h-4 text-amber-600" />
                   <span>
                     {new Date(lease.startDate).toLocaleDateString()} —{' '}
                     {new Date(lease.endDate).toLocaleDateString()}
@@ -164,7 +164,7 @@ export const LeasesTab = () => {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 text-xs text-slate-400">
+            <div className="pt-3 border-t border-warm-200 text-xs text-warm-500">
               <p className="italic">"{lease.terms}"</p>
             </div>
           </div>
@@ -180,7 +180,7 @@ export const LeasesTab = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Select Property</label>
+            <label className="block text-xs font-medium text-warm-600 mb-1">Select Property</label>
             <select
               value={formData.property}
               onChange={(e) => {
@@ -192,10 +192,10 @@ export const LeasesTab = () => {
                   securityDeposit: prop?.securityDeposit || '',
                 });
               }}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
             >
               {properties.map((p) => (
-                <option key={p._id} value={p._id} className="bg-slate-900">
+                <option key={p._id} value={p._id} className="bg-white">
                   {p.title} (₹{Number(p.rentAmount || 0).toLocaleString('en-IN')}/mo)
                 </option>
               ))}
@@ -204,86 +204,86 @@ export const LeasesTab = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Tenant Name</label>
+              <label className="block text-xs font-medium text-warm-600 mb-1">Tenant Name</label>
               <input
                 type="text"
                 required
                 value={formData.tenantName}
                 onChange={(e) => setFormData({ ...formData, tenantName: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Tenant Email</label>
+              <label className="block text-xs font-medium text-warm-600 mb-1">Tenant Email</label>
               <input
                 type="email"
                 required
                 value={formData.tenantEmail}
                 onChange={(e) => setFormData({ ...formData, tenantEmail: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Start Date</label>
+              <label className="block text-xs font-medium text-warm-600 mb-1">Start Date</label>
               <input
                 type="date"
                 required
                 value={formData.startDate}
                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">End Date</label>
+              <label className="block text-xs font-medium text-warm-600 mb-1">End Date</label>
               <input
                 type="date"
                 required
                 value={formData.endDate}
                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Monthly Rent (₹)</label>
+              <label className="block text-xs font-medium text-warm-600 mb-1">Monthly Rent (₹)</label>
               <input
                 type="number"
                 required
                 value={formData.monthlyRent}
                 onChange={(e) => setFormData({ ...formData, monthlyRent: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">Security Deposit (₹)</label>
+              <label className="block text-xs font-medium text-warm-600 mb-1">Security Deposit (₹)</label>
               <input
                 type="number"
                 required
                 value={formData.securityDeposit}
                 onChange={(e) => setFormData({ ...formData, securityDeposit: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1">Lease Terms & Conditions</label>
+            <label className="block text-xs font-medium text-warm-600 mb-1">Lease Terms & Conditions</label>
             <textarea
               rows="2"
               value={formData.terms}
               onChange={(e) => setFormData({ ...formData, terms: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:border-sky-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-semibold rounded-xl text-xs shadow-lg shadow-sky-500/25 transition-all"
+            className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 text-warm-900 font-semibold rounded-xl text-xs shadow-lg shadow-amber transition-all"
           >
             Issue & Sign Lease Agreement
           </button>

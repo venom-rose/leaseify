@@ -35,17 +35,17 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center">
-          <div className="max-w-md p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4">
-            <div className="h-12 w-12 rounded-2xl bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center justify-center mx-auto text-xl font-bold">
+        <div className="min-h-screen flex items-center justify-center p-6 text-center" style={{ background: '#FBF9F5' }}>
+          <div className="max-w-md p-8 rounded-3xl bg-white border border-amber-200 shadow-xl space-y-4">
+            <div className="h-12 w-12 rounded-2xl bg-red-50 text-red-500 border border-red-200 flex items-center justify-center mx-auto text-xl font-bold">
               ⚠️
             </div>
-            <h2 className="text-xl font-bold text-white">Something went wrong</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-xl font-bold text-warm-950">Something went wrong</h2>
+            <p className="text-xs text-warm-600">
               An unexpected render issue occurred. Click below to recover and reset the dashboard.
             </p>
             {this.state.error?.message && (
-              <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-rose-400 font-mono text-[11px] text-left overflow-x-auto">
+              <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 font-mono text-[11px] text-left overflow-x-auto">
                 {this.state.error.message}
               </div>
             )}
@@ -54,7 +54,7 @@ class ErrorBoundary extends Component {
                 localStorage.clear();
                 window.location.reload();
               }}
-              className="w-full py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-sky-500/25 transition-all"
+              className="w-full py-2.5 btn-amber rounded-xl text-xs shadow-amber"
             >
               Reset Session & Reload
             </button>
@@ -95,7 +95,7 @@ const MainApp = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 flex">
+    <div className="min-h-screen flex" style={{ background: '#FBF9F5' }}>
       {/* Sidebar Navigation */}
       <Sidebar
         currentTab={currentTab}

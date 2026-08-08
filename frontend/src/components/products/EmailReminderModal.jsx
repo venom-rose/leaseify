@@ -68,14 +68,14 @@ export const EmailReminderModal = ({ isOpen, onClose, rental, onSent }) => {
     >
       <div className="space-y-4">
         {/* Template Selector */}
-        <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-2xl border border-slate-800 text-xs">
+        <div className="grid grid-cols-2 gap-1.5 bg-warm-50 p-1 rounded-2xl border border-warm-200 text-xs">
           <button
             type="button"
             onClick={() => setReminderType('due_reminder')}
             className={`py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
               reminderType === 'due_reminder'
-                ? 'bg-sky-500 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-amber-500 text-warm-900 shadow-sm'
+                : 'text-warm-500 hover:text-warm-900'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
@@ -87,8 +87,8 @@ export const EmailReminderModal = ({ isOpen, onClose, rental, onSent }) => {
             onClick={() => setReminderType('overdue_warning')}
             className={`py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
               reminderType === 'overdue_warning'
-                ? 'bg-rose-500 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-red-500 text-warm-900 shadow-sm'
+                : 'text-warm-500 hover:text-warm-900'
             }`}
           >
             <AlertTriangle className="w-3.5 h-3.5" />
@@ -97,25 +97,25 @@ export const EmailReminderModal = ({ isOpen, onClose, rental, onSent }) => {
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-500 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Live Responsive Email Client Simulation Card */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden shadow-2xl text-xs">
+        <div className="rounded-2xl border border-warm-200 bg-warm-50 overflow-hidden shadow-xl text-xs">
           {/* Email Header bar */}
-          <div className="p-3 bg-slate-900 border-b border-slate-800 space-y-1">
+          <div className="p-3 bg-white border-b border-warm-200 space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">To:</span>
-              <span className="font-mono text-white font-medium truncate max-w-[280px]">
+              <span className="text-warm-500">To:</span>
+              <span className="font-mono text-warm-900 font-medium truncate max-w-[280px]">
                 {recipientName} &lt;{recipientEmail}&gt;
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">Subject:</span>
-              <span className="font-bold text-sky-400 truncate max-w-[280px]">
+              <span className="text-warm-500">Subject:</span>
+              <span className="font-bold text-amber-600 truncate max-w-[280px]">
                 {reminderType === 'due_reminder'
                   ? `🔔 Return Due Reminder: Order #${rental.transactionId}`
                   : `🚨 URGENT: Overdue Notice for Order #${rental.transactionId}`}
@@ -124,14 +124,14 @@ export const EmailReminderModal = ({ isOpen, onClose, rental, onSent }) => {
           </div>
 
           {/* Email Body Preview */}
-          <div className="p-4 space-y-3 bg-slate-950/80 text-slate-300 leading-relaxed">
-            <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
+          <div className="p-4 space-y-3 bg-black/20 text-warm-600 leading-relaxed">
+            <div className="p-3 rounded-xl bg-white border border-warm-200 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-white font-bold">Leaseify Logistics Notification</p>
-                <p className="text-[11px] text-slate-400">Automated Escrow & Fleet Manager</p>
+                <p className="text-warm-900 font-bold">Leaseify Logistics Notification</p>
+                <p className="text-[11px] text-warm-500">Automated Escrow & Fleet Manager</p>
               </div>
             </div>
 
@@ -142,27 +142,27 @@ export const EmailReminderModal = ({ isOpen, onClose, rental, onSent }) => {
             {reminderType === 'due_reminder' ? (
               <p>
                 This is a courteous reminder that your rental for{' '}
-                <strong className="text-white">
+                <strong className="text-warm-900">
                   {rental.items?.map((i) => i.name).join(', ') || 'Rented Item'}
                 </strong>{' '}
-                is scheduled to be returned on <strong className="text-white">{returnDateFormatted}</strong>.
+                is scheduled to be returned on <strong className="text-warm-900">{returnDateFormatted}</strong>.
                 Returning on time preserves <strong>100% of your ₹{rental.depositTotal} security deposit</strong>.
               </p>
             ) : (
-              <p className="text-rose-300">
+              <p className="text-red-400">
                 Your rental return is currently <strong>overdue</strong>. Daily late penalties are currently accruing and will be deducted from your ₹{rental.depositTotal} escrow security deposit upon return. Please bring items to our nearest hub immediately.
               </p>
             )}
 
             {customNote && (
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 italic text-[11px]">
+              <div className="p-2.5 rounded-xl bg-white border border-warm-200 text-warm-600 italic text-[11px]">
                 "{customNote}"
               </div>
             )}
 
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-[11px]">
+            <div className="p-3 rounded-xl bg-warm-50 border border-warm-200 flex items-center justify-between text-[11px]">
               <span>Return Counter:</span>
-              <span className="font-semibold text-white">
+              <span className="font-semibold text-warm-900">
                 {rental.pickupLocation || 'Main Hub (Gate 1)'}
               </span>
             </div>
@@ -171,7 +171,7 @@ export const EmailReminderModal = ({ isOpen, onClose, rental, onSent }) => {
 
         {/* Custom Admin Note Input */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+          <label className="block text-[11px] font-semibold text-warm-600 mb-1">
             Include Custom Staff Message (Optional)
           </label>
           <input
@@ -179,7 +179,7 @@ export const EmailReminderModal = ({ isOpen, onClose, rental, onSent }) => {
             placeholder="e.g. Please bring the original power adapter and case."
             value={customNote}
             onChange={(e) => setCustomNote(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
+            className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 placeholder-warm-400 focus:outline-none focus:border-amber-500"
           />
         </div>
 
@@ -188,10 +188,10 @@ export const EmailReminderModal = ({ isOpen, onClose, rental, onSent }) => {
           type="button"
           disabled={loading || sentSuccess}
           onClick={handleSendEmail}
-          className={`w-full py-3 text-white font-bold rounded-xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 ${
+          className={`w-full py-3 text-warm-900 font-bold rounded-xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 ${
             sentSuccess
-              ? 'bg-emerald-500 shadow-emerald-500/25'
-              : 'bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 shadow-sky-500/25'
+              ? 'bg-emerald-500 shadow-amber'
+              : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 shadow-amber'
           } disabled:opacity-50`}
         >
           {sentSuccess ? (

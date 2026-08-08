@@ -95,23 +95,23 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
     >
       <div className="space-y-5">
         {/* Top Order Badge & Verification Pill */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-500/10 via-slate-900 to-indigo-500/10 border border-sky-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-500/10 via-slate-900 to-indigo-500/10 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600">
               Reservation Verified
             </span>
-            <h4 className="text-sm font-black text-white mt-0.5">
+            <h4 className="text-sm font-black text-warm-900 mt-0.5">
               Order #{rental.transactionId || 'RNT-990'}
             </h4>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Renter: <strong className="text-white">{rental.user?.name || 'Alex Rivera'}</strong>
+            <p className="text-xs text-warm-500 mt-0.5">
+              Renter: <strong className="text-warm-900">{rental.user?.name || 'Alex Rivera'}</strong>
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-center">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">Pickup Pass</span>
-              <span className="font-mono text-xs font-black text-emerald-400 tracking-wider">
+            <div className="p-2.5 rounded-xl bg-warm-50 border border-warm-200 text-center">
+              <span className="text-[10px] uppercase font-bold text-warm-500 block">Pickup Pass</span>
+              <span className="font-mono text-xs font-black text-emerald-600 tracking-wider">
                 {verificationCode}
               </span>
             </div>
@@ -123,7 +123,7 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
                   onClose();
                   onOpenQR(rental, 'pickup');
                 }}
-                className="p-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 transition-all flex flex-col items-center justify-center gap-0.5"
+                className="p-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-sky-500/40 text-amber-500 transition-all flex flex-col items-center justify-center gap-0.5"
                 title="Open QR Scanner & Pass"
               >
                 <QrCode className="w-4 h-4" />
@@ -134,22 +134,22 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-500 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Pickup Location & Date Card */}
-        <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 text-xs">
+        <div className="p-4 rounded-2xl bg-warm-50 border border-warm-200 space-y-3 text-xs">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-slate-300 uppercase tracking-wider text-[10px]">
+            <span className="font-bold text-warm-600 uppercase tracking-wider text-[10px]">
               Scheduled Logistics
             </span>
             <button
               type="button"
               onClick={() => setRescheduleMode(!rescheduleMode)}
-              className="text-sky-400 hover:underline font-semibold"
+              className="text-amber-600 hover:underline font-semibold"
             >
               {rescheduleMode ? 'Cancel' : 'Change Date / Hub'}
             </button>
@@ -159,20 +159,20 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
             <div className="space-y-3 pt-1 animate-in fade-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[11px] text-slate-400 mb-1">Pickup Date</label>
+                  <label className="block text-[11px] text-warm-500 mb-1">Pickup Date</label>
                   <input
                     type="date"
                     value={pickupDate}
                     onChange={(e) => setPickupDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-sky-500"
+                    className="w-full px-3 py-2 bg-white border border-warm-200 rounded-xl text-warm-900 text-xs focus:outline-none focus:border-amber-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-slate-400 mb-1">Pickup Hub / Counter</label>
+                  <label className="block text-[11px] text-warm-500 mb-1">Pickup Hub / Counter</label>
                   <select
                     value={pickupLocation}
                     onChange={(e) => setPickupLocation(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-sky-500"
+                    className="w-full px-3 py-2 bg-white border border-warm-200 rounded-xl text-warm-900 text-xs focus:outline-none focus:border-amber-500"
                   >
                     <option value="Main City Center Hub (Counter #1)">Main City Center Hub (Counter #1)</option>
                     <option value="West Logistics Warehouse (Bay 4)">West Logistics Warehouse (Bay 4)</option>
@@ -185,21 +185,21 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
                 type="button"
                 onClick={handleScheduleSave}
                 disabled={loading}
-                className="w-full py-2 bg-sky-500 hover:bg-sky-400 text-white font-semibold rounded-xl text-xs transition-colors"
+                className="w-full py-2 bg-amber-500 hover:bg-sky-400 text-warm-900 font-semibold rounded-xl text-xs transition-colors"
               >
                 Save Scheduled Handover
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2 pt-1">
-              <div className="flex items-center gap-2 text-slate-300">
-                <Calendar className="w-4 h-4 text-sky-400 shrink-0" />
+              <div className="flex items-center gap-2 text-warm-600">
+                <Calendar className="w-4 h-4 text-amber-600 shrink-0" />
                 <span>
                   Date: <strong>{new Date(pickupDate).toLocaleDateString()}</strong>
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-slate-300">
-                <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="flex items-center gap-2 text-warm-600">
+                <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span className="truncate">{pickupLocation}</span>
               </div>
             </div>
@@ -210,34 +210,34 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
         <form onSubmit={handleMarkPicked} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">
-                Recipient / Tenant Name <span className="text-rose-400">*</span>
+              <label className="block text-warm-600 font-semibold mb-1">
+                Recipient / Tenant Name <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <User className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500" />
+                <User className="w-3.5 h-3.5 absolute left-3 top-2.5 text-warm-400" />
                 <input
                   type="text"
                   required
                   placeholder="e.g. Alex Rivera"
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-sky-500"
+                  className="w-full pl-8 pr-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-warm-900 focus:outline-none focus:border-amber-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">
+              <label className="block text-warm-600 font-semibold mb-1">
                 Recipient Contact Phone
               </label>
               <div className="relative">
-                <Phone className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500" />
+                <Phone className="w-3.5 h-3.5 absolute left-3 top-2.5 text-warm-400" />
                 <input
                   type="tel"
                   placeholder="+91 98765 43210"
                   value={recipientPhone}
                   onChange={(e) => setRecipientPhone(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-sky-500"
+                  className="w-full pl-8 pr-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-warm-900 focus:outline-none focus:border-amber-500"
                 />
               </div>
             </div>
@@ -245,7 +245,7 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">
+              <label className="block text-warm-600 font-semibold mb-1">
                 Govt ID / Verification Number (Optional)
               </label>
               <input
@@ -253,11 +253,11 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
                 placeholder="e.g. DL / Aadhaar / Passport #9821"
                 value={idNumber}
                 onChange={(e) => setIdNumber(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-sky-500"
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-warm-900 focus:outline-none focus:border-amber-500"
               />
             </div>
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">
+              <label className="block text-warm-600 font-semibold mb-1">
                 Handover Notes / Checklist
               </label>
               <input
@@ -265,7 +265,7 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
                 placeholder="e.g. Inspected pristine, power cable provided"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-sky-500"
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-warm-900 focus:outline-none focus:border-amber-500"
               />
             </div>
           </div>
@@ -274,7 +274,7 @@ export const PickupModal = ({ isOpen, onClose, rental, onPickupSuccess, onOpenQR
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-sky-500 via-indigo-600 to-teal-600 hover:from-sky-400 hover:to-teal-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-sky-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-3 bg-gradient-to-r from-sky-500 via-indigo-600 to-teal-600 hover:from-sky-400 hover:to-teal-500 text-warm-900 font-bold rounded-xl text-xs shadow-lg shadow-amber transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <PackageCheck className="w-4 h-4" />
             <span>

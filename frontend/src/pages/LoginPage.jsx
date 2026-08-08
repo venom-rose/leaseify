@@ -33,10 +33,10 @@ export const LoginPage = ({ onNavigateToSignup }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Glow Decorations */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #FBF9F5 0%, #F5F0E8 100%)' }}>
+      {/* Subtle decorative circles */}
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-200/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10 px-4">
         {/* Brand Logo */}
@@ -44,67 +44,67 @@ export const LoginPage = ({ onNavigateToSignup }) => {
           <img
             src="/logo.png"
             alt="Leaseify.co Logo"
-            className="h-20 w-20 rounded-3xl object-cover shadow-2xl shadow-teal-500/25 ring-2 ring-white/10"
+            className="h-20 w-20 rounded-3xl object-cover shadow-xl ring-2 ring-amber-200"
           />
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-white">
-          Lease<span className="text-[#a3e635]">ify</span><span className="text-sky-400">.co</span>
+        <h1 className="text-3xl font-extrabold tracking-tight text-warm-900">
+          Lease<span className="text-amber-500">ify</span><span className="text-amber-600">.co</span>
         </h1>
-        <p className="mt-1 text-sm text-slate-300 font-medium">
+        <p className="mt-1 text-sm text-warm-500 font-medium">
           Lease your Luxury
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4">
-        <div className="glass-panel py-8 px-6 sm:px-10 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+        <div className="bg-white py-8 px-6 sm:px-10 rounded-3xl border border-warm-200 shadow-xl space-y-6">
           <div>
-            <h2 className="text-xl font-bold text-white tracking-tight">Sign In</h2>
-            <p className="text-xs text-slate-400 mt-1">
+            <h2 className="text-xl font-bold text-warm-900 tracking-tight">Sign In</h2>
+            <p className="text-xs text-warm-500 mt-1">
               Enter your registered credentials to access your portal.
             </p>
           </div>
 
           {/* Quick Demo Credentials Autofill */}
-          <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          <div className="p-3.5 rounded-2xl bg-warm-100 border border-warm-200 space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-warm-500">
               ⚡ Demo Accounts (Autofill Credentials)
             </p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickFill('admin')}
-                className="flex items-center gap-2 p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/25 hover:bg-purple-500/20 text-left transition-all group"
+                className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 hover:bg-amber-100 text-left transition-all group"
               >
-                <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white group-hover:text-purple-300 truncate">Manager (Admin)</p>
-                  <p className="text-[10px] text-slate-400 truncate">admin@leaseify.com</p>
+                  <p className="text-xs font-bold text-warm-900 group-hover:text-amber-700 truncate">Manager (Admin)</p>
+                  <p className="text-[10px] text-warm-500 truncate">admin@leaseify.com</p>
                 </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickFill('user')}
-                className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 hover:bg-emerald-500/20 text-left transition-all group"
+                className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-left transition-all group"
               >
-                <UserCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <UserCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-white group-hover:text-emerald-300 truncate">Tenant (Resident)</p>
-                  <p className="text-[10px] text-slate-400 truncate">tenant@leaseify.com</p>
+                  <p className="text-xs font-bold text-warm-900 group-hover:text-emerald-700 truncate">Tenant (Resident)</p>
+                  <p className="text-[10px] text-warm-500 truncate">tenant@leaseify.com</p>
                 </div>
               </button>
             </div>
           </div>
 
           <div className="relative flex items-center justify-center">
-            <div className="border-t border-slate-800 w-full" />
-            <span className="bg-slate-900 px-3 text-[11px] text-slate-500 uppercase tracking-wider">
+            <div className="border-t border-warm-200 w-full" />
+            <span className="bg-white px-3 text-[11px] text-warm-400 uppercase tracking-wider absolute">
               Or Sign In with Email
             </span>
           </div>
 
           {error && (
-            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-500 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -112,40 +112,40 @@ export const LoginPage = ({ onNavigateToSignup }) => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              <label className="block text-xs font-medium text-warm-700 mb-1.5">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
+                <Mail className="absolute left-3.5 top-3 w-4 h-4 text-warm-400" />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="e.g. admin@leaseify.com"
-                  className="w-full pl-10 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                  className="w-full pl-10 pr-3 py-2.5 input-warm rounded-xl text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              <label className="block text-xs font-medium text-warm-700 mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
+                <Lock className="absolute left-3.5 top-3 w-4 h-4 text-warm-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                  className="w-full pl-10 pr-10 py-2.5 input-warm rounded-xl text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-500 hover:text-slate-300"
+                  className="absolute right-3 top-3 text-warm-400 hover:text-warm-600"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -155,19 +155,19 @@ export const LoginPage = ({ onNavigateToSignup }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-semibold rounded-xl text-sm shadow-lg shadow-sky-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 btn-amber rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <span>{loading ? 'Authenticating...' : 'Sign In to Dashboard'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="pt-2 text-center border-t border-slate-800/80">
-            <p className="text-xs text-slate-400">
+          <div className="pt-2 text-center border-t border-warm-200">
+            <p className="text-xs text-warm-500">
               Don't have an account yet?{' '}
               <button
                 onClick={onNavigateToSignup}
-                className="font-semibold text-sky-400 hover:text-sky-300 hover:underline ml-1"
+                className="font-semibold text-amber-600 hover:text-amber-700 hover:underline ml-1"
               >
                 Sign up as Tenant
               </button>
