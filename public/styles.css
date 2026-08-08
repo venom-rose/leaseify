@@ -1,6 +1,6 @@
 /* ========================================================
    Leaseify — Conceptzilla / Shakuro Luxury Car Rental Theme
-   with Authentication, Splash Screen, & Profile Management
+   with Complete Rental Checkout Flow, Invoices & Return System
    ======================================================== */
 
 :root {
@@ -191,6 +191,377 @@ body {
 .btn-ghost:hover {
   color: #fff;
   transform: translateX(4px);
+}
+
+/* ========================================================
+   CHECKOUT STEPPER & FULFILLMENT SELECTOR
+   ======================================================== */
+.checkout-stepper-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(10, 14, 23, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.step-node {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  opacity: 0.5;
+  transition: var(--transition);
+}
+
+.step-node.active {
+  opacity: 1;
+}
+
+.step-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.step-node.active .step-circle {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #000;
+  box-shadow: 0 0 12px var(--gold-glow);
+}
+
+.step-name {
+  font-size: 0.825rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-subtle);
+  margin: 0 1rem;
+}
+
+.step-line.active {
+  background: var(--gold);
+}
+
+.checkout-step-content {
+  display: none;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.checkout-step-content.active {
+  display: block;
+}
+
+.cart-product-hero {
+  display: flex;
+  gap: 1.5rem;
+  background: rgba(10, 14, 23, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  align-items: center;
+}
+
+.cart-hero-img {
+  width: 160px;
+  height: 105px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.fulfillment-selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.fulfillment-card {
+  display: flex;
+  gap: 1rem;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.fulfillment-card input {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.fulfillment-card.active, .fulfillment-card:hover {
+  border-color: var(--gold);
+  background: rgba(245, 158, 11, 0.06);
+}
+
+.ful-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--gold-bg);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ful-info {
+  flex: 1;
+}
+
+.ful-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.ful-title strong {
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.ful-price {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.ful-info p {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.pay-method-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.pay-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.825rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pay-tab.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #000;
+}
+
+.btn-cart-nav {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-cart-nav:hover {
+  background: var(--gold-bg);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.cart-badge-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--gold);
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.75rem;
+}
+
+/* ========================================================
+   PRINTABLE LUXURY TAX INVOICE
+   ======================================================== */
+.printable-invoice-body {
+  background: #0d121c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem;
+  color: #f8fafc;
+}
+
+.invoice-header-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.inv-brand-box h2 {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.inv-meta-box {
+  text-align: right;
+}
+
+.inv-number {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.inv-client-vehicle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 1.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.inv-section-title {
+  font-size: 0.75rem;
+  color: var(--gold);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.invoice-table th {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.invoice-table td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+}
+
+.invoice-totals-box {
+  margin-left: auto;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: rgba(10, 14, 23, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+}
+
+.inv-escrow-guarantee {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid var(--emerald-border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: #a7f3d0;
+}
+
+/* Print Stylesheet for Real PDF Generation */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #invoice-modal, #invoice-modal * {
+    visibility: visible;
+  }
+  #invoice-modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #fff !important;
+    color: #000 !important;
+    display: block !important;
+  }
+  .modal-header button, .modal-close-btn {
+    display: none !important;
+  }
+  .printable-invoice-body {
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+  }
+  .invoice-table th {
+    background: #f1f5f9 !important;
+    color: #000 !important;
+  }
+  .invoice-table td, .inv-section-title, .inv-brand-box h2 {
+    color: #000 !important;
+  }
 }
 
 /* ========================================================
@@ -1619,50 +1990,6 @@ body {
 .status-completed { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border: 1px solid var(--border-subtle); }
 .status-cancelled { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 
-/* Activity Feed */
-.activity-feed {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.activity-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  padding-bottom: 0.85rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.activity-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.act-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--gold);
-  margin-top: 6px;
-  flex-shrink: 0;
-}
-
-.act-content {
-  flex: 1;
-}
-
-.act-desc {
-  font-size: 0.85rem;
-  color: var(--text-main);
-}
-
-.act-time {
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  margin-top: 0.2rem;
-}
-
 /* Customer Rental Card */
 .rentals-list-container {
   display: flex;
@@ -1767,7 +2094,7 @@ body {
 }
 
 .modal-lg {
-  max-width: 860px;
+  max-width: 880px;
 }
 
 @keyframes modalPop {
@@ -1813,59 +2140,7 @@ body {
   padding: 1.75rem;
 }
 
-/* Booking Modal Grid */
-.booking-modal-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.35fr;
-  gap: 2rem;
-}
-
-.booking-img {
-  width: 100%;
-  height: 190px;
-  object-fit: cover;
-  border-radius: var(--radius-md);
-  margin-bottom: 1rem;
-}
-
-.booking-specs-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.spec-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-}
-
-.spec-lbl {
-  color: var(--text-muted);
-}
-
-.spec-val {
-  font-weight: 700;
-  color: #fff;
-}
-
-.pickup-location-box {
-  margin-top: 1.25rem;
-  padding: 0.85rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed var(--border-subtle);
-  border-radius: var(--radius-md);
-  display: flex;
-  gap: 0.6rem;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.pickup-location-box strong {
-  color: #fff;
-  display: block;
-}
-
+/* Price Ledger */
 .price-ledger {
   background: rgba(10, 14, 23, 0.7);
   border: 1px solid var(--border-subtle);
@@ -1925,155 +2200,6 @@ body {
   font-size: 0.775rem;
   color: #94a3b8;
   margin-bottom: 1.25rem;
-}
-
-/* Inspection Modal Styles */
-.inspection-modal-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 2rem;
-}
-
-.inspect-order-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  background: rgba(10, 14, 23, 0.6);
-  border-radius: var(--radius-md);
-  padding: 1.25rem;
-}
-
-.inspect-order-summary h4, .inspect-form-panel h4 {
-  font-family: var(--font-heading);
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 0.5rem;
-}
-
-.penalty-status-box {
-  margin-top: 0.75rem;
-  background: var(--rose-bg);
-  border: 1px solid var(--rose-border);
-  border-radius: var(--radius-md);
-  padding: 0.85rem;
-}
-
-.penalty-header {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: var(--rose);
-  margin-bottom: 0.5rem;
-}
-
-.condition-selector-group {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.condition-radio input {
-  display: none;
-}
-
-.condition-chip {
-  display: inline-block;
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  transition: var(--transition);
-}
-
-.condition-radio input:checked + .condition-chip.pristine {
-  background: var(--emerald-bg);
-  border-color: var(--emerald);
-  color: var(--emerald);
-}
-
-.condition-radio input:checked + .condition-chip.good {
-  background: var(--cyan-bg);
-  border-color: var(--cyan);
-  color: var(--cyan);
-}
-
-.condition-radio input:checked + .condition-chip.scuffs {
-  background: var(--amber-bg);
-  border-color: var(--amber);
-  color: var(--amber);
-}
-
-.condition-radio input:checked + .condition-chip.damaged {
-  background: var(--rose-bg);
-  border-color: var(--rose);
-  color: var(--rose);
-}
-
-.checklist-items {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.check-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--text-main);
-  cursor: pointer;
-}
-
-.settlement-reconciliation-card {
-  background: rgba(10, 14, 23, 0.7);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  border-radius: var(--radius-md);
-  padding: 1.25rem;
-  margin: 1.25rem 0;
-}
-
-.settlement-reconciliation-card h5 {
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 0.75rem;
-}
-
-.settle-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  margin-bottom: 0.35rem;
-}
-
-.settle-divider {
-  height: 1px;
-  background: var(--border-subtle);
-  margin: 0.5rem 0;
-}
-
-.settle-final {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #fff;
-}
-
-.refund-badge {
-  font-family: var(--font-mono);
-  color: var(--emerald);
-}
-
-.settle-status-tag {
-  font-size: 0.75rem;
-  color: var(--emerald);
-  margin-top: 0.25rem;
-  font-weight: 700;
 }
 
 /* Forms */
@@ -2148,90 +2274,6 @@ body {
   margin-top: 1.5rem;
 }
 
-/* Settings View Layout */
-.settings-grid {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 1.5rem;
-}
-
-.settings-card {
-  display: flex;
-  flex-direction: column;
-}
-
-.settings-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.settings-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  background: var(--amber-bg);
-  color: var(--amber);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.settings-header h3 {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #fff;
-}
-
-.settings-header p {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.sandbox-instructions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.sandbox-step {
-  display: flex;
-  gap: 0.85rem;
-  font-size: 0.85rem;
-}
-
-.step-num {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: var(--gold);
-  color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 0.75rem;
-  flex-shrink: 0;
-}
-
-.sandbox-step code {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-  color: var(--gold);
-}
-
-.sandbox-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: auto;
-}
-
 /* Toast Notifications */
 .toast-container {
   position: fixed;
@@ -2267,27 +2309,6 @@ body {
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* Receipt Modal Box */
-.receipt-box {
-  background: #0b0f19;
-  border: 1px dashed rgba(245, 158, 11, 0.3);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.receipt-qr-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(245, 158, 11, 0.1);
-  padding: 1rem;
-  border-radius: var(--radius-sm);
-  margin-bottom: 0.5rem;
-}
-
 /* Responsive Media Queries */
 @media (max-width: 1100px) {
   .concept-hero {
@@ -2309,11 +2330,11 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .admin-charts-grid, .settings-grid {
+  .fulfillment-selector-grid {
     grid-template-columns: 1fr;
   }
 
-  .booking-modal-grid, .inspection-modal-grid {
+  .booking-modal-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -1,4 +1,4 @@
-// db.js - SQLite Database initialization with Auth credentials using Node 22 native SQLite
+// db.js - SQLite Database initialization with Rental Flow, Invoices & Escrow
 const { DatabaseSync } = require('node:sqlite');
 const path = require('node:path');
 const fs = require('node:fs');
@@ -80,6 +80,7 @@ function initSchema() {
     CREATE TABLE IF NOT EXISTS rentals (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       rental_code TEXT UNIQUE NOT NULL,
+      invoice_number TEXT UNIQUE,
       user_id INTEGER NOT NULL,
       product_id INTEGER NOT NULL,
       start_date TEXT NOT NULL,
@@ -95,6 +96,11 @@ function initSchema() {
       late_days_count INTEGER NOT NULL DEFAULT 0,
       deposit_refunded_amount REAL NOT NULL DEFAULT 0,
       status TEXT NOT NULL DEFAULT 'PENDING_APPROVAL',
+      fulfillment_type TEXT NOT NULL DEFAULT 'PICKUP', -- 'PICKUP' | 'DELIVERY'
+      delivery_address TEXT,
+      delivery_fee REAL NOT NULL DEFAULT 0,
+      payment_method TEXT DEFAULT 'CREDIT_CARD', -- 'CREDIT_CARD', 'APPLE_PAY', 'CRYPTO'
+      paid_at TEXT,
       pickup_notes TEXT,
       return_notes TEXT,
       customer_notes TEXT,
@@ -454,58 +460,65 @@ function seedDatabase(force = false) {
 
   const insertRental = db.prepare(`
     INSERT INTO rentals (
-      rental_code, user_id, product_id, start_date, end_date, actual_return_date,
+      rental_code, invoice_number, user_id, product_id, start_date, end_date, actual_return_date,
       duration_days, daily_rate, base_rental_fee, deposit_amount, deposit_status,
       damage_fee, late_penalty_fee, late_days_count, deposit_refunded_amount, status,
+      fulfillment_type, delivery_address, delivery_fee, payment_method, paid_at,
       pickup_notes, return_notes, customer_notes, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   insertRental.run(
-    'RNT-9110', 2, 1, pastDate(2), futureDate(3), null,
+    'RNT-9110', 'INV-2026-9110', 2, 1, pastDate(2), futureDate(3), null,
     5, 650.0, 3250.0, 1500.0, 'HELD',
     0, 0, 0, 0, 'ACTIVE',
+    'PICKUP', 'Leaseify Executive Lounge, 850 Sunset Blvd', 0, 'CREDIT_CARD', pastDate(2) + ' 10:28:00',
     'Customer completed identity verification. Track telemetry key released in pristine condition.',
     null, 'Weekend drive on Pacific Coast Highway.', pastDate(2) + ' 10:30:00'
   );
 
   insertRental.run(
-    'RNT-7419', 3, 4, pastDate(6), pastDate(2), null,
+    'RNT-7419', 'INV-2026-7419', 3, 4, pastDate(6), pastDate(2), null,
     4, 890.0, 3560.0, 2200.0, 'HELD',
     0, 2670.0, 2, 0, 'OVERDUE',
-    'Released with full ceramic protection inspection certificate.',
+    'DELIVERY', '788 Beverly Glen Blvd, Los Angeles, CA', 150.0, 'APPLE_PAY', pastDate(6) + ' 09:10:00',
+    'Delivered via white-glove enclosed transporter.',
     null, 'VIP film premiere and charity gala.', pastDate(6) + ' 09:15:00'
   );
 
   insertRental.run(
-    'RNT-8832', 4, 2, futureDate(1), futureDate(4), null,
+    'RNT-8832', 'INV-2026-8832', 4, 2, futureDate(1), futureDate(4), null,
     3, 420.0, 1260.0, 1000.0, 'HELD',
     0, 0, 0, 0, 'PENDING_APPROVAL',
+    'PICKUP', 'LAX Private Flight Terminal Hub', 0, 'CREDIT_CARD', pastDate(0) + ' 08:40:00',
     null, null, 'Executive airport pickup and business conference tour.', pastDate(0) + ' 08:45:00'
   );
 
   insertRental.run(
-    'RNT-6204', 2, 3, futureDate(0), futureDate(3), null,
+    'RNT-6204', 'INV-2026-6204', 2, 3, futureDate(0), futureDate(3), null,
     3, 580.0, 1740.0, 1400.0, 'HELD',
     0, 0, 0, 0, 'READY_FOR_PICKUP',
+    'PICKUP', 'Leaseify Executive Lounge, Bay 02', 0, 'CREDIT_CARD', pastDate(1) + ' 14:15:00',
     'Vehicle fully detailed, tank topped with 98 Octane, parked in Executive Bay 02.',
     null, 'Mountain resort weekend trip.', pastDate(1) + ' 14:20:00'
   );
 
   insertRental.run(
-    'RNT-4155', 4, 5, pastDate(4), pastDate(0), pastDate(0),
+    'RNT-4155', 'INV-2026-4155', 4, 5, pastDate(4), pastDate(0), pastDate(0),
     4, 390.0, 1560.0, 900.0, 'HELD',
     0, 0, 0, 0, 'RETURN_SUBMITTED',
+    'PICKUP', 'Leaseify Executive Lounge Intake', 0, 'CREDIT_CARD', pastDate(4) + ' 10:55:00',
     'Vehicle returned to intake bay. Awaiting wheel rim and paintwork diagnostic inspection.',
-    'Customer reported minor surface curb rash on rear right alloy.', 'Coastal weekend tour.', pastDate(4) + ' 11:00:00'
+    'Customer returned at lounge intake bay.', 'Coastal weekend tour.', pastDate(4) + ' 11:00:00'
   );
 
   insertRental.run(
-    'RNT-3011', 3, 7, pastDate(10), pastDate(7), pastDate(7),
+    'RNT-3011', 'INV-2026-3011', 3, 7, pastDate(10), pastDate(7), pastDate(7),
     3, 980.0, 2940.0, 2500.0, 'REFUNDED',
     0, 0, 0, 2500.0, 'INSPECTED_COMPLETED',
+    'DELIVERY', 'Bespoke Private Residence Delivery', 150.0, 'CREDIT_CARD', pastDate(10) + ' 15:50:00',
     'Handover inspection passed with zero imperfections.',
-    'Return inspection flawless. Full escrow deposit of $2,500 refunded to customer card.', 'Wedding celebration ceremony escort.', pastDate(10) + ' 16:00:00'
+    'Return on-time at store lounge. Full escrow deposit of $2,500 refunded to customer card.', 'Wedding celebration ceremony escort.', pastDate(10) + ' 16:00:00'
   );
 
   const insertActivity = db.prepare(`
@@ -515,7 +528,7 @@ function seedDatabase(force = false) {
 
   insertActivity.run(2, 'System Engine', 'system', 'PENALTY_ACCRUED', 'Automated late penalty triggered for Ferrari F8 Tributo (RNT-7419): +$2,670.00 for 2 overdue days.', pastDate(0) + ' 00:05:00');
   insertActivity.run(1, 'Sarah Connor', 'admin', 'PICKUP_AUTHORIZED', 'Vehicle Porsche 911 GT3 RS handed over to Alex Rivera with deposit lock verified in escrow.', pastDate(2) + ' 10:35:00');
-  insertActivity.run(6, 'Sarah Connor', 'admin', 'DEPOSIT_REFUNDED', 'Full deposit of $2,500.00 returned to Marcus Vance after clean vehicle diagnostic.', pastDate(7) + ' 18:20:00');
+  insertActivity.run(6, 'Sarah Connor', 'admin', 'DEPOSIT_REFUNDED', 'Full deposit of $2,500.00 returned to Marcus Vance after clean on-time vehicle return.', pastDate(7) + ' 18:20:00');
 }
 
 module.exports = {

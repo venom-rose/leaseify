@@ -1,4 +1,4 @@
-// app.js - Full-Stack Client Logic with JWT Auth & Role-Based Routing for Leaseify
+// app.js - Full-Stack Client Logic with Rental Flow, Invoices, Store Return & Escrow Settlement
 
 class LeaseifyApp {
   constructor() {
@@ -15,7 +15,13 @@ class LeaseifyApp {
     this.config = null;
     this.selectedCategory = 'all';
     this.currentFilterStatus = 'ALL';
-    this.selectedBookingProduct = null;
+
+    // Cart & Checkout State
+    this.cartProduct = null;
+    this.checkoutStep = 1;
+    this.fulfillmentType = 'PICKUP'; // 'PICKUP' | 'DELIVERY'
+    this.paymentMethod = 'CREDIT_CARD'; // 'CREDIT_CARD' | 'APPLE_PAY' | 'CRYPTO'
+
     this.activeInspectionRental = null;
 
     this.init();
@@ -163,13 +169,12 @@ class LeaseifyApp {
         await this.fetchRentals();
         await this.fetchAnalytics();
 
-        // Redirect based on role
         if (this.currentUser.role === 'admin') {
           this.navigate('admin');
-          this.showToast(`Welcome Fleet Director ${this.currentUser.name}! Redirecting to Operations Hub.`, 'success');
+          this.showToast(`Welcome Fleet Director ${this.currentUser.name}!`, 'success');
         } else {
           this.navigate('store');
-          this.showToast(`Welcome back, ${this.currentUser.name}! Redirecting to Showroom.`, 'success');
+          this.showToast(`Welcome back, ${this.currentUser.name}!`, 'success');
         }
       } else {
         this.showToast(data.error || 'Authentication failed', 'error');
@@ -217,7 +222,7 @@ class LeaseifyApp {
         await this.fetchAnalytics();
 
         this.navigate('store');
-        this.showToast(`Welcome to Leaseify, ${this.currentUser.name}! Your client profile is active.`, 'success');
+        this.showToast(`Welcome to Leaseify, ${this.currentUser.name}! Profile created.`, 'success');
       } else {
         this.showToast(data.error || 'Registration failed', 'error');
       }
@@ -233,13 +238,15 @@ class LeaseifyApp {
   logout() {
     this.token = null;
     this.currentUser = null;
+    this.cartProduct = null;
+    this.updateCartBadge();
     localStorage.removeItem('leaseify_jwt_token');
     this.closeModal('profile-modal');
     this.showSplashScreen();
     this.showToast('You have been securely signed out.', 'info');
   }
 
-  // User Profile Modal
+  // Profile Management
   openProfileModal() {
     if (!this.currentUser || this.currentUser.id === 0) {
       this.showAuthModal('login');
@@ -285,7 +292,7 @@ class LeaseifyApp {
         this.currentUser = data.user;
         this.updateUserUI();
         this.closeModal('profile-modal');
-        this.showToast('Profile updated successfully!', 'success');
+        this.showToast('Profile & delivery address updated successfully!', 'success');
       } else {
         this.showToast(data.error || 'Failed to update profile', 'error');
       }
@@ -351,149 +358,618 @@ class LeaseifyApp {
   }
 
   // ==========================================
-  // Navigation & Role Guarding
+  // RENTAL FLOW STEPS (1 TO 7): CART & CHECKOUT
   // ==========================================
-  navigate(viewId) {
-    // Role protection: Guard admin views
-    if ((viewId === 'admin' || viewId === 'inventory' || viewId === 'settings') && (!this.currentUser || this.currentUser.role !== 'admin')) {
-      this.showToast('Access Restricted: Fleet Operations Hub is for authorized Administrators only.', 'error');
-      this.showAuthModal('login');
-      return;
+
+  // Step 2 & 3: Select Product & Choose Period
+  openBookingModal(productId) {
+    const product = this.products.find(p => p.id === productId);
+    if (!product) return;
+
+    this.cartProduct = product;
+    this.updateCartBadge();
+
+    // Populate Cart Modal Step 1
+    const pBox = document.getElementById('cart-product-summary');
+    if (pBox) {
+      pBox.innerHTML = `
+        <img src="${product.image}" alt="${product.name}" class="cart-hero-img">
+        <div style="flex: 1;">
+          <span style="font-size: 0.725rem; color: var(--gold); font-weight: 800; text-transform: uppercase;">${product.category_name || product.category_id}</span>
+          <h3 style="font-family: var(--font-heading); color: #fff; font-size: 1.35rem; margin: 0.2rem 0;">${product.name}</h3>
+          <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+            <span>Daily Rate: <strong style="color: var(--gold);">$${product.daily_rate.toFixed(2)}/day</strong></span>
+            <span>Security Deposit: <strong style="color: var(--amber);">$${product.deposit_amount.toFixed(2)}</strong></span>
+          </div>
+        </div>
+      `;
     }
 
-    this.currentView = viewId;
-    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+    const barStart = document.getElementById('bar-pickup-date')?.value;
+    const barEnd = document.getElementById('bar-return-date')?.value;
 
-    const viewEl = document.getElementById(`view-${viewId}`);
-    const navEl = document.getElementById(`nav-${viewId}`);
-
-    if (viewEl) viewEl.classList.add('active');
-    if (navEl) navEl.classList.add('active');
-
-    if (viewId === 'store') {
-      this.renderProducts();
-    } else if (viewId === 'my-rentals') {
-      this.renderCustomerRentals();
-    } else if (viewId === 'admin') {
-      this.fetchAnalytics().then(() => {
-        this.fetchRentals().then(() => this.renderAdminDashboard());
-      });
-    } else if (viewId === 'inventory') {
-      this.fetchProducts().then(() => this.renderInventoryTable());
-    } else if (viewId === 'settings') {
-      this.fetchConfig().then(() => this.populateSettingsForm());
-    }
-
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
-  }
-
-  updateUserUI() {
-    if (!this.currentUser) return;
-
-    const avatarEl = document.getElementById('user-avatar');
-    const nameEl = document.getElementById('user-name-display');
-    const tierEl = document.getElementById('user-tier-display');
-    const roleBadgeText = document.getElementById('nav-role-text');
-
-    if (avatarEl) avatarEl.src = this.currentUser.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
-    if (nameEl) nameEl.innerText = this.currentUser.name;
-    if (tierEl) tierEl.innerText = this.currentUser.membership_tier || (this.currentUser.role === 'admin' ? 'Fleet Director' : 'VIP Member');
-
-    if (roleBadgeText) {
-      roleBadgeText.innerText = this.currentUser.role === 'admin' ? 'Fleet Director (Admin)' : 'Client Portal';
-    }
-
-    const adminLinks = document.querySelectorAll('.admin-only');
-    adminLinks.forEach(el => {
-      el.style.display = this.currentUser.role === 'admin' ? 'flex' : 'none';
-    });
-  }
-
-  updateSimulatedTimeBadge() {
-    const timeDisplay = document.getElementById('simulated-time-display');
-    if (!timeDisplay || !this.config) return;
-
-    const offset = this.config.simulated_days_offset || 0;
-    if (offset === 0) {
-      timeDisplay.innerText = 'Today (Live)';
-      timeDisplay.parentElement.style.color = '#f59e0b';
-    } else {
-      timeDisplay.innerText = `+${offset}d Fast-Fwd`;
-      timeDisplay.parentElement.style.color = '#f43f5e';
-    }
-  }
-
-  async simulateTimeOffset(days) {
-    try {
-      const res = await fetch(`${this.apiBase}/config/simulate-time`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ days_offset: days })
-      });
-      const data = await res.json();
-      this.config = data.config;
-      this.updateSimulatedTimeBadge();
-
-      await this.fetchRentals();
-      await this.fetchAnalytics();
-
-      this.renderAdminDashboard();
-      this.renderCustomerRentals();
-
-      this.showToast(data.message, days > 0 ? 'info' : 'success');
-    } catch (err) {
-      this.showToast('Failed to adjust simulation time', 'error');
-    }
-  }
-
-  // ==========================================
-  // CONCEPTZILLA HERO SPOTLIGHT & COLOR SWITCHER
-  // ==========================================
-  setHeroColor(colorHex, imgUrl, colorName) {
-    document.querySelectorAll('.color-dot').forEach(dot => dot.classList.remove('active'));
-    if (event && event.target) {
-      event.target.classList.add('active');
-    }
-
-    const img = document.getElementById('spotlight-car-img');
-    const box = document.getElementById('spotlight-img-box');
-    if (img) img.src = imgUrl;
-    if (box) box.style.filter = `drop-shadow(0 0 25px ${colorHex}40)`;
-
-    this.showToast(`Selected ${colorName} Paintwork Finish`, 'info');
-  }
-
-  initFloatingBookingBar() {
     const today = new Date();
     const start = new Date(today);
     start.setDate(start.getDate() + 1);
     const end = new Date(start);
     end.setDate(end.getDate() + 3);
-
     const fmt = (d) => d.toISOString().split('T')[0];
-    const pickupEl = document.getElementById('bar-pickup-date');
-    const returnEl = document.getElementById('bar-return-date');
-    if (pickupEl) pickupEl.value = fmt(start);
-    if (returnEl) returnEl.value = fmt(end);
+
+    document.getElementById('cart-start-date').value = barStart || fmt(start);
+    document.getElementById('cart-end-date').value = barEnd || fmt(end);
+
+    // Pre-populate address from user profile
+    if (this.currentUser && this.currentUser.address) {
+      const streetInput = document.getElementById('deliv-street');
+      if (streetInput && !streetInput.value) {
+        streetInput.value = this.currentUser.address;
+      }
+    }
+
+    this.goToCheckoutStep(1);
+    this.recalculateCartPricing();
+    this.openModal('cart-modal');
   }
 
-  syncBookingBar() {
-    const pDate = document.getElementById('bar-pickup-date')?.value;
-    const rDate = document.getElementById('bar-return-date')?.value;
-    if (pDate && rDate) {
-      const s = new Date(pDate);
-      const e = new Date(rDate);
-      if (e < s) {
-        this.showToast('Return date must be after pick-up date', 'error');
+  openCartModal() {
+    if (!this.cartProduct) {
+      if (this.products.length > 0) {
+        this.openBookingModal(this.products[0].id);
+      } else {
+        this.showToast('Please browse products and select a vehicle to rent.', 'info');
       }
+      return;
+    }
+    this.openModal('cart-modal');
+  }
+
+  updateCartBadge() {
+    const badge = document.getElementById('nav-cart-count');
+    if (badge) {
+      badge.innerText = this.cartProduct ? '1' : '0';
     }
   }
 
-  selectCategoryFromBar(catId) {
-    this.selectCategory(catId);
+  goToCheckoutStep(step) {
+    if (step > 1 && (!this.currentUser || this.currentUser.id === 0)) {
+      this.showToast('Please sign in or create an account to proceed with checkout', 'info');
+      this.showAuthModal('login');
+      return;
+    }
+
+    this.checkoutStep = step;
+
+    // Update Stepper Nodes
+    for (let i = 1; i <= 3; i++) {
+      const node = document.getElementById(`step-node-${i}`);
+      const content = document.getElementById(`checkout-step-${i}`);
+      const line = document.getElementById(`step-line-${i}`);
+
+      if (node) node.classList.toggle('active', i <= step);
+      if (content) content.classList.toggle('active', i === step);
+      if (line) line.classList.toggle('active', i < step);
+    }
+
+    this.recalculateCartPricing();
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  setFulfillmentType(type) {
+    this.fulfillmentType = type;
+
+    const pickupCard = document.getElementById('opt-pickup-card');
+    const delivCard = document.getElementById('opt-delivery-card');
+    const delivForm = document.getElementById('delivery-address-form');
+
+    if (pickupCard) pickupCard.classList.toggle('active', type === 'PICKUP');
+    if (delivCard) delivCard.classList.toggle('active', type === 'DELIVERY');
+    if (delivForm) delivForm.style.display = type === 'DELIVERY' ? 'block' : 'none';
+
+    const rPickup = document.getElementById('radio-pickup');
+    const rDeliv = document.getElementById('radio-delivery');
+    if (rPickup) rPickup.checked = (type === 'PICKUP');
+    if (rDeliv) rDeliv.checked = (type === 'DELIVERY');
+
+    this.recalculateCartPricing();
+  }
+
+  setPaymentMethod(method) {
+    this.paymentMethod = method;
+    document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
+
+    const tab = document.getElementById(`pay-tab-${method === 'CREDIT_CARD' ? 'card' : method === 'APPLE_PAY' ? 'apple' : 'wire'}`);
+    if (tab) tab.classList.add('active');
+
+    const cardBox = document.getElementById('card-inputs-box');
+    if (cardBox) {
+      cardBox.style.display = method === 'CREDIT_CARD' ? 'block' : 'none';
+    }
+  }
+
+  recalculateCartPricing() {
+    if (!this.cartProduct) return;
+
+    const startVal = document.getElementById('cart-start-date')?.value;
+    const endVal = document.getElementById('cart-end-date')?.value;
+
+    if (!startVal || !endVal) return;
+
+    const start = new Date(startVal);
+    const end = new Date(endVal);
+
+    if (end < start) {
+      this.showToast('Return date cannot be earlier than pick-up date', 'error');
+      return;
+    }
+
+    const diffMs = end.getTime() - start.getTime();
+    const durationDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+    let baseFee = 0;
+    const p = this.cartProduct;
+
+    if (durationDays >= 7 && p.weekly_rate > 0) {
+      const weeks = Math.floor(durationDays / 7);
+      const remDays = durationDays % 7;
+      baseFee = (weeks * p.weekly_rate) + (remDays * p.daily_rate);
+    } else {
+      baseFee = durationDays * p.daily_rate;
+    }
+
+    const deposit = p.deposit_amount;
+    const deliveryFee = this.fulfillmentType === 'DELIVERY' ? 150.0 : 0.0;
+    const totalDue = baseFee + deposit + deliveryFee;
+
+    const durEl = document.getElementById('cart-ledger-duration');
+    const baseEl = document.getElementById('cart-ledger-base');
+    const delivEl = document.getElementById('cart-ledger-deliv');
+    const depEl = document.getElementById('cart-ledger-deposit');
+    const totEl = document.getElementById('cart-ledger-total');
+
+    if (durEl) durEl.innerText = `${durationDays} Day(s) ${durationDays >= 7 ? '(VIP Weekly Rate)' : ''}`;
+    if (baseEl) baseEl.innerText = `$${baseFee.toFixed(2)}`;
+    if (delivEl) delivEl.innerText = `$${deliveryFee.toFixed(2)} (${this.fulfillmentType === 'DELIVERY' ? 'Flatbed Transporter' : 'Store Pickup'})`;
+    if (depEl) depEl.innerText = `$${deposit.toFixed(2)}`;
+    if (totEl) totEl.innerText = `$${totalDue.toFixed(2)}`;
+  }
+
+  // Step 6 & 7: Execute Payment & Generate Invoice
+  async executePaymentCheckout() {
+    if (!this.cartProduct || !this.currentUser) return;
+
+    const startVal = document.getElementById('cart-start-date').value;
+    const endVal = document.getElementById('cart-end-date').value;
+    const tripNotes = document.getElementById('cart-trip-notes').value;
+
+    let address = 'Leaseify Executive Lounge, 850 Sunset Blvd, West Hollywood';
+    if (this.fulfillmentType === 'DELIVERY') {
+      const street = document.getElementById('deliv-street').value;
+      const city = document.getElementById('deliv-city').value;
+      const state = document.getElementById('deliv-state').value;
+      address = `${street}, ${city}, ${state}`.trim();
+
+      if (!street) {
+        this.showToast('Please enter your delivery street address', 'error');
+        this.goToCheckoutStep(2);
+        return;
+      }
+    }
+
+    const btn = document.getElementById('btn-pay-confirm');
+    btn.disabled = true;
+    btn.innerHTML = `<i data-lucide="loader"></i> Processing Secure Escrow Payment...`;
+
+    try {
+      const payload = {
+        user_id: this.currentUser.id,
+        product_id: this.cartProduct.id,
+        start_date: startVal,
+        end_date: endVal,
+        fulfillment_type: this.fulfillmentType,
+        delivery_address: address,
+        payment_method: this.paymentMethod,
+        customer_notes: tripNotes
+      };
+
+      const res = await fetch(`${this.apiBase}/rentals/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        this.closeModal('cart-modal');
+        this.cartProduct = null;
+        this.updateCartBadge();
+        this.showToast(`Payment of $${data.total_paid.toFixed(2)} Confirmed! Invoice ${data.invoice_number} generated.`, 'success');
+
+        await this.fetchProducts();
+        await this.fetchRentals();
+        await this.fetchAnalytics();
+
+        this.renderProducts();
+        this.renderCustomerRentals();
+
+        // Display Generated Official Tax Invoice
+        this.showInvoice(data.rental.id);
+      } else {
+        this.showToast(data.error || 'Payment failed', 'error');
+      }
+    } catch (err) {
+      this.showToast('Error during payment processing: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<i data-lucide="lock"></i> Pay & Confirm Reservation`;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  // ==========================================
+  // INVOICE VIEWER & DOWNLOAD/PRINT (STEP 7)
+  // ==========================================
+  async showInvoice(rentalId) {
+    try {
+      const res = await fetch(`${this.apiBase}/rentals/${rentalId}`);
+      if (!res.ok) throw new Error('Invoice not found');
+      const r = await res.json();
+
+      const invTitle = document.getElementById('inv-header-title');
+      if (invTitle) invTitle.innerText = `Invoice #${r.invoice_number || r.rental_code}`;
+
+      const totalPaid = r.base_rental_fee + r.deposit_amount + (r.delivery_fee || 0);
+
+      const html = `
+        <div class="printable-invoice-body">
+          <div class="invoice-header-grid">
+            <div class="inv-brand-box">
+              <h2>LEASEIFY<span style="color: var(--gold);">.FLEET</span></h2>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Leaseify Premier Automotive Inc.<br>
+                850 Sunset Blvd, West Hollywood, CA 90069<br>
+                Tax ID: US-94-8832104 • concierge@leaseify.io
+              </p>
+            </div>
+            <div class="inv-meta-box">
+              <div class="inv-number">${r.invoice_number || `INV-2026-${r.id}`}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Order Code: <strong>${r.rental_code}</strong></div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Issue Date: ${r.paid_at || r.created_at}</div>
+              <div style="margin-top: 0.35rem;">
+                <span class="badge-soft badge-gold">Payment Status: PAID & SECURED</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="inv-client-vehicle-grid">
+            <div>
+              <div class="inv-section-title">Billed & Registered To:</div>
+              <strong style="color: #fff; font-size: 1.05rem;">${r.user_name}</strong>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">${r.user_email}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">${r.user_phone || '+1 (555) 876-5432'}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;">
+                Fulfillment Address: <strong style="color: #fff;">${r.delivery_address || 'Store Hub Pickup'}</strong>
+              </div>
+            </div>
+
+            <div>
+              <div class="inv-section-title">Vehicle Telemetry Specs:</div>
+              <strong style="color: #fff; font-size: 1.05rem;">${r.product_name}</strong>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Brand/Model: ${r.product_brand} • Serial: ${r.product_serial || 'VIN-AUTO'}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Rental Window: <strong>${r.start_date}</strong> to <strong>${r.end_date}</strong> (${r.duration_days} days)</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Handover Option: <span class="text-gold">${r.fulfillment_type === 'DELIVERY' ? 'White-Glove Flatbed Delivery' : 'VIP Store Pickup'}</span></div>
+            </div>
+          </div>
+
+          <table class="invoice-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Rate / Period</th>
+                <th>Qty</th>
+                <th style="text-align: right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>${r.product_name} — Vehicle Rental</strong>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Scheduled Duration: ${r.start_date} &rarr; ${r.end_date}</div>
+                </td>
+                <td>$${r.daily_rate.toFixed(2)} / day</td>
+                <td>${r.duration_days} Days</td>
+                <td style="text-align: right; font-family: var(--font-mono); font-weight: 700;">$${r.base_rental_fee.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Handover & Logistics (${r.fulfillment_type})</strong>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">${r.delivery_address}</div>
+                </td>
+                <td>${r.delivery_fee > 0 ? '$150.00 Flat' : 'Complimentary'}</td>
+                <td>1</td>
+                <td style="text-align: right; font-family: var(--font-mono); font-weight: 700;">$${(r.delivery_fee || 0).toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Security Deposit Escrow (100% Refundable)</strong>
+                  <div style="font-size: 0.75rem; color: var(--emerald);">Held in isolated escrow account. Released upon vehicle return.</div>
+                </td>
+                <td>Escrow Lock</td>
+                <td>1</td>
+                <td style="text-align: right; font-family: var(--font-mono); font-weight: 700; color: var(--amber);">$${r.deposit_amount.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div class="inv-escrow-guarantee">
+              <i data-lucide="shield-check" style="width: 28px; height: 28px; color: var(--emerald); flex-shrink: 0;"></i>
+              <div>
+                <strong>Deposit Escrow Guarantee:</strong><br>
+                <span>Upon returning the vehicle at our store lounge on time, your $${r.deposit_amount.toFixed(2)} security deposit is automatically refunded in full to your payment card.</span>
+              </div>
+            </div>
+
+            <div class="invoice-totals-box">
+              <div class="ledger-row">
+                <span class="ledger-lbl">Subtotal Rental:</span>
+                <span class="ledger-val">$${r.base_rental_fee.toFixed(2)}</span>
+              </div>
+              <div class="ledger-row">
+                <span class="ledger-lbl">Logistics / Delivery:</span>
+                <span class="ledger-val">$${(r.delivery_fee || 0).toFixed(2)}</span>
+              </div>
+              <div class="ledger-row">
+                <span class="ledger-lbl text-amber">Security Escrow Deposit:</span>
+                <span class="ledger-val text-amber">$${r.deposit_amount.toFixed(2)}</span>
+              </div>
+              <div class="ledger-divider"></div>
+              <div class="ledger-row ledger-total">
+                <span>Total Amount Paid:</span>
+                <span class="total-amount text-gold">$${totalPaid.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('printable-invoice-content').innerHTML = html;
+      this.openModal('invoice-modal');
+    } catch (err) {
+      this.showToast('Could not load invoice: ' + err.message, 'error');
+    }
+  }
+
+  // ==========================================
+  // STORE RETURN FLOW (ON-TIME VS LATE ESCROW SETTLEMENT)
+  // ==========================================
+  openStoreReturnModal(rentalId) {
+    const r = this.rentals.find(item => item.id === rentalId);
+    if (!r) return;
+
+    // Determine on-time vs late based on simulated time
+    const config = this.config || { simulated_days_offset: 0, late_fee_daily_multiplier: 1.5 };
+    const offset = config.simulated_days_offset || 0;
+    const now = new Date();
+    now.setDate(now.getDate() + offset);
+
+    const end = new Date(r.end_date + 'T23:59:59');
+    const isLate = now.getTime() > end.getTime();
+
+    let lateDays = 0;
+    let lateFee = 0;
+
+    if (isLate) {
+      const diffMs = now.getTime() - end.getTime();
+      lateDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+      lateFee = Math.round(lateDays * (r.daily_rate * (config.late_fee_daily_multiplier || 1.5)) * 100) / 100;
+    }
+
+    const deposit = r.deposit_amount;
+    const netRefund = Math.max(0, deposit - lateFee);
+
+    const html = `
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div style="display: flex; gap: 1rem; align-items: center; background: rgba(10, 14, 23, 0.6); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <img src="${r.product_image}" style="width: 100px; height: 68px; object-fit: cover; border-radius: 6px;">
+          <div>
+            <span class="cust-rental-code">${r.rental_code}</span>
+            <h4 style="color: #fff; font-size: 1.15rem; margin: 0.15rem 0;">${r.product_name}</h4>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Scheduled Return Date: <strong>${r.end_date}</strong></span>
+          </div>
+        </div>
+
+        <div style="background: ${isLate ? 'var(--rose-bg)' : 'var(--emerald-bg)'}; border: 1px solid ${isLate ? 'var(--rose-border)' : 'var(--emerald-border)'}; border-radius: var(--radius-md); padding: 1.15rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; color: ${isLate ? 'var(--rose)' : 'var(--emerald)'}; font-weight: 800; font-size: 0.95rem; margin-bottom: 0.35rem;">
+            <i data-lucide="${isLate ? 'alert-triangle' : 'check-circle'}"></i>
+            <span>${isLate ? `Late Return Detected (${lateDays} Day(s) Overdue)` : 'On-Time Return at Store Hub!'}</span>
+          </div>
+          <p style="font-size: 0.825rem; color: ${isLate ? '#fecdd3' : '#a7f3d0'}; line-height: 1.4;">
+            ${isLate ? `Your scheduled return was on ${r.end_date}. Under our policy, a late penalty of $${lateFee.toFixed(2)} will be deducted from your escrow deposit.` : `Thank you for returning on time! 100% of your $${deposit.toFixed(2)} security deposit is eligible for immediate refund.`}
+          </p>
+        </div>
+
+        <div class="settlement-reconciliation-card" style="margin: 0;">
+          <h5>Escrow Settlement Breakdown</h5>
+          <div class="settle-row">
+            <span>Original Security Deposit Held:</span>
+            <span>$${deposit.toFixed(2)}</span>
+          </div>
+          ${isLate ? `
+            <div class="settle-row text-rose">
+              <span>Late Return Penalty (${lateDays}d × 1.5x):</span>
+              <span>-$${lateFee.toFixed(2)}</span>
+            </div>
+          ` : ''}
+          <div class="settle-divider"></div>
+          <div class="settle-row settle-final">
+            <span>Net Escrow Refund to Your Card:</span>
+            <span class="refund-badge" style="color: ${isLate ? 'var(--amber)' : 'var(--emerald)'};">$${netRefund.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="return-notes-input">Driver Return Feedback (Optional)</label>
+          <input type="text" id="return-notes-input" class="form-input" placeholder="e.g. Tank full, returned at West Hollywood Lounge bay 01...">
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('return-store-modal')">Cancel</button>
+          <button type="button" class="btn btn-gold" onclick="app.submitStoreReturn(${r.id})">
+            <i data-lucide="check-check"></i> Complete Store Return & Release Escrow
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('return-store-content').innerHTML = html;
+    this.openModal('return-store-modal');
+  }
+
+  async submitStoreReturn(rentalId) {
+    const notes = document.getElementById('return-notes-input')?.value || '';
+    try {
+      const res = await fetch(`${this.apiBase}/rentals/${rentalId}/return-store`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.token}`
+        },
+        body: JSON.stringify({
+          return_notes: notes,
+          inspector_name: this.currentUser ? this.currentUser.name : 'Store Concierge'
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        this.closeModal('return-store-modal');
+        this.showToast(data.message, data.is_late ? 'info' : 'success');
+
+        await this.fetchProducts();
+        await this.fetchRentals();
+        await this.fetchAnalytics();
+
+        this.renderProducts();
+        this.renderCustomerRentals();
+      } else {
+        this.showToast(data.error || 'Failed to complete store return', 'error');
+      }
+    } catch (err) {
+      this.showToast('Error during store return: ' + err.message, 'error');
+    }
+  }
+
+  // ==========================================
+  // VIEW 2: CUSTOMER DASHBOARD ("MY BOOKINGS")
+  // ==========================================
+  updateCustomerRentalsCount() {
+    const countEl = document.getElementById('my-rentals-count');
+    if (!countEl || !this.currentUser) return;
+    const myRentals = this.rentals.filter(r => r.user_id === this.currentUser.id && r.status !== 'CANCELLED');
+    countEl.innerText = myRentals.length;
+  }
+
+  renderCustomerRentals() {
+    const container = document.getElementById('customer-rentals-list');
+    if (!container) return;
+
+    const myRentals = this.currentUser ? this.rentals.filter(r => r.user_id === this.currentUser.id) : [];
+
+    const activeCount = myRentals.filter(r => r.status === 'ACTIVE' || r.status === 'READY_FOR_PICKUP' || r.status === 'PENDING_APPROVAL').length;
+    const escrowHeld = myRentals.filter(r => r.deposit_status === 'HELD').reduce((sum, r) => sum + r.deposit_amount, 0);
+    const refunded = myRentals.reduce((sum, r) => sum + (r.deposit_refunded_amount || 0), 0);
+
+    const activeEl = document.getElementById('cust-active-count');
+    const heldEl = document.getElementById('cust-escrow-held');
+    const refEl = document.getElementById('cust-refunded-deposits');
+
+    if (activeEl) activeEl.innerText = activeCount;
+    if (heldEl) heldEl.innerText = `$${escrowHeld.toFixed(2)}`;
+    if (refEl) refEl.innerText = `$${refunded.toFixed(2)}`;
+
+    if (myRentals.length === 0) {
+      container.innerHTML = `
+        <div class="glass-card" style="text-align: center; padding: 4rem 2rem;">
+          <i data-lucide="car" style="width: 48px; height: 48px; color: var(--text-dim); margin-bottom: 1rem;"></i>
+          <h3 style="color: #fff; font-size: 1.25rem;">No Active Vehicle Reservations</h3>
+          <p style="color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 1.5rem;">Explore our showroom of luxury supercars and electric GTs.</p>
+          <button class="btn btn-gold" onclick="app.navigate('store')">
+            <i data-lucide="compass"></i> Explore Showroom
+          </button>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
+
+    container.innerHTML = myRentals.map(r => {
+      const statusBadge = this.getStatusBadgeHtml(r.status);
+      const isOverdue = r.status === 'OVERDUE';
+      const totalPaid = r.base_rental_fee + r.deposit_amount + (r.delivery_fee || 0);
+
+      return `
+        <div class="customer-rental-card ${isOverdue ? 'border-danger-subtle' : ''}">
+          <img src="${r.product_image}" alt="${r.product_name}" class="cust-card-img" onerror="this.src='https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200'">
+          
+          <div class="cust-card-info">
+            <div class="cust-card-top">
+              <span class="cust-rental-code">${r.rental_code}</span>
+              ${statusBadge}
+              <span style="font-size: 0.75rem; color: var(--text-dim); margin-left: auto;">${r.fulfillment_type === 'DELIVERY' ? '🚚 Home Delivery' : '🏢 Store Pickup'}</span>
+            </div>
+
+            <h3 class="cust-prod-name">${r.product_name}</h3>
+            
+            <div class="cust-dates-box">
+              <i data-lucide="calendar"></i>
+              <span>${r.start_date} &rarr; <strong>${r.end_date}</strong> (${r.duration_days} days)</span>
+            </div>
+
+            ${isOverdue ? `
+              <div style="color: var(--rose); font-size: 0.8rem; font-weight: 700; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.35rem;">
+                <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
+                <span>Vehicle Past Due (${r.late_days_count} day(s)). Accrued late fee: $${r.late_penalty_fee.toFixed(2)}</span>
+              </div>
+            ` : ''}
+
+            <!-- Payment & Escrow Breakdown Strip -->
+            <div style="display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.825rem; margin-top: 0.65rem; color: var(--text-muted); background: rgba(0,0,0,0.25); padding: 0.5rem 0.75rem; border-radius: 6px;">
+              <span>Rental: <strong style="color: #fff;">$${r.base_rental_fee.toFixed(2)}</strong></span>
+              <span>Deposit Escrow: <strong style="color: var(--amber);">$${r.deposit_amount.toFixed(2)} (${r.deposit_status})</strong></span>
+              ${r.delivery_fee > 0 ? `<span>Delivery: <strong>$${r.delivery_fee.toFixed(2)}</strong></span>` : ''}
+              <span>Total Paid: <strong style="color: var(--gold);">$${totalPaid.toFixed(2)}</strong></span>
+              ${r.deposit_refunded_amount > 0 ? `<span>Refunded: <strong style="color: var(--emerald);">$${r.deposit_refunded_amount.toFixed(2)}</strong></span>` : ''}
+            </div>
+          </div>
+
+          <div class="cust-card-actions">
+            <!-- Download Invoice Action -->
+            <button class="btn btn-gold btn-sm" onclick="app.showInvoice(${r.id})">
+              <i data-lucide="file-text"></i> View / Download Invoice
+            </button>
+
+            <!-- Store Return Action -->
+            ${(r.status === 'ACTIVE' || r.status === 'OVERDUE' || r.status === 'READY_FOR_PICKUP') ? `
+              <button class="btn btn-emerald btn-sm" onclick="app.openStoreReturnModal(${r.id})">
+                <i data-lucide="arrow-down-left"></i> Return at Store Hub
+              </button>
+            ` : ''}
+
+            ${r.status === 'READY_FOR_PICKUP' ? `
+              <button class="btn btn-secondary btn-sm" onclick="app.showInvoice(${r.id})">
+                <i data-lucide="qr-code"></i> Show VIP Pass
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    if (window.lucide) window.lucide.createIcons();
   }
 
   // ==========================================
@@ -610,272 +1086,145 @@ class LeaseifyApp {
   }
 
   // ==========================================
-  // VEHICLE BOOKING & PRICING CALCULATOR
+  // NAVIGATION & ADMIN HELPERS
   // ==========================================
-  openBookingModal(productId) {
-    if (!this.currentUser || this.currentUser.id === 0) {
-      this.showToast('Please sign in or create a client profile to book vehicles.', 'info');
+  navigate(viewId) {
+    if ((viewId === 'admin' || viewId === 'inventory' || viewId === 'settings') && (!this.currentUser || this.currentUser.role !== 'admin')) {
+      this.showToast('Access Restricted: Fleet Operations Hub is for authorized Administrators only.', 'error');
       this.showAuthModal('login');
       return;
     }
 
-    const product = this.products.find(p => p.id === productId);
-    if (!product) return;
+    this.currentView = viewId;
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
 
-    this.selectedBookingProduct = product;
+    const viewEl = document.getElementById(`view-${viewId}`);
+    const navEl = document.getElementById(`nav-${viewId}`);
 
-    document.getElementById('modal-booking-title').innerText = product.name;
-    document.getElementById('modal-booking-img').src = product.image;
-    document.getElementById('modal-booking-brand').innerText = `${product.brand} ${product.model || ''}`;
-    document.getElementById('modal-booking-condition').innerText = product.condition_status || 'Pristine';
-    document.getElementById('modal-booking-daily-rate').innerText = `$${product.daily_rate.toFixed(2)} / day`;
-    document.getElementById('modal-booking-weekly-rate').innerText = `$${product.weekly_rate.toFixed(2)} / week`;
-    document.getElementById('modal-booking-deposit').innerText = `$${product.deposit_amount.toFixed(2)}`;
+    if (viewEl) viewEl.classList.add('active');
+    if (navEl) navEl.classList.add('active');
 
-    if (this.config && this.config.pickup_location) {
-      document.getElementById('modal-pickup-location').innerText = this.config.pickup_location;
+    if (viewId === 'store') {
+      this.renderProducts();
+    } else if (viewId === 'my-rentals') {
+      this.renderCustomerRentals();
+    } else if (viewId === 'admin') {
+      this.fetchAnalytics().then(() => {
+        this.fetchRentals().then(() => this.renderAdminDashboard());
+      });
+    } else if (viewId === 'inventory') {
+      this.fetchProducts().then(() => this.renderInventoryTable());
+    } else if (viewId === 'settings') {
+      this.fetchConfig().then(() => this.populateSettingsForm());
     }
 
-    const barStart = document.getElementById('bar-pickup-date')?.value;
-    const barEnd = document.getElementById('bar-return-date')?.value;
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
 
+  updateUserUI() {
+    if (!this.currentUser) return;
+
+    const avatarEl = document.getElementById('user-avatar');
+    const nameEl = document.getElementById('user-name-display');
+    const tierEl = document.getElementById('user-tier-display');
+    const roleBadgeText = document.getElementById('nav-role-text');
+
+    if (avatarEl) avatarEl.src = this.currentUser.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
+    if (nameEl) nameEl.innerText = this.currentUser.name;
+    if (tierEl) tierEl.innerText = this.currentUser.membership_tier || (this.currentUser.role === 'admin' ? 'Fleet Director' : 'VIP Member');
+
+    if (roleBadgeText) {
+      roleBadgeText.innerText = this.currentUser.role === 'admin' ? 'Fleet Director (Admin)' : 'Client Portal';
+    }
+
+    const adminLinks = document.querySelectorAll('.admin-only');
+    adminLinks.forEach(el => {
+      el.style.display = this.currentUser.role === 'admin' ? 'flex' : 'none';
+    });
+  }
+
+  updateSimulatedTimeBadge() {
+    const timeDisplay = document.getElementById('simulated-time-display');
+    if (!timeDisplay || !this.config) return;
+
+    const offset = this.config.simulated_days_offset || 0;
+    if (offset === 0) {
+      timeDisplay.innerText = 'Today (Live)';
+      timeDisplay.parentElement.style.color = '#f59e0b';
+    } else {
+      timeDisplay.innerText = `+${offset}d Fast-Fwd`;
+      timeDisplay.parentElement.style.color = '#f43f5e';
+    }
+  }
+
+  async simulateTimeOffset(days) {
+    try {
+      const res = await fetch(`${this.apiBase}/config/simulate-time`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ days_offset: days })
+      });
+      const data = await res.json();
+      this.config = data.config;
+      this.updateSimulatedTimeBadge();
+
+      await this.fetchRentals();
+      await this.fetchAnalytics();
+
+      this.renderAdminDashboard();
+      this.renderCustomerRentals();
+
+      this.showToast(data.message, days > 0 ? 'info' : 'success');
+    } catch (err) {
+      this.showToast('Failed to adjust simulation time', 'error');
+    }
+  }
+
+  setHeroColor(colorHex, imgUrl, colorName) {
+    document.querySelectorAll('.color-dot').forEach(dot => dot.classList.remove('active'));
+    if (event && event.target) {
+      event.target.classList.add('active');
+    }
+
+    const img = document.getElementById('spotlight-car-img');
+    const box = document.getElementById('spotlight-img-box');
+    if (img) img.src = imgUrl;
+    if (box) box.style.filter = `drop-shadow(0 0 25px ${colorHex}40)`;
+
+    this.showToast(`Selected ${colorName} Paintwork Finish`, 'info');
+  }
+
+  initFloatingBookingBar() {
     const today = new Date();
     const start = new Date(today);
     start.setDate(start.getDate() + 1);
     const end = new Date(start);
     end.setDate(end.getDate() + 3);
+
     const fmt = (d) => d.toISOString().split('T')[0];
-
-    document.getElementById('book-start-date').value = barStart || fmt(start);
-    document.getElementById('book-end-date').value = barEnd || fmt(end);
-
-    this.calculateBookingEstimate();
-    this.openModal('booking-modal');
+    const pickupEl = document.getElementById('bar-pickup-date');
+    const returnEl = document.getElementById('bar-return-date');
+    if (pickupEl) pickupEl.value = fmt(start);
+    if (returnEl) returnEl.value = fmt(end);
   }
 
-  calculateBookingEstimate() {
-    if (!this.selectedBookingProduct) return;
-
-    const startVal = document.getElementById('book-start-date').value;
-    const endVal = document.getElementById('book-end-date').value;
-
-    if (!startVal || !endVal) return;
-
-    const start = new Date(startVal);
-    const end = new Date(endVal);
-
-    if (end < start) {
-      document.getElementById('ledger-duration').innerText = 'Invalid date range';
-      document.getElementById('ledger-base-fee').innerText = '$0.00';
-      document.getElementById('ledger-total').innerText = '$0.00';
-      return;
-    }
-
-    const diffMs = end.getTime() - start.getTime();
-    const durationDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-
-    let baseFee = 0;
-    const p = this.selectedBookingProduct;
-
-    if (durationDays >= 7 && p.weekly_rate > 0) {
-      const weeks = Math.floor(durationDays / 7);
-      const remDays = durationDays % 7;
-      baseFee = (weeks * p.weekly_rate) + (remDays * p.daily_rate);
-    } else {
-      baseFee = durationDays * p.daily_rate;
-    }
-
-    const deposit = p.deposit_amount;
-    const totalDue = baseFee + deposit;
-
-    document.getElementById('ledger-duration').innerText = `${durationDays} Day(s) ${durationDays >= 7 ? '(Weekly VIP Rate Applied)' : ''}`;
-    document.getElementById('ledger-base-fee').innerText = `$${baseFee.toFixed(2)}`;
-    document.getElementById('ledger-deposit').innerText = `$${deposit.toFixed(2)}`;
-    document.getElementById('ledger-total').innerText = `$${totalDue.toFixed(2)}`;
-  }
-
-  async submitBooking() {
-    if (!this.selectedBookingProduct) return;
-
-    if (!this.currentUser || this.currentUser.id === 0) {
-      this.showToast('Please sign in or create an account to finalize reservation', 'error');
-      this.showAuthModal('login');
-      return;
-    }
-
-    const startVal = document.getElementById('book-start-date').value;
-    const endVal = document.getElementById('book-end-date').value;
-    const notesVal = document.getElementById('book-customer-notes').value;
-
-    if (!startVal || !endVal) {
-      this.showToast('Please select valid pick-up and return dates', 'error');
-      return;
-    }
-
-    try {
-      const payload = {
-        user_id: this.currentUser.id,
-        product_id: this.selectedBookingProduct.id,
-        start_date: startVal,
-        end_date: endVal,
-        customer_notes: notesVal
-      };
-
-      const res = await fetch(`${this.apiBase}/rentals`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.token}`
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        this.closeModal('booking-modal');
-        this.showToast(`Vehicle Reservation ${data.rental_code} Confirmed!`, 'success');
-
-        await this.fetchProducts();
-        await this.fetchRentals();
-        await this.fetchAnalytics();
-
-        this.renderProducts();
-        this.renderCustomerRentals();
-        this.navigate('my-rentals');
-      } else {
-        this.showToast(data.error || 'Failed to submit reservation', 'error');
+  syncBookingBar() {
+    const pDate = document.getElementById('bar-pickup-date')?.value;
+    const rDate = document.getElementById('bar-return-date')?.value;
+    if (pDate && rDate) {
+      const s = new Date(pDate);
+      const e = new Date(rDate);
+      if (e < s) {
+        this.showToast('Return date must be after pick-up date', 'error');
       }
-    } catch (err) {
-      this.showToast('Error booking vehicle: ' + err.message, 'error');
     }
   }
 
-  // ==========================================
-  // VIEW 2: CUSTOMER "MY BOOKINGS"
-  // ==========================================
-  updateCustomerRentalsCount() {
-    const countEl = document.getElementById('my-rentals-count');
-    if (!countEl || !this.currentUser) return;
-    const myRentals = this.rentals.filter(r => r.user_id === this.currentUser.id && r.status !== 'CANCELLED');
-    countEl.innerText = myRentals.length;
-  }
-
-  renderCustomerRentals() {
-    const container = document.getElementById('customer-rentals-list');
-    if (!container) return;
-
-    const myRentals = this.currentUser ? this.rentals.filter(r => r.user_id === this.currentUser.id) : [];
-
-    const activeCount = myRentals.filter(r => r.status === 'ACTIVE' || r.status === 'READY_FOR_PICKUP' || r.status === 'PENDING_APPROVAL').length;
-    const escrowHeld = myRentals.filter(r => r.deposit_status === 'HELD').reduce((sum, r) => sum + r.deposit_amount, 0);
-    const refunded = myRentals.reduce((sum, r) => sum + (r.deposit_refunded_amount || 0), 0);
-
-    const activeEl = document.getElementById('cust-active-count');
-    const heldEl = document.getElementById('cust-escrow-held');
-    const refEl = document.getElementById('cust-refunded-deposits');
-
-    if (activeEl) activeEl.innerText = activeCount;
-    if (heldEl) heldEl.innerText = `$${escrowHeld.toFixed(2)}`;
-    if (refEl) refEl.innerText = `$${refunded.toFixed(2)}`;
-
-    if (myRentals.length === 0) {
-      container.innerHTML = `
-        <div class="glass-card" style="text-align: center; padding: 4rem 2rem;">
-          <i data-lucide="car" style="width: 48px; height: 48px; color: var(--text-dim); margin-bottom: 1rem;"></i>
-          <h3 style="color: #fff; font-size: 1.25rem;">No Active Vehicle Reservations</h3>
-          <p style="color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 1.5rem;">Explore our showroom of luxury supercars and electric GTs.</p>
-          <button class="btn btn-gold" onclick="app.navigate('store')">
-            <i data-lucide="compass"></i> Explore Showroom
-          </button>
-        </div>
-      `;
-      if (window.lucide) window.lucide.createIcons();
-      return;
-    }
-
-    container.innerHTML = myRentals.map(r => {
-      const statusBadge = this.getStatusBadgeHtml(r.status);
-      const isOverdue = r.status === 'OVERDUE';
-
-      return `
-        <div class="customer-rental-card ${isOverdue ? 'border-danger-subtle' : ''}">
-          <img src="${r.product_image}" alt="${r.product_name}" class="cust-card-img" onerror="this.src='https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200'">
-          
-          <div class="cust-card-info">
-            <div class="cust-card-top">
-              <span class="cust-rental-code">${r.rental_code}</span>
-              ${statusBadge}
-            </div>
-
-            <h3 class="cust-prod-name">${r.product_name}</h3>
-            
-            <div class="cust-dates-box">
-              <i data-lucide="calendar"></i>
-              <span>${r.start_date} &rarr; <strong>${r.end_date}</strong> (${r.duration_days} days)</span>
-            </div>
-
-            ${isOverdue ? `
-              <div style="color: var(--rose); font-size: 0.8rem; font-weight: 700; margin-top: 0.4rem; display: flex; align-items: center; gap: 0.35rem;">
-                <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
-                <span>Vehicle Past Due (${r.late_days_count} day(s)). Accrued late fee: $${r.late_penalty_fee.toFixed(2)}</span>
-              </div>
-            ` : ''}
-
-            <div style="display: flex; gap: 1.5rem; font-size: 0.825rem; margin-top: 0.65rem; color: var(--text-muted);">
-              <span>Rental Fee: <strong style="color: #fff;">$${r.base_rental_fee.toFixed(2)}</strong></span>
-              <span>Escrow Deposit: <strong style="color: var(--gold);">$${r.deposit_amount.toFixed(2)}</strong></span>
-              ${r.deposit_refunded_amount > 0 ? `<span>Refunded: <strong style="color: var(--emerald);">$${r.deposit_refunded_amount.toFixed(2)}</strong></span>` : ''}
-            </div>
-          </div>
-
-          <div class="cust-card-actions">
-            ${r.status === 'READY_FOR_PICKUP' ? `
-              <button class="btn btn-emerald btn-sm" onclick="app.showPickupPass('${r.rental_code}')">
-                <i data-lucide="qr-code"></i> Show VIP Pass
-              </button>
-            ` : ''}
-
-            ${(r.status === 'ACTIVE' || r.status === 'OVERDUE') ? `
-              <button class="btn btn-secondary btn-sm" onclick="app.customerInitiateReturn(${r.id})">
-                <i data-lucide="arrow-left-circle"></i> Initiate Return
-              </button>
-            ` : ''}
-
-            <button class="btn btn-secondary btn-sm" onclick="app.viewRentalReceipt(${r.id})">
-              <i data-lucide="receipt"></i> View Pass & Escrow
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    if (window.lucide) window.lucide.createIcons();
-  }
-
-  async customerInitiateReturn(rentalId) {
-    if (!confirm('Return vehicle to Leaseify Executive Lounge for intake inspection?')) return;
-    try {
-      const res = await fetch(`${this.apiBase}/rentals/${rentalId}/status`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.token}`
-        },
-        body: JSON.stringify({
-          status: 'RETURN_SUBMITTED',
-          actor_name: this.currentUser ? this.currentUser.name : 'Driver',
-          actor_role: 'customer',
-          notes: 'Driver returned vehicle to Executive Lounge intake bay.'
-        })
-      });
-      if (res.ok) {
-        this.showToast('Vehicle return initiated! Technicians will perform intake diagnostic.', 'success');
-        await this.fetchRentals();
-        this.renderCustomerRentals();
-      }
-    } catch (err) {
-      this.showToast('Error initiating return', 'error');
-    }
+  selectCategoryFromBar(catId) {
+    this.selectCategory(catId);
   }
 
   // ==========================================
@@ -1023,7 +1372,7 @@ class LeaseifyApp {
         <tr>
           <td>
             <span style="font-family: var(--font-mono); font-weight: 800; color: var(--gold);">${r.rental_code}</span>
-            <div style="font-size: 0.7rem; color: var(--text-dim);">${r.created_at ? r.created_at.split(' ')[0] : ''}</div>
+            <div style="font-size: 0.7rem; color: var(--text-dim);">${r.invoice_number || 'INV-2026'} • ${r.created_at ? r.created_at.split(' ')[0] : ''}</div>
           </td>
           <td>
             <div style="font-weight: 700; color: #fff;">${r.user_name}</div>
@@ -1035,7 +1384,7 @@ class LeaseifyApp {
           </td>
           <td>
             <div style="font-size: 0.8rem; color: #cbd5e1;">${r.start_date} &rarr; <strong>${r.end_date}</strong></div>
-            <div style="font-size: 0.7rem; color: var(--text-dim);">${r.duration_days} Day(s)</div>
+            <div style="font-size: 0.7rem; color: var(--text-dim);">${r.duration_days} Day(s) • ${r.fulfillment_type}</div>
           </td>
           <td>
             <div style="font-family: var(--font-mono); font-weight: 700; color: #fff;">$${r.base_rental_fee.toFixed(2)}</div>
@@ -1052,6 +1401,9 @@ class LeaseifyApp {
           </td>
           <td>${statusBadge}</td>
           <td class="text-right">
+            <button class="btn btn-sm btn-secondary" onclick="app.showInvoice(${r.id})" title="View Official Tax Invoice">
+              <i data-lucide="file-text"></i> Invoice
+            </button>
             ${this.getAdminActionButtons(r)}
           </td>
         </tr>
@@ -1080,17 +1432,13 @@ class LeaseifyApp {
 
     if (rental.status === 'ACTIVE' || rental.status === 'OVERDUE' || rental.status === 'RETURN_SUBMITTED') {
       return `
-        <button class="btn btn-sm btn-emerald" onclick="app.openInspectionModal(${rental.id})">
-          <i data-lucide="clipboard-check"></i> Diagnostic Return
+        <button class="btn btn-sm btn-emerald" onclick="app.openStoreReturnModal(${rental.id})">
+          <i data-lucide="clipboard-check"></i> Return Diagnostic
         </button>
       `;
     }
 
-    return `
-      <button class="btn btn-sm btn-secondary" onclick="app.viewRentalReceipt(${rental.id})">
-        <i data-lucide="file-text"></i> Details
-      </button>
-    `;
+    return '';
   }
 
   async updateRentalStatus(rentalId, newStatus) {
@@ -1132,7 +1480,7 @@ class LeaseifyApp {
     container.innerHTML = activities.map(a => {
       return `
         <div class="activity-item">
-          <div class="act-dot" style="background: ${a.action_type.includes('PENALTY') ? 'var(--rose)' : a.action_type.includes('REFUND') ? 'var(--emerald)' : 'var(--gold)'};"></div>
+          <div class="act-dot" style="background: ${a.action_type.includes('PENALTY') ? 'var(--rose)' : a.action_type.includes('REFUND') || a.action_type.includes('ORDER_PAID') ? 'var(--emerald)' : 'var(--gold)'};"></div>
           <div class="act-content">
             <div class="act-desc">
               <strong style="color: #fff;">${a.actor_name}</strong>: ${a.description}
@@ -1142,113 +1490,6 @@ class LeaseifyApp {
         </div>
       `;
     }).join('');
-  }
-
-  // ==========================================
-  // RETURN INSPECTION WORKFLOW & ESCROW MATH
-  // ==========================================
-  openInspectionModal(rentalId) {
-    const rental = this.rentals.find(r => r.id === rentalId);
-    if (!rental) return;
-
-    this.activeInspectionRental = rental;
-
-    document.getElementById('inspect-modal-title').innerText = `Diagnostic & Settle Pass ${rental.rental_code}`;
-    document.getElementById('inspect-customer-name').innerText = rental.user_name;
-    document.getElementById('inspect-product-name').innerText = rental.product_name;
-    document.getElementById('inspect-end-date').innerText = rental.end_date;
-    document.getElementById('inspect-deposit-held').innerText = `$${rental.deposit_amount.toFixed(2)}`;
-
-    const overdueDays = rental.late_days_count || 0;
-    const lateFee = rental.late_penalty_fee || 0;
-
-    document.getElementById('inspect-overdue-days').innerText = `${overdueDays} Day(s)`;
-    document.getElementById('inspect-late-fee').innerText = `$${lateFee.toFixed(2)}`;
-
-    document.getElementById('inspect-damage-fee').value = 0;
-    document.getElementById('inspect-notes').value = '';
-
-    this.recalcInspectionSettlement();
-    this.openModal('inspection-modal');
-  }
-
-  recalcInspectionSettlement() {
-    if (!this.activeInspectionRental) return;
-
-    const r = this.activeInspectionRental;
-    const deposit = r.deposit_amount;
-    const lateFee = r.late_penalty_fee || 0;
-    const damageFee = parseFloat(document.getElementById('inspect-damage-fee').value || 0);
-
-    const totalDeductions = damageFee + lateFee;
-    const refund = Math.max(0, deposit - totalDeductions);
-
-    document.getElementById('settle-original-deposit').innerText = `$${deposit.toFixed(2)}`;
-    document.getElementById('settle-damage-deduction').innerText = `-$${damageFee.toFixed(2)}`;
-    document.getElementById('settle-late-deduction').innerText = `-$${lateFee.toFixed(2)}`;
-    document.getElementById('settle-refund-total').innerText = `$${refund.toFixed(2)}`;
-
-    const tag = document.getElementById('settle-status-tag');
-    if (refund >= deposit) {
-      tag.innerText = 'Escrow Status: 100% Full Refund Authorized to Client Card';
-      tag.style.color = 'var(--emerald)';
-    } else if (refund > 0) {
-      tag.innerText = `Escrow Status: Partial Refund ($${refund.toFixed(2)} to client, $${totalDeductions.toFixed(2)} retained)`;
-      tag.style.color = 'var(--amber)';
-    } else {
-      tag.innerText = 'Escrow Status: Total Forfeit (Deductions exceed or equal escrow deposit)';
-      tag.style.color = 'var(--rose)';
-    }
-  }
-
-  async submitInspectionSettlement() {
-    if (!this.activeInspectionRental) return;
-
-    const rentalId = this.activeInspectionRental.id;
-    const conditionGrade = document.querySelector('input[name="inspect-condition"]:checked')?.value || 'Good';
-    const damageFee = parseFloat(document.getElementById('inspect-damage-fee').value || 0);
-    const notes = document.getElementById('inspect-notes').value;
-
-    const checklist = [
-      document.getElementById('chk-parts')?.checked ? 'All keys & charging items returned' : 'Missing keys/items',
-      document.getElementById('chk-power')?.checked ? 'OBD-II diagnostic passed' : 'Diagnostic fault detected',
-      document.getElementById('chk-clean')?.checked ? 'Paintwork & interior pristine' : 'Needs detailing'
-    ];
-
-    try {
-      const res = await fetch(`${this.apiBase}/rentals/${rentalId}/inspect`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.token}`
-        },
-        body: JSON.stringify({
-          inspector_name: this.currentUser ? this.currentUser.name : 'Sarah Connor',
-          inspection_type: 'RETURN_CHECK',
-          condition_grade: conditionGrade,
-          checklist,
-          damage_fee: damageFee,
-          inspection_notes: notes
-        })
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        this.closeModal('inspection-modal');
-        this.showToast('Vehicle diagnostic completed & escrow deposit refunded!', 'success');
-
-        await this.fetchProducts();
-        await this.fetchRentals();
-        await this.fetchAnalytics();
-
-        this.renderAdminDashboard();
-        this.renderCustomerRentals();
-      } else {
-        this.showToast(data.error || 'Failed to complete inspection', 'error');
-      }
-    } catch (err) {
-      this.showToast('Error during inspection: ' + err.message, 'error');
-    }
   }
 
   // ==========================================
@@ -1426,94 +1667,7 @@ class LeaseifyApp {
   }
 
   // ==========================================
-  // DIGITAL RECEIPT & VIP PASS
-  // ==========================================
-  viewRentalReceipt(rentalId) {
-    const r = this.rentals.find(item => item.id === rentalId);
-    if (!r) return;
-
-    document.getElementById('receipt-code-title').innerText = `Vehicle Rental Pass #${r.rental_code}`;
-
-    const html = `
-      <div class="receipt-box">
-        <div class="receipt-qr-banner">
-          <div>
-            <span style="font-size: 0.75rem; color: var(--gold); text-transform: uppercase; font-weight: 800;">Executive Vehicle Pass</span>
-            <h3 style="color: #fff; font-size: 1.25rem; font-family: var(--font-heading);">${r.rental_code}</h3>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">Status: ${r.status}</span>
-          </div>
-          <div style="background: #fff; padding: 6px; border-radius: 6px;">
-            <svg width="60" height="60" viewBox="0 0 100 100">
-              <rect width="100" height="100" fill="#fff"/>
-              <rect x="10" y="10" width="30" height="30" fill="#000"/>
-              <rect x="60" y="10" width="30" height="30" fill="#000"/>
-              <rect x="10" y="60" width="30" height="30" fill="#000"/>
-              <rect x="50" y="50" width="15" height="15" fill="#000"/>
-              <rect x="75" y="75" width="15" height="15" fill="#000"/>
-            </svg>
-          </div>
-        </div>
-
-        <div class="spec-row">
-          <span class="spec-lbl">Driver / Client:</span>
-          <span class="spec-val">${r.user_name} (${r.user_email})</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-lbl">Vehicle:</span>
-          <span class="spec-val">${r.product_name}</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-lbl">Rental Period:</span>
-          <span class="spec-val">${r.start_date} to ${r.end_date} (${r.duration_days} days)</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-lbl">Daily Base Rate:</span>
-          <span class="spec-val">$${r.daily_rate.toFixed(2)} / day</span>
-        </div>
-
-        <div class="ledger-divider"></div>
-
-        <div class="spec-row">
-          <span class="spec-lbl">Base Vehicle Rental Fee:</span>
-          <span class="spec-val">$${r.base_rental_fee.toFixed(2)}</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-lbl">Security Deposit (Escrow):</span>
-          <span class="spec-val text-amber">$${r.deposit_amount.toFixed(2)}</span>
-        </div>
-
-        ${r.late_penalty_fee > 0 ? `
-          <div class="spec-row text-rose">
-            <span class="spec-lbl">Late Return Penalty (${r.late_days_count}d):</span>
-            <span class="spec-val">-$${r.late_penalty_fee.toFixed(2)}</span>
-          </div>
-        ` : ''}
-
-        ${r.damage_fee > 0 ? `
-          <div class="spec-row text-rose">
-            <span class="spec-lbl">Damage Assessment Fee:</span>
-            <span class="spec-val">-$${r.damage_fee.toFixed(2)}</span>
-          </div>
-        ` : ''}
-
-        <div class="spec-row" style="margin-top: 0.5rem; font-weight: 800;">
-          <span class="spec-lbl" style="color: #fff;">Escrow Deposit Status:</span>
-          <span class="spec-val text-emerald">${r.deposit_status} ($${(r.deposit_refunded_amount || 0).toFixed(2)} Refunded)</span>
-        </div>
-      </div>
-    `;
-
-    document.getElementById('receipt-content').innerHTML = html;
-    this.openModal('receipt-modal');
-  }
-
-  showPickupPass(rentalCode) {
-    const r = this.rentals.find(item => item.rental_code === rentalCode);
-    if (r) this.viewRentalReceipt(r.id);
-  }
-
-  // ==========================================
-  // Helper Utilities
+  // HELPER UTILITIES
   // ==========================================
   getStatusBadgeHtml(status) {
     const labels = {

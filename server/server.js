@@ -1,4 +1,4 @@
-// server.js - Native Node HTTP server & REST API with JWT Auth for Leaseify
+// server.js - Native Node HTTP server & REST API with Rental Checkout, Invoices & Escrow
 const http = require('node:http');
 const path = require('node:path');
 const fs = require('node:fs');
@@ -149,7 +149,6 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'An account with this email address already exists.' });
       }
 
-      // Security check: Never allow signing up as admin
       const role = 'customer';
       const salt = generateSalt();
       const passwordHash = hashPassword(password, salt);
@@ -246,11 +245,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { message: 'Profile updated successfully', user: updated });
     }
 
-    // Health Check
-    if (pathname === '/api/health' && req.method === 'GET') {
-      return sendJson(res, 200, { status: 'healthy', app: 'Leaseify Premier Fleet', timestamp: new Date().toISOString() });
-    }
-
     // System Config
     if (pathname === '/api/config' && req.method === 'GET') {
       const config = db.prepare('SELECT * FROM system_config WHERE id = 1').get();
@@ -276,15 +270,15 @@ const server = http.createServer(async (req, res) => {
       `);
 
       updateStmt.run(
-        body.company_name,
-        body.currency_symbol,
+        body.company_name ?? null,
+        body.currency_symbol ?? null,
         body.grace_period_hours !== undefined ? Number(body.grace_period_hours) : null,
         body.late_fee_daily_multiplier !== undefined ? Number(body.late_fee_daily_multiplier) : null,
         body.deposit_percentage_default !== undefined ? Number(body.deposit_percentage_default) : null,
         body.min_rental_days !== undefined ? Number(body.min_rental_days) : null,
         body.max_rental_days !== undefined ? Number(body.max_rental_days) : null,
-        body.pickup_location,
-        body.contact_email,
+        body.pickup_location ?? null,
+        body.contact_email ?? null,
         body.simulated_days_offset !== undefined ? Number(body.simulated_days_offset) : null
       );
 
@@ -307,12 +301,6 @@ const server = http.createServer(async (req, res) => {
         updated_rentals_count: evalResult.updated,
         config
       });
-    }
-
-    // Users List
-    if (pathname === '/api/users' && req.method === 'GET') {
-      const users = db.prepare('SELECT id, name, email, role, avatar, address, phone, membership_tier, created_at FROM users').all();
-      return sendJson(res, 200, users);
     }
 
     // Categories
@@ -464,14 +452,14 @@ const server = http.createServer(async (req, res) => {
       `);
 
       stmt.run(
-        body.name, body.category_id, body.brand, body.model, body.image,
+        body.name ?? null, body.category_id ?? null, body.brand ?? null, body.model ?? null, body.image ?? null,
         body.daily_rate !== undefined ? Number(body.daily_rate) : null,
         body.weekly_rate !== undefined ? Number(body.weekly_rate) : null,
         body.deposit_amount !== undefined ? Number(body.deposit_amount) : null,
         body.replacement_value !== undefined ? Number(body.replacement_value) : null,
         body.total_stock !== undefined ? Number(body.total_stock) : null,
         body.available_stock !== undefined ? Number(body.available_stock) : null,
-        body.condition_status, body.description, body.serial_number,
+        body.condition_status ?? null, body.description ?? null, body.serial_number ?? null,
         id
       );
 
@@ -488,7 +476,7 @@ const server = http.createServer(async (req, res) => {
       let query = `
         SELECT r.*,
                p.name as product_name, p.image as product_image, p.brand as product_brand, p.serial_number as product_serial,
-               u.name as user_name, u.email as user_email, u.phone as user_phone, u.avatar as user_avatar
+               u.name as user_name, u.email as user_email, u.phone as user_phone, u.avatar as user_avatar, u.address as user_address
         FROM rentals r
         JOIN products p ON r.product_id = p.id
         JOIN users u ON r.user_id = u.id
@@ -507,9 +495,9 @@ const server = http.createServer(async (req, res) => {
       }
 
       if (search) {
-        query += ` AND (r.rental_code LIKE ? OR p.name LIKE ? OR u.name LIKE ?)`;
+        query += ` AND (r.rental_code LIKE ? OR p.name LIKE ? OR u.name LIKE ? OR r.invoice_number LIKE ?)`;
         const s = `%${search}%`;
-        params.push(s, s, s);
+        params.push(s, s, s, s);
       }
 
       query += ` ORDER BY r.id DESC`;
@@ -518,18 +506,18 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, rentals);
     }
 
-    // Rental Detail
+    // Rental Detail / Invoice
     if (pathname.startsWith('/api/rentals/') && req.method === 'GET' && !pathname.endsWith('/status')) {
-      const id = pathname.split('/')[3];
+      const idOrCode = pathname.split('/')[3];
       const rental = db.prepare(`
         SELECT r.*,
-               p.name as product_name, p.image as product_image, p.brand as product_brand, p.serial_number as product_serial, p.replacement_value,
-               u.name as user_name, u.email as user_email, u.phone as user_phone, u.avatar as user_avatar, u.membership_tier
+               p.name as product_name, p.image as product_image, p.brand as product_brand, p.serial_number as product_serial, p.replacement_value, p.top_speed, p.horsepower,
+               u.name as user_name, u.email as user_email, u.phone as user_phone, u.avatar as user_avatar, u.address as user_address, u.membership_tier
         FROM rentals r
         JOIN products p ON r.product_id = p.id
         JOIN users u ON r.user_id = u.id
-        WHERE r.id = ? OR r.rental_code = ?
-      `).get(id, id);
+        WHERE r.id = ? OR r.rental_code = ? OR r.invoice_number = ?
+      `).get(idOrCode, idOrCode, idOrCode);
 
       if (!rental) {
         return sendJson(res, 404, { error: 'Rental not found' });
@@ -537,21 +525,32 @@ const server = http.createServer(async (req, res) => {
 
       const logs = db.prepare('SELECT * FROM activity_logs WHERE rental_id = ? ORDER BY timestamp DESC').all(rental.id);
       const inspections = db.prepare('SELECT * FROM inspection_logs WHERE rental_id = ? ORDER BY timestamp DESC').all(rental.id);
+      const config = db.prepare('SELECT * FROM system_config WHERE id = 1').get();
 
       return sendJson(res, 200, {
         ...rental,
+        system_config: config,
         activity_logs: logs,
         inspection_logs: inspections.map(i => ({ ...i, checklist: JSON.parse(i.checklist_json || '[]') }))
       });
     }
 
-    // Create New Rental
-    if (pathname === '/api/rentals' && req.method === 'POST') {
+    // COMPLETE RENTAL CHECKOUT & PAYMENT FLOW (Steps 4, 5, 6, 7)
+    if (pathname === '/api/rentals/checkout' && req.method === 'POST') {
       const body = await parseJsonBody(req);
-      const { user_id, product_id, start_date, end_date, customer_notes } = body;
+      const {
+        user_id,
+        product_id,
+        start_date,
+        end_date,
+        fulfillment_type, // 'PICKUP' | 'DELIVERY'
+        delivery_address,
+        payment_method, // 'CREDIT_CARD', 'APPLE_PAY', 'CRYPTO'
+        customer_notes
+      } = body;
 
       if (!user_id || !product_id || !start_date || !end_date) {
-        return sendJson(res, 400, { error: 'Missing required rental parameters' });
+        return sendJson(res, 400, { error: 'Missing required rental parameters (user, product, or dates).' });
       }
 
       const product = db.prepare('SELECT * FROM products WHERE id = ?').get(product_id);
@@ -560,7 +559,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       if (product.available_stock <= 0) {
-        return sendJson(res, 400, { error: 'Vehicle is currently reserved for the selected dates.' });
+        return sendJson(res, 400, { error: 'Vehicle is currently reserved. Please choose another vehicle.' });
       }
 
       const s = new Date(start_date);
@@ -578,30 +577,157 @@ const server = http.createServer(async (req, res) => {
       }
 
       const depositAmount = product.deposit_amount;
-      const rentalCode = `RNT-${Math.floor(1000 + Math.random() * 9000)}`;
+      const deliveryFee = fulfillment_type === 'DELIVERY' ? 150.0 : 0.0;
+      const totalPaidNow = baseFee + depositAmount + deliveryFee;
+
+      const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+      const rentalCode = `RNT-${randomSuffix}`;
+      const invoiceNumber = `INV-2026-${randomSuffix}`;
+      const nowTimestamp = new Date().toISOString().replace('T', ' ').split('.')[0];
 
       const insertRental = db.prepare(`
         INSERT INTO rentals (
-          rental_code, user_id, product_id, start_date, end_date, duration_days,
-          daily_rate, base_rental_fee, deposit_amount, deposit_status, status, customer_notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'HELD', 'PENDING_APPROVAL', ?)
+          rental_code, invoice_number, user_id, product_id, start_date, end_date, duration_days,
+          daily_rate, base_rental_fee, deposit_amount, deposit_status, status,
+          fulfillment_type, delivery_address, delivery_fee, payment_method, paid_at,
+          customer_notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'HELD', 'PENDING_APPROVAL', ?, ?, ?, ?, ?, ?)
       `);
 
       const result = insertRental.run(
-        rentalCode, user_id, product_id, start_date, end_date,
-        durationDays, product.daily_rate, baseFee, depositAmount, customer_notes || ''
+        rentalCode,
+        invoiceNumber,
+        user_id,
+        product_id,
+        start_date,
+        end_date,
+        durationDays,
+        product.daily_rate,
+        baseFee,
+        depositAmount,
+        fulfillment_type || 'PICKUP',
+        delivery_address || 'Leaseify Executive Lounge, 850 Sunset Blvd',
+        deliveryFee,
+        payment_method || 'CREDIT_CARD',
+        nowTimestamp,
+        customer_notes || ''
       );
 
       db.prepare('UPDATE products SET available_stock = MAX(0, available_stock - 1) WHERE id = ?').run(product_id);
 
-      const user = db.prepare('SELECT name FROM users WHERE id = ?').get(user_id);
+      const user = db.prepare('SELECT name, email FROM users WHERE id = ?').get(user_id);
       db.prepare(`
         INSERT INTO activity_logs (rental_id, actor_name, actor_role, action_type, description)
-        VALUES (?, ?, 'customer', 'RENTAL_CREATED', ?)
-      `).run(result.lastInsertRowid, user ? user.name : 'Driver', `Vehicle booking reserved for ${durationDays} day(s). Escrow deposit of $${depositAmount.toFixed(2)} secured.`);
+        VALUES (?, ?, 'customer', 'ORDER_PAID', ?)
+      `).run(
+        result.lastInsertRowid,
+        user ? user.name : 'Driver',
+        `Payment authorized ($${totalPaidNow.toFixed(2)} total, including $${depositAmount.toFixed(2)} escrow deposit). Invoice ${invoiceNumber} issued via ${payment_method || 'Card'}. Fulfillment: ${fulfillment_type || 'PICKUP'}.`
+      );
 
-      const created = db.prepare('SELECT * FROM rentals WHERE id = ?').get(result.lastInsertRowid);
-      return sendJson(res, 201, created);
+      const created = db.prepare(`
+        SELECT r.*,
+               p.name as product_name, p.image as product_image, p.brand as product_brand, p.serial_number as product_serial,
+               u.name as user_name, u.email as user_email, u.phone as user_phone, u.address as user_address
+        FROM rentals r
+        JOIN products p ON r.product_id = p.id
+        JOIN users u ON r.user_id = u.id
+        WHERE r.id = ?
+      `).get(result.lastInsertRowid);
+
+      return sendJson(res, 201, {
+        message: 'Payment confirmed & reservation invoice generated!',
+        invoice_number: invoiceNumber,
+        total_paid: totalPaidNow,
+        rental: created
+      });
+    }
+
+    // STORE RETURN FLOW: On-time vs Late Return with Escrow Settlement
+    if (pathname.match(/^\/api\/rentals\/\d+\/return-store$/) && req.method === 'POST') {
+      const id = pathname.split('/')[3];
+      const body = await parseJsonBody(req);
+      const { return_notes, inspector_name } = body;
+
+      const rental = db.prepare(`
+        SELECT r.*, p.daily_rate, p.name as product_name
+        FROM rentals r
+        JOIN products p ON r.product_id = p.id
+        WHERE r.id = ?
+      `).get(id);
+
+      if (!rental) {
+        return sendJson(res, 404, { error: 'Rental not found' });
+      }
+
+      // Check current simulated system date vs scheduled end_date
+      const config = db.prepare('SELECT * FROM system_config WHERE id = 1').get();
+      const simulatedOffset = config.simulated_days_offset || 0;
+      const today = new Date();
+      today.setDate(today.getDate() + simulatedOffset);
+
+      const scheduledEnd = new Date(rental.end_date + 'T23:59:59');
+      const isLate = today.getTime() > scheduledEnd.getTime();
+
+      let lateDays = 0;
+      let lateFee = 0;
+
+      if (isLate) {
+        const diffMs = today.getTime() - scheduledEnd.getTime();
+        lateDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+        const multiplier = config.late_fee_daily_multiplier || 1.5;
+        lateFee = Math.round(lateDays * (rental.daily_rate * multiplier) * 100) / 100;
+      }
+
+      const deposit = rental.deposit_amount;
+      const netRefund = Math.max(0, deposit - lateFee);
+      const depositStatus = netRefund === deposit ? 'REFUNDED' : (netRefund > 0 ? 'PARTIALLY_REFUNDED' : 'FORFEITED');
+      const nowTimestamp = new Date().toISOString().split('T')[0];
+
+      db.prepare(`
+        UPDATE rentals SET
+          status = 'INSPECTED_COMPLETED',
+          actual_return_date = ?,
+          late_days_count = ?,
+          late_penalty_fee = ?,
+          deposit_refunded_amount = ?,
+          deposit_status = ?,
+          return_notes = ?
+        WHERE id = ?
+      `).run(
+        nowTimestamp,
+        lateDays,
+        lateFee,
+        netRefund,
+        depositStatus,
+        `Store Return completed. ${isLate ? `Late by ${lateDays} day(s). Penalty: $${lateFee.toFixed(2)}.` : 'Returned on time. Full deposit refunded.'} Notes: ${return_notes || 'Clean return at store lounge.'}`,
+        id
+      );
+
+      // Return product stock to available
+      db.prepare('UPDATE products SET available_stock = available_stock + 1 WHERE id = ?').run(rental.product_id);
+
+      // Log activity
+      db.prepare(`
+        INSERT INTO activity_logs (rental_id, actor_name, actor_role, action_type, description)
+        VALUES (?, ?, 'system', 'STORE_RETURN_COMPLETED', ?)
+      `).run(
+        id,
+        inspector_name || 'Store Concierge',
+        `Vehicle ${rental.product_name} returned at store. ${isLate ? `Overdue by ${lateDays}d (Late Fee: $${lateFee.toFixed(2)} deducted). Net Escrow Refund: $${netRefund.toFixed(2)}.` : `On-time return! 100% Full Escrow Refund of $${deposit.toFixed(2)} credited.`}`
+      );
+
+      const updated = db.prepare('SELECT * FROM rentals WHERE id = ?').get(id);
+      return sendJson(res, 200, {
+        message: isLate ? `Vehicle returned late (${lateDays} day(s)). Late penalty of $${lateFee.toFixed(2)} deducted from escrow. Net refund: $${netRefund.toFixed(2)}.` : `Vehicle returned on time! 100% deposit refund of $${deposit.toFixed(2)} processed to client card.`,
+        is_late: isLate,
+        late_days: lateDays,
+        late_fee: lateFee,
+        original_deposit: deposit,
+        refund_amount: netRefund,
+        deposit_status: depositStatus,
+        rental: updated
+      });
     }
 
     // Status Transition Workflow
@@ -748,7 +874,7 @@ const server = http.createServer(async (req, res) => {
       const utilizationRate = Math.round((rentedFleet / totalFleet) * 100);
 
       const overdueList = db.prepare(`
-        SELECT r.id, r.rental_code, r.end_date, r.late_days_count, r.late_penalty_fee, r.deposit_amount,
+        SELECT r.id, r.rental_code, r.invoice_number, r.end_date, r.late_days_count, r.late_penalty_fee, r.deposit_amount,
                p.name as product_name, p.daily_rate,
                u.name as customer_name, u.phone as customer_phone, u.email as customer_email
         FROM rentals r
@@ -759,7 +885,7 @@ const server = http.createServer(async (req, res) => {
       `).all();
 
       const recentActivity = db.prepare(`
-        SELECT a.*, r.rental_code
+        SELECT a.*, r.rental_code, r.invoice_number
         FROM activity_logs a
         LEFT JOIN rentals r ON a.rental_id = r.id
         ORDER BY a.timestamp DESC
@@ -820,7 +946,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`====================================================`);
-  console.log(` Leaseify Car Rental & Auth Server running on port ${PORT}`);
+  console.log(` Leaseify Rental Checkout & Auth Server running on port ${PORT}`);
   console.log(` Local URL: http://localhost:${PORT}`);
   console.log(` API Base: http://localhost:${PORT}/api`);
   console.log(`====================================================`);

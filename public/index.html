@@ -32,7 +32,7 @@
             LEASEIFY<span class="brand-gold">.FLEET</span>
           </h1>
           <p class="splash-subtitle">
-            The next-generation luxury automotive rental platform. Secure deposit escrow, automated return penalty intelligence, and seamless fleet operations.
+            The next-generation luxury automotive rental platform. Seamless cart checkout, transparent deposit escrow, automated return penalty intelligence, and instant invoices.
           </p>
 
           <div class="splash-car-preview">
@@ -72,7 +72,7 @@
             <i data-lucide="car"></i> Fleet Showroom
           </button>
           <button class="nav-link" id="nav-my-rentals" onclick="app.navigate('my-rentals')">
-            <i data-lucide="key-round"></i> My Bookings
+            <i data-lucide="key-round"></i> My Bookings & Invoices
             <span class="badge-counter" id="my-rentals-count">0</span>
           </button>
           <button class="nav-link admin-only" id="nav-admin" onclick="app.navigate('admin')">
@@ -88,6 +88,12 @@
       </div>
 
       <div class="nav-right">
+        <!-- Cart Drawer Button -->
+        <button class="btn-cart-nav" onclick="app.openCartModal()" id="btn-nav-cart" title="View Reservation Cart">
+          <i data-lucide="shopping-bag"></i>
+          <span class="cart-badge-count" id="nav-cart-count">0</span>
+        </button>
+
         <!-- Time Machine Simulation Pill -->
         <div class="time-machine-pill" title="Fast-forward days to simulate overdue vehicle penalties">
           <div class="tm-label">
@@ -110,7 +116,7 @@
         </div>
 
         <!-- User Profile Pill & Actions -->
-        <div class="user-profile-menu" onclick="app.openProfileModal()">
+        <div class="user-profile-menu" onclick="app.openProfileModal()" title="Manage Profile & Address">
           <img id="user-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="User" class="avatar-img">
           <div class="user-details">
             <span class="user-name" id="user-name-display">Alex Rivera</span>
@@ -145,7 +151,7 @@
               DRIVE THE <br><span class="gradient-text">EXTRAORDINARY.</span>
             </h1>
             <p class="hero-description">
-              Experience the pinnacle of automotive engineering with instant verification, transparent escrow deposit protection, and automated return reconciliations.
+              Select your vehicle, customize rental duration, choose store pickup or white-glove flatbed delivery, and lock in your escrow-protected reservation.
             </p>
 
             <div class="hero-quick-cta">
@@ -217,13 +223,13 @@
         <!-- Floating Quick-Booking Search Bar -->
         <div class="floating-booking-bar" id="floating-booking-bar">
           <div class="booking-field">
-            <label><i data-lucide="map-pin"></i> Pick-up & Drop Location</label>
+            <label><i data-lucide="map-pin"></i> Pick-up Location</label>
             <select id="bar-location" class="field-select">
-              <option>Leaseify VIP Lounge (Beverly Hills)</option>
-              <option>LAX Private Flight Terminal</option>
+              <option>Leaseify Executive Lounge (Beverly Hills)</option>
+              <option>LAX Private Flight Terminal Hub</option>
               <option>West Hollywood Executive Hub</option>
               <option>Miami South Beach Harbor</option>
-              <option>Direct Concierge Delivery</option>
+              <option>White-Glove Flatbed Home Delivery</option>
             </select>
           </div>
 
@@ -294,26 +300,29 @@
             </div>
           </div>
           <div class="trust-item">
-            <div class="trust-icon"><i data-lucide="sparkles"></i></div>
+            <div class="trust-icon"><i data-lucide="truck"></i></div>
             <div>
-              <h4>Pristine Fleet Guarantee</h4>
-              <p>Each vehicle undergoes a 40-point diagnostic check and ceramic detailing.</p>
+              <h4>Store Pickup OR Delivery</h4>
+              <p>Free pickup at Executive Lounge or flatbed delivery directly to your driveway.</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- ======================================================== -->
-      <!-- VIEW 2: CUSTOMER "MY BOOKINGS" -->
+      <!-- VIEW 2: CUSTOMER DASHBOARD ("MY BOOKINGS & INVOICES") -->
       <!-- ======================================================== -->
       <section id="view-my-rentals" class="view-section">
         <div class="page-header">
           <div>
-            <span class="section-tag">CLIENT PORTAL</span>
-            <h1 class="page-title">My Vehicle Bookings</h1>
-            <p class="page-subtitle">Manage ongoing rentals, access VIP digital pickup passes, track return deadlines, and review deposit refunds.</p>
+            <span class="section-tag">CLIENT PORTAL & ORDERS</span>
+            <h1 class="page-title">My Vehicle Bookings & Invoices</h1>
+            <p class="page-subtitle">Track ongoing rentals, initiate store returns with automated deposit settlement, view payment breakdowns, and download official invoices.</p>
           </div>
           <div class="header-actions">
+            <button class="btn btn-secondary" onclick="app.openProfileModal()">
+              <i data-lucide="user-cog"></i> Manage Profile & Address
+            </button>
             <button class="btn btn-gold" onclick="app.navigate('store')">
               <i data-lucide="plus"></i> Reserve Another Vehicle
             </button>
@@ -520,7 +529,7 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Order Code</th>
+                  <th>Order Code & Invoice</th>
                   <th>Driver / Client</th>
                   <th>Vehicle & VIN</th>
                   <th>Rental Period</th>
@@ -704,7 +713,7 @@
                 <div class="step-num">3</div>
                 <div>
                   <strong>Escrow Deposit Reconciliation</strong>
-                  <p>Technicians perform vehicle diagnostic return inspections, deduct damages & late fees, and release net escrow refund with a digital ledger.</p>
+                  <p>When returning at store, on-time returns receive a 100% deposit refund, while late returns automatically deduct penalties.</p>
                 </div>
               </div>
             </div>
@@ -724,7 +733,263 @@
     </main>
 
     <!-- ======================================================== -->
-    <!-- AUTH MODAL: LOGIN / SIGNUP / PROFILE -->
+    <!-- MODAL: CART & CHECKOUT FLOW (STEPS 4, 5, 6, 7) -->
+    <!-- ======================================================== -->
+    <div id="cart-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Reservation & Checkout Stepper</span>
+            <h2>Complete Your Luxury Reservation</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('cart-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="checkout-stepper-bar">
+            <div class="step-node active" id="step-node-1">
+              <span class="step-circle">1</span>
+              <span class="step-name">Review Dates</span>
+            </div>
+            <div class="step-line" id="step-line-1"></div>
+            <div class="step-node" id="step-node-2">
+              <span class="step-circle">2</span>
+              <span class="step-name">Fulfillment / Pickup</span>
+            </div>
+            <div class="step-line" id="step-line-2"></div>
+            <div class="step-node" id="step-node-3">
+              <span class="step-circle">3</span>
+              <span class="step-name">Payment & Deposit</span>
+            </div>
+          </div>
+
+          <!-- Step 1: Vehicle & Dates Review -->
+          <div id="checkout-step-1" class="checkout-step-content active">
+            <div class="cart-product-hero" id="cart-product-summary">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <div class="form-row" style="margin-top: 1.25rem;">
+              <div class="form-group">
+                <label for="cart-start-date"><i data-lucide="calendar"></i> Pick-up Date</label>
+                <input type="date" id="cart-start-date" class="form-input" onchange="app.recalculateCartPricing()">
+              </div>
+              <div class="form-group">
+                <label for="cart-end-date"><i data-lucide="calendar-check"></i> Scheduled Return Date</label>
+                <input type="date" id="cart-end-date" class="form-input" onchange="app.recalculateCartPricing()">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="cart-trip-notes">Special Trip Notes / Concierge Requests</label>
+              <input type="text" id="cart-trip-notes" class="form-input" placeholder="e.g. VIP film premiere, highway touring, child booster seat...">
+            </div>
+
+            <div class="checkout-actions">
+              <button class="btn btn-secondary" onclick="app.closeModal('cart-modal')">Cancel</button>
+              <button class="btn btn-gold" onclick="app.goToCheckoutStep(2)">
+                Continue to Fulfillment &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 2: Shipping / Delivery vs Store Pickup -->
+          <div id="checkout-step-2" class="checkout-step-content">
+            <h3 style="color: #fff; font-size: 1.15rem; margin-bottom: 1rem;">Choose Handover & Fulfillment Option</h3>
+            
+            <div class="fulfillment-selector-grid">
+              <label class="fulfillment-card" id="opt-pickup-card" onclick="app.setFulfillmentType('PICKUP')">
+                <input type="radio" name="fulfillment_type" value="PICKUP" checked id="radio-pickup">
+                <div class="ful-icon"><i data-lucide="building-2"></i></div>
+                <div class="ful-info">
+                  <div class="ful-title">
+                    <strong>VIP Store & Lounge Pickup</strong>
+                    <span class="ful-price text-emerald">FREE ($0.00)</span>
+                  </div>
+                  <p>Pick up vehicle directly at the Leaseify Executive Lounge (850 Sunset Blvd, West Hollywood) with private valet greeting.</p>
+                </div>
+              </label>
+
+              <label class="fulfillment-card" id="opt-delivery-card" onclick="app.setFulfillmentType('DELIVERY')">
+                <input type="radio" name="fulfillment_type" value="DELIVERY" id="radio-delivery">
+                <div class="ful-icon"><i data-lucide="truck"></i></div>
+                <div class="ful-info">
+                  <div class="ful-title">
+                    <strong>White-Glove Flatbed Delivery</strong>
+                    <span class="ful-price text-gold">+$150.00</span>
+                  </div>
+                  <p>Delivered directly to your residence, luxury hotel, or private jet hangar via enclosed transporter.</p>
+                </div>
+              </label>
+            </div>
+
+            <!-- Delivery Address Form (shown if Delivery is chosen) -->
+            <div id="delivery-address-form" style="display: none; margin-top: 1.25rem;" class="glass-card">
+              <h4 style="color: var(--gold); font-size: 0.95rem; margin-bottom: 0.75rem;">
+                <i data-lucide="map-pin"></i> Shipping & Delivery Details
+              </h4>
+              <div class="form-group">
+                <label for="deliv-street">Street Address / Destination</label>
+                <input type="text" id="deliv-street" class="form-input" placeholder="e.g. 90210 Wilshire Blvd, Suite 500">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="deliv-city">City</label>
+                  <input type="text" id="deliv-city" class="form-input" value="Beverly Hills">
+                </div>
+                <div class="form-group">
+                  <label for="deliv-state">State & ZIP</label>
+                  <input type="text" id="deliv-state" class="form-input" value="CA 90210">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="deliv-instructions">Delivery Access Instructions (Gates / Concierge)</label>
+                <input type="text" id="deliv-instructions" class="form-input" placeholder="Call upon arrival, leave with concierge...">
+              </div>
+            </div>
+
+            <div class="checkout-actions">
+              <button class="btn btn-secondary" onclick="app.goToCheckoutStep(1)">&larr; Back to Dates</button>
+              <button class="btn btn-gold" onclick="app.goToCheckoutStep(3)">
+                Proceed to Payment & Deposit &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: Payment Gateway & Security Deposit Breakdown -->
+          <div id="checkout-step-3" class="checkout-step-content">
+            <div class="booking-modal-grid">
+              <div class="payment-methods-panel">
+                <h4 style="color: #fff; margin-bottom: 1rem;">Payment Method</h4>
+                <div class="pay-method-tabs">
+                  <button type="button" class="pay-tab active" id="pay-tab-card" onclick="app.setPaymentMethod('CREDIT_CARD')">
+                    <i data-lucide="credit-card"></i> Card
+                  </button>
+                  <button type="button" class="pay-tab" id="pay-tab-apple" onclick="app.setPaymentMethod('APPLE_PAY')">
+                    <i data-lucide="smartphone"></i> Apple Pay
+                  </button>
+                  <button type="button" class="pay-tab" id="pay-tab-wire" onclick="app.setPaymentMethod('CRYPTO')">
+                    <i data-lucide="wallet"></i> Wire / Crypto
+                  </button>
+                </div>
+
+                <div id="card-inputs-box">
+                  <div class="form-group">
+                    <label for="pay-card-num">Card Number</label>
+                    <input type="text" id="pay-card-num" class="form-input" value="•••• •••• •••• 4242" placeholder="4242 4242 4242 4242">
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="pay-card-exp">Expiry</label>
+                      <input type="text" id="pay-card-exp" class="form-input" value="12/28" placeholder="MM/YY">
+                    </div>
+                    <div class="form-group">
+                      <label for="pay-card-cvv">CVC / CVV</label>
+                      <input type="text" id="pay-card-cvv" class="form-input" value="888" placeholder="CVC">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="deposit-guarantee-note" style="margin-top: 1rem;">
+                  <i data-lucide="shield-check"></i>
+                  <span>Security deposit will be placed in secure escrow and released 100% upon vehicle return at store.</span>
+                </div>
+              </div>
+
+              <!-- Price Ledger Breakdown -->
+              <div class="price-ledger-box">
+                <h4 style="color: #fff; margin-bottom: 0.85rem;">Payment Summary</h4>
+                <div class="price-ledger">
+                  <div class="ledger-row">
+                    <span class="ledger-lbl">Rental Duration:</span>
+                    <span class="ledger-val" id="cart-ledger-duration">3 Day(s)</span>
+                  </div>
+                  <div class="ledger-row">
+                    <span class="ledger-lbl">Base Vehicle Rental Fee:</span>
+                    <span class="ledger-val" id="cart-ledger-base">$0.00</span>
+                  </div>
+                  <div class="ledger-row">
+                    <span class="ledger-lbl">Fulfillment / Delivery:</span>
+                    <span class="ledger-val" id="cart-ledger-deliv">$0.00</span>
+                  </div>
+                  <div class="ledger-row">
+                    <span class="ledger-lbl">
+                      Security Deposit (Escrow):
+                      <span class="badge-escrow">100% Refundable</span>
+                    </span>
+                    <span class="ledger-val text-amber" id="cart-ledger-deposit">$0.00</span>
+                  </div>
+                  <div class="ledger-divider"></div>
+                  <div class="ledger-row ledger-total">
+                    <span>Total Authorized Today:</span>
+                    <span class="total-amount text-gold" id="cart-ledger-total">$0.00</span>
+                  </div>
+                </div>
+
+                <button class="btn btn-gold btn-lg btn-full" id="btn-pay-confirm" onclick="app.executePaymentCheckout()">
+                  <i data-lucide="lock"></i> Pay & Confirm Reservation
+                </button>
+              </div>
+            </div>
+
+            <div class="checkout-actions" style="margin-top: 1.5rem;">
+              <button class="btn btn-secondary" onclick="app.goToCheckoutStep(2)">&larr; Back to Fulfillment</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: PRINTABLE OFFICIAL TAX INVOICE (STEP 7) -->
+    <!-- ======================================================== -->
+    <div id="invoice-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Official Rental Tax Invoice</span>
+            <h2 id="inv-header-title">Invoice #INV-2026-0000</h2>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-sm btn-gold" onclick="window.print()">
+              <i data-lucide="printer"></i> Print / Download PDF
+            </button>
+            <button class="modal-close-btn" onclick="app.closeModal('invoice-modal')">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-body printable-invoice-body" id="printable-invoice-content">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: STORE RETURN CONFIRMATION & ESCROW SETTLEMENT -->
+    <!-- ======================================================== -->
+    <div id="return-store-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Store Hub Return</span>
+            <h2>Return Vehicle at Store Lounge</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('return-store-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="return-store-content">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODALS: AUTH & PROFILE MODALS -->
     <!-- ======================================================== -->
     
     <!-- Modal: Login -->
@@ -740,8 +1005,6 @@
           </button>
         </div>
         <form id="login-form" onsubmit="app.handleLogin(event)" class="modal-body auth-modal-body">
-          
-          <!-- One-click Demo Credentials Quick-Fill -->
           <div class="demo-accounts-box">
             <span class="demo-box-lbl">Quick Demo Login:</span>
             <div class="demo-btn-group">
@@ -788,7 +1051,6 @@
           </button>
         </div>
         <form id="signup-form" onsubmit="app.handleSignup(event)" class="modal-body auth-modal-body">
-          
           <div class="security-role-notice">
             <i data-lucide="shield"></i>
             <div>
@@ -840,7 +1102,7 @@
         <div class="modal-header">
           <div class="modal-title-group">
             <span class="badge-soft badge-gold">Account Settings</span>
-            <h2>My Profile & Credentials</h2>
+            <h2>My Profile & Address</h2>
           </div>
           <button class="modal-close-btn" onclick="app.closeModal('profile-modal')">
             <i data-lucide="x"></i>
@@ -857,7 +1119,7 @@
           </div>
 
           <div class="form-group">
-            <label for="prof-name">Full Name</label>
+            <label for="prof-name">Full Legal Name</label>
             <input type="text" id="prof-name" required class="form-input">
           </div>
 
@@ -867,7 +1129,7 @@
           </div>
 
           <div class="form-group">
-            <label for="prof-address">Delivery & Billing Address</label>
+            <label for="prof-address">Default Delivery & Billing Address</label>
             <input type="text" id="prof-address" required class="form-input">
           </div>
 
@@ -889,248 +1151,7 @@
     </div>
 
     <!-- ======================================================== -->
-    <!-- MODAL 1: VEHICLE BOOKING & INSTANT PRICING CALCULATOR -->
-    <!-- ======================================================== -->
-    <div id="booking-modal" class="modal-overlay">
-      <div class="modal-card modal-lg">
-        <div class="modal-header">
-          <div class="modal-title-group">
-            <span class="badge-soft badge-gold">Vehicle Reservation & Deposit Lock</span>
-            <h2 id="modal-booking-title">Porsche 911 GT3 RS</h2>
-          </div>
-          <button class="modal-close-btn" onclick="app.closeModal('booking-modal')">
-            <i data-lucide="x"></i>
-          </button>
-        </div>
-
-        <div class="modal-body booking-modal-grid">
-          <div class="booking-product-summary">
-            <img id="modal-booking-img" src="" alt="Car" class="booking-img">
-            <div class="booking-specs-list">
-              <div class="spec-row">
-                <span class="spec-lbl">Brand / Model</span>
-                <span class="spec-val" id="modal-booking-brand">-</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-lbl">Condition</span>
-                <span class="spec-val text-emerald" id="modal-booking-condition">Pristine</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-lbl">Daily Rate</span>
-                <span class="spec-val text-gold" id="modal-booking-daily-rate">$0.00 / day</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-lbl">Weekly Discounted Rate</span>
-                <span class="spec-val" id="modal-booking-weekly-rate">$0.00 / week</span>
-              </div>
-              <div class="spec-row">
-                <span class="spec-lbl">Refundable Escrow Deposit</span>
-                <span class="spec-val text-amber" id="modal-booking-deposit">$0.00</span>
-              </div>
-            </div>
-
-            <div class="pickup-location-box">
-              <i data-lucide="map-pin"></i>
-              <div>
-                <strong>VIP Pickup Location</strong>
-                <p id="modal-pickup-location">Leaseify Executive Lounge, 850 Sunset Blvd</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="booking-calculator-panel">
-            <h3>Rental Period & Pricing Calculator</h3>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="book-start-date">Pick-up Date</label>
-                <input type="date" id="book-start-date" class="form-input" onchange="app.calculateBookingEstimate()">
-              </div>
-              <div class="form-group">
-                <label for="book-end-date">Return Date</label>
-                <input type="date" id="book-end-date" class="form-input" onchange="app.calculateBookingEstimate()">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="book-customer-notes">Trip Destination / Special Requests</label>
-              <input type="text" id="book-customer-notes" placeholder="e.g. Pacific Coast Highway tour, VIP airport transfer..." class="form-input">
-            </div>
-
-            <div class="price-ledger">
-              <div class="ledger-row">
-                <span class="ledger-lbl">Rental Duration</span>
-                <span class="ledger-val" id="ledger-duration">1 Day(s)</span>
-              </div>
-              <div class="ledger-row">
-                <span class="ledger-lbl">Base Vehicle Rental Fee</span>
-                <span class="ledger-val" id="ledger-base-fee">$0.00</span>
-              </div>
-              <div class="ledger-row">
-                <span class="ledger-lbl">
-                  Security Deposit (Escrow)
-                  <span class="badge-escrow">100% Refundable</span>
-                </span>
-                <span class="ledger-val text-amber" id="ledger-deposit">$0.00</span>
-              </div>
-              <div class="ledger-divider"></div>
-              <div class="ledger-row ledger-total">
-                <span>Total Due Today</span>
-                <span class="total-amount text-gold" id="ledger-total">$0.00</span>
-              </div>
-            </div>
-
-            <div class="deposit-guarantee-note">
-              <i data-lucide="shield-check"></i>
-              <span>Your security deposit is locked in escrow and automatically refunded upon satisfactory diagnostic return inspection.</span>
-            </div>
-
-            <button class="btn btn-gold btn-lg btn-full" onclick="app.submitBooking()">
-              <i data-lucide="check-circle"></i> Confirm & Book Vehicle
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- MODAL 2: PICKUP & RETURN INSPECTION WORKFLOW -->
-    <!-- ======================================================== -->
-    <div id="inspection-modal" class="modal-overlay">
-      <div class="modal-card modal-lg">
-        <div class="modal-header">
-          <div class="modal-title-group">
-            <span class="badge-soft badge-amber">Workflow Stage: Vehicle Diagnostic Return & Escrow Settlement</span>
-            <h2 id="inspect-modal-title">Inspect & Settle Rental RNT-0000</h2>
-          </div>
-          <button class="modal-close-btn" onclick="app.closeModal('inspection-modal')">
-            <i data-lucide="x"></i>
-          </button>
-        </div>
-
-        <div class="modal-body inspection-modal-grid">
-          <div class="inspect-order-summary">
-            <h4>Rental Details</h4>
-            <div class="spec-row">
-              <span class="spec-lbl">Driver / Client</span>
-              <span class="spec-val" id="inspect-customer-name">-</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-lbl">Vehicle</span>
-              <span class="spec-val" id="inspect-product-name">-</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-lbl">Scheduled Return</span>
-              <span class="spec-val" id="inspect-end-date">-</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-lbl">Deposit Held in Escrow</span>
-              <span class="spec-val text-amber" id="inspect-deposit-held">$0.00</span>
-            </div>
-
-            <div class="penalty-status-box" id="inspect-penalty-box">
-              <div class="penalty-header">
-                <i data-lucide="clock-alert"></i>
-                <span>Automated Late Penalty Status</span>
-              </div>
-              <div class="penalty-details">
-                <div class="spec-row">
-                  <span class="spec-lbl">Overdue Days</span>
-                  <span class="spec-val text-rose" id="inspect-overdue-days">0 Days</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-lbl">Late Return Penalty</span>
-                  <span class="spec-val text-rose" id="inspect-late-fee">$0.00</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="inspect-form-panel">
-            <h4>Technician Inspection Assessment</h4>
-
-            <div class="form-group">
-              <label>Vehicle Condition Rating</label>
-              <div class="condition-selector-group">
-                <label class="condition-radio">
-                  <input type="radio" name="inspect-condition" value="Pristine" checked onchange="app.recalcInspectionSettlement()">
-                  <span class="condition-chip pristine">Pristine</span>
-                </label>
-                <label class="condition-radio">
-                  <input type="radio" name="inspect-condition" value="Good" onchange="app.recalcInspectionSettlement()">
-                  <span class="condition-chip good">Good</span>
-                </label>
-                <label class="condition-radio">
-                  <input type="radio" name="inspect-condition" value="Minor Scuffs" onchange="app.recalcInspectionSettlement()">
-                  <span class="condition-chip scuffs">Minor Scuffs</span>
-                </label>
-                <label class="condition-radio">
-                  <input type="radio" name="inspect-condition" value="Damaged" onchange="app.recalcInspectionSettlement()">
-                  <span class="condition-chip damaged">Damaged</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Return Diagnostic Checklist</label>
-              <div class="checklist-items">
-                <label class="check-item">
-                  <input type="checkbox" id="chk-parts" checked>
-                  <span>All keys, charging kit, & telemetry keyfobs returned</span>
-                </label>
-                <label class="check-item">
-                  <input type="checkbox" id="chk-power" checked>
-                  <span>OBD-II engine diagnostic passed & fuel/battery full</span>
-                </label>
-                <label class="check-item">
-                  <input type="checkbox" id="chk-clean" checked>
-                  <span>Exterior paintwork & interior leather spotless</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="inspect-damage-fee">Damage / Detailing Assessment Fee ($)</label>
-              <input type="number" id="inspect-damage-fee" value="0" min="0" step="25" class="form-input" oninput="app.recalcInspectionSettlement()">
-            </div>
-
-            <div class="form-group">
-              <label for="inspect-notes">Technician Notes</label>
-              <textarea id="inspect-notes" rows="2" class="form-textarea" placeholder="Note rim condition, tire tread wear, or detailing notes..."></textarea>
-            </div>
-
-            <div class="settlement-reconciliation-card">
-              <h5>Deposit Escrow Settlement</h5>
-              <div class="settle-row">
-                <span>Original Escrow Deposit Held:</span>
-                <span id="settle-original-deposit">$0.00</span>
-              </div>
-              <div class="settle-row text-rose">
-                <span>Less Damage Deductions:</span>
-                <span id="settle-damage-deduction">-$0.00</span>
-              </div>
-              <div class="settle-row text-rose">
-                <span>Less Late Return Penalties:</span>
-                <span id="settle-late-deduction">-$0.00</span>
-              </div>
-              <div class="settle-divider"></div>
-              <div class="settle-row settle-final">
-                <span>Net Refund to Driver:</span>
-                <span class="refund-badge" id="settle-refund-total">$0.00</span>
-              </div>
-              <div class="settle-status-tag" id="settle-status-tag">Status: Full Refund</div>
-            </div>
-
-            <button class="btn btn-emerald btn-lg btn-full" onclick="app.submitInspectionSettlement()">
-              <i data-lucide="check-check"></i> Authorize Refund & Close Rental
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- MODAL 3: ADD/EDIT VEHICLE MODAL -->
+    <!-- MODAL: ADD/EDIT VEHICLE MODAL (ADMIN) -->
     <!-- ======================================================== -->
     <div id="product-modal" class="modal-overlay">
       <div class="modal-card">
@@ -1215,26 +1236,6 @@
             <button type="submit" class="btn btn-gold">Save Vehicle</button>
           </div>
         </form>
-      </div>
-    </div>
-
-    <!-- ======================================================== -->
-    <!-- MODAL 4: DIGITAL RECEIPT & VIP PASS VIEW -->
-    <!-- ======================================================== -->
-    <div id="receipt-modal" class="modal-overlay">
-      <div class="modal-card">
-        <div class="modal-header">
-          <div class="modal-title-group">
-            <span class="badge-soft badge-gold">VIP Vehicle Rental Pass & Escrow Proof</span>
-            <h2 id="receipt-code-title">Pass #RNT-0000</h2>
-          </div>
-          <button class="modal-close-btn" onclick="app.closeModal('receipt-modal')">
-            <i data-lucide="x"></i>
-          </button>
-        </div>
-        <div class="modal-body receipt-modal-body" id="receipt-content">
-          <!-- Rendered dynamically -->
-        </div>
       </div>
     </div>
 
