@@ -51,12 +51,21 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/rentals', rentalRoutes);
 
-// Catch 404 for unknown endpoints
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: `API endpoint not found: ${req.originalUrl}`,
-  });
+// Serve static assets from frontend build
+const path = require('path');
+const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendDistPath));
+
+// Catch-all handler for serving frontend index.html for client-side routing,
+// while returning 404 for missing API requests.
+app.get('*', (req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      message: `API endpoint not found: ${req.originalUrl}`,
+    });
+  }
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 
 // Centralized error handling
