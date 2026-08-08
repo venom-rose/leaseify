@@ -5,7 +5,12 @@ const {
   getRentals,
   getRentalById,
   updateRentalStatus,
+  schedulePickup,
+  markAsPicked,
   processRentalReturn,
+  verifyQRToken,
+  sendReminderEmail,
+  getPredictionsAndAvailability,
   getRentalInvoice,
   getRentalSettings,
   updateRentalSettings,
@@ -30,6 +35,10 @@ router
   .post(authorize('admin'), triggerOverdueSync);
 
 router
+  .route('/predictions')
+  .get(getPredictionsAndAvailability);
+
+router
   .route('/:id')
   .get(getRentalById);
 
@@ -38,8 +47,24 @@ router
   .put(updateRentalStatus);
 
 router
+  .route('/:id/schedule-pickup')
+  .post(schedulePickup);
+
+router
+  .route('/:id/mark-picked')
+  .post(markAsPicked);
+
+router
   .route('/:id/return')
   .post(processRentalReturn);
+
+router
+  .route('/:id/verify-qr')
+  .post(verifyQRToken);
+
+router
+  .route('/:id/send-reminder')
+  .post(sendReminderEmail);
 
 router
   .route('/:id/invoice')

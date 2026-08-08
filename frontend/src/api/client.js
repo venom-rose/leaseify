@@ -825,6 +825,79 @@ export const api = {
     );
   },
 
+  schedulePickup: async (id, pickupData) => {
+    return safeFetch(
+      `/rentals/${id}/schedule-pickup`,
+      {
+        method: 'POST',
+        body: JSON.stringify(pickupData),
+      },
+      () => {
+        const rental = initialMockData.rentals.find((r) => r._id === id);
+        if (rental) {
+          rental.scheduledPickupDate = pickupData.scheduledPickupDate;
+          rental.pickupLocation = pickupData.pickupLocation || rental.pickupLocation;
+          rental.status = 'booked';
+        }
+        return {
+          success: true,
+          message: 'Pickup scheduled successfully!',
+          data: rental,
+        };
+      }
+    );
+  },
+
+  markAsPicked: async (id, data = {}) => {
+    return safeFetch(
+      `/rentals/${id}/mark-picked`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+      () => {
+        const rental = initialMockData.rentals.find((r) => r._id === id);
+        if (rental) {
+          rental.status = 'picked';
+          rental.pickedAt = new Date().toISOString();
+          rental.pickedBy = data.pickedByName ? { name: data.pickedByName, phone: data.pickedByPhone } : null;
+        }
+        return {
+          success: true,
+          message: 'Item marked as Picked Up! Rental period active.',
+          data: rental,
+        };
+      }
+    );
+  },
+
+  verifyQRToken: async (id, qrData) => {
+    return safeFetch(
+      `/rentals/${id}/verify-qr`,
+      {
+        method: 'POST',
+        body: JSON.stringify(qrData),
+      },
+      () => {
+        const rental = initialMockData.rentals.find((r) => r._id === id);
+        if (rental) {
+          if (qrData.action === 'pickup') {
+            rental.status = 'picked';
+            rental.pickedAt = new Date().toISOString();
+          } else if (qrData.action === 'return') {
+            rental.status = 'returned';
+            rental.returnedAt = new Date().toISOString();
+          }
+        }
+        return {
+          success: true,
+          message: `✅ QR Code Verified for Order #${rental?.transactionId || 'RNT-99'}!`,
+          data: rental,
+        };
+      }
+    );
+  },
+
   getInvoice: async (id) => {
     return safeFetch(`/rentals/${id}/invoice`, { method: 'GET' }, () => {
       const rental = initialMockData.rentals.find((r) => r._id === id) || initialMockData.rentals[0];
@@ -894,6 +967,36 @@ export const api = {
         data: settingsData,
       })
     );
+  },
+
+  sendReminderEmail: async (id, data = {}) => {
+    return safeFetch(
+      `/rentals/${id}/send-reminder`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      },
+      () => ({
+        success: true,
+        message: 'Reminder email dispatched successfully!',
+        data: {
+          sentAt: new Date().toISOString(),
+          status: 'delivered',
+        },
+      })
+    );
+  },
+
+  getPredictions: async () => {
+    return safeFetch('/rentals/predictions', { method: 'GET' }, () => ({
+      success: true,
+      data: {
+        predictions: [],
+        productAvailability: [],
+        riskDistribution: [],
+        revenueForecast: [],
+      },
+    }));
   },
 
   syncOverdueRentals: async () => {

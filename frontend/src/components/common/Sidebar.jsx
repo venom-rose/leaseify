@@ -12,6 +12,7 @@ import {
   Building,
   Package,
   PackageCheck,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -20,9 +21,10 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen }) => {
 
   const adminNav = [
     { id: 'dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
-    { id: 'properties', label: 'Properties & Units', icon: Building2 },
-    { id: 'products', label: 'Rental Store (Products)', icon: Package },
+    { id: 'analytics', label: 'AI & Analytics', icon: Sparkles, badge: 'New' },
     { id: 'rentals', label: 'Product Rentals (Orders)', icon: PackageCheck },
+    { id: 'products', label: 'Rental Store (Products)', icon: Package },
+    { id: 'properties', label: 'Properties & Units', icon: Building2 },
     { id: 'leases', label: 'Lease Agreements', icon: FileText },
     { id: 'payments', label: 'Payments & Revenue', icon: CreditCard },
     { id: 'maintenance', label: 'Maintenance Requests', icon: Wrench },
@@ -32,6 +34,7 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen }) => {
     { id: 'tenant-portal', label: 'My Rental Home', icon: Building },
     { id: 'products', label: 'Rental Store (Items)', icon: Package },
     { id: 'rentals', label: 'My Rented Items', icon: PackageCheck },
+    { id: 'analytics', label: 'Fleet Analytics', icon: Sparkles },
     { id: 'payments', label: 'Rent Payments & Dues', icon: CreditCard },
     { id: 'maintenance', label: 'Maintenance Tickets', icon: Wrench },
     { id: 'leases', label: 'My Lease Agreement', icon: FileText },

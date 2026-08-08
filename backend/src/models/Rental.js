@@ -52,11 +52,66 @@ const rentalSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    // Status tracking: booked, picked, returned, late (plus legacy active, overdue, completed)
     status: {
       type: String,
-      enum: ['pending', 'active', 'overdue', 'completed', 'cancelled', 'returned'],
-      default: 'active',
+      enum: ['booked', 'picked', 'returned', 'late', 'active', 'overdue', 'completed', 'cancelled', 'pending'],
+      default: 'booked',
     },
+    
+    // --- PICKUP WORKFLOW FIELDS ---
+    scheduledPickupDate: {
+      type: Date,
+      default: function () {
+        return this.startDate || new Date();
+      },
+    },
+    pickupLocation: {
+      type: String,
+      default: 'Main City Center Hub (Counter #1)',
+    },
+    pickedAt: {
+      type: Date,
+    },
+    pickupVerificationCode: {
+      type: String,
+      default: () => 'PKP-' + Math.floor(100000 + Math.random() * 900000),
+    },
+    pickedBy: {
+      name: { type: String, default: '' },
+      phone: { type: String, default: '' },
+      idType: { type: String, default: 'Government ID' },
+      idNumber: { type: String, default: '' },
+    },
+    pickupNotes: {
+      type: String,
+      default: '',
+    },
+
+    // --- RETURN & INSPECTION WORKFLOW FIELDS ---
+    returnedAt: {
+      type: Date,
+    },
+    returnVerificationCode: {
+      type: String,
+      default: () => 'RTN-' + Math.floor(100000 + Math.random() * 900000),
+    },
+    itemCondition: {
+      type: String,
+      enum: ['excellent', 'good', 'fair', 'minor_damage', 'severe_damage'],
+      default: 'excellent',
+    },
+    conditionNotes: {
+      type: String,
+      default: '',
+    },
+    damagePenalty: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    // --- LATE RETURN & PENALTY TRACKING ---
     accruedPenalty: {
       type: Number,
       default: 0,
@@ -68,30 +123,6 @@ const rentalSchema = new mongoose.Schema(
     gracePeriodApplied: {
       type: Boolean,
       default: false,
-    },
-    paymentMethod: {
-      type: String,
-      enum: ['Credit Card', 'Bank Transfer', 'Stripe', 'PayPal', 'Cash'],
-      default: 'Credit Card',
-    },
-    paymentStatus: {
-      type: String,
-      enum: ['paid', 'pending', 'refunded'],
-      default: 'paid',
-    },
-    transactionId: {
-      type: String,
-      unique: true,
-      default: () => 'RNT-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-    },
-    invoiceNumber: {
-      type: String,
-      default: () => 'INV-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
-    },
-
-    // Return & Security Deposit Refund Tracking
-    returnedAt: {
-      type: Date,
     },
     isLate: {
       type: Boolean,
@@ -117,6 +148,27 @@ const rentalSchema = new mongoose.Schema(
     refundTransactionId: {
       type: String,
       default: '',
+    },
+
+    // Payment & Identification
+    paymentMethod: {
+      type: String,
+      enum: ['Credit Card', 'Bank Transfer', 'Stripe', 'PayPal', 'Cash', 'UPI', 'Net Banking'],
+      default: 'Credit Card',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['paid', 'pending', 'refunded'],
+      default: 'paid',
+    },
+    transactionId: {
+      type: String,
+      unique: true,
+      default: () => 'RNT-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
+    },
+    invoiceNumber: {
+      type: String,
+      default: () => 'INV-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
     },
 
     deliveryAddress: {
