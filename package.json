@@ -1,22 +1,16 @@
 {
-  "name": "leaseify",
-  "version": "2.0.0",
-  "description": "Leaseify — Premier Car & Luxury Fleet Rental Full-Stack Platform",
-  "main": "backend/server.js",
+  "name": "leaseify-root",
+  "version": "1.0.0",
+  "description": "Full-Stack Rental & Property Management System",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "node backend/server.js",
-    "seed": "node backend/seed.js",
-    "test": "node -e \"console.log('Use automated test scripts')\""
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "start:backend": "npm --prefix backend start",
+    "start:frontend": "npm --prefix frontend start",
+    "seed": "npm --prefix backend run seed",
+    "install:all": "npm --prefix backend install && npm --prefix frontend install"
   },
-  "keywords": [
-    "car-rental",
-    "supercar-fleet",
-    "rental-management",
-    "escrow-deposit",
-    "jwt-auth",
-    "invoices"
-  ],
-  "author": "Leaseify Engineering Team",
-  "license": "MIT"
+  "keywords": ["rental-management", "mern", "react", "express", "mongodb"],
+  "author": "",
+  "license": "ISC"
 }
