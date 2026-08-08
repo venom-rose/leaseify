@@ -57,6 +57,7 @@ function initSchema() {
 
     CREATE TABLE IF NOT EXISTS categories (
       id TEXT PRIMARY KEY,
+      parent_category_id TEXT,
       name TEXT NOT NULL,
       icon TEXT NOT NULL,
       description TEXT
@@ -66,16 +67,18 @@ function initSchema() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       category_id TEXT NOT NULL,
+      subcategory_id TEXT,
       brand TEXT NOT NULL,
       manufacturer TEXT NOT NULL DEFAULT 'OEM Factory',
-      color TEXT NOT NULL DEFAULT 'Obsidian Black',
+      color TEXT NOT NULL DEFAULT 'Standard',
       size TEXT NOT NULL DEFAULT 'Standard Spec',
       model TEXT,
       image TEXT NOT NULL,
+      hourly_rate REAL NOT NULL DEFAULT 0,
       daily_rate REAL NOT NULL,
       weekly_rate REAL NOT NULL,
       deposit_type TEXT NOT NULL DEFAULT 'FIXED' CHECK(deposit_type IN ('FIXED', 'PERCENTAGE')),
-      deposit_rate REAL NOT NULL DEFAULT 1000.0,
+      deposit_rate REAL NOT NULL DEFAULT 100.0,
       deposit_amount REAL NOT NULL,
       replacement_value REAL NOT NULL,
       total_stock INTEGER NOT NULL DEFAULT 1,
@@ -84,11 +87,8 @@ function initSchema() {
       description TEXT NOT NULL,
       features TEXT,
       accessories_included TEXT,
+      attributes_json TEXT,
       serial_number TEXT,
-      top_speed TEXT,
-      acceleration TEXT,
-      horsepower TEXT,
-      fuel_type TEXT,
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (category_id) REFERENCES categories(id)
     );
@@ -188,6 +188,8 @@ function initSchema() {
       end_date TEXT NOT NULL,
       actual_return_date TEXT,
       duration_days INTEGER NOT NULL,
+      quantity INTEGER NOT NULL DEFAULT 1,
+      rate_unit TEXT NOT NULL DEFAULT 'DAY',
       daily_rate REAL NOT NULL,
       base_rental_fee REAL NOT NULL,
       deposit_type TEXT NOT NULL DEFAULT 'FIXED',
@@ -389,6 +391,14 @@ function migrateSchema() {
     );
   `);
 
+  // categories & products updates
+  addColumnIfMissing('categories', 'parent_category_id', 'TEXT');
+  addColumnIfMissing('products', 'subcategory_id', 'TEXT');
+  addColumnIfMissing('products', 'hourly_rate', 'REAL NOT NULL DEFAULT 0');
+  addColumnIfMissing('products', 'attributes_json', 'TEXT');
+  addColumnIfMissing('rentals', 'quantity', 'INTEGER NOT NULL DEFAULT 1');
+  addColumnIfMissing('rentals', 'rate_unit', "TEXT NOT NULL DEFAULT 'DAY'");
+
   // pricelists table - add columns introduced by the Product & Pricing system update
   addColumnIfMissing('pricelists', 'is_default', 'INTEGER NOT NULL DEFAULT 0');
   addColumnIfMissing('pricelists', 'condition_type', "TEXT NOT NULL DEFAULT 'GENERAL'");
@@ -405,9 +415,9 @@ function migrateSchema() {
   addColumnIfMissing('pricelists', 'is_active', 'INTEGER NOT NULL DEFAULT 1');
 
   // products table - add columns introduced by the attributes update
-  addColumnIfMissing('products', 'brand', "TEXT NOT NULL DEFAULT 'Unknown'");
+  addColumnIfMissing('products', 'brand', "TEXT NOT NULL DEFAULT 'Generic'");
   addColumnIfMissing('products', 'manufacturer', "TEXT NOT NULL DEFAULT 'OEM Factory'");
-  addColumnIfMissing('products', 'color', "TEXT NOT NULL DEFAULT 'Obsidian Black'");
+  addColumnIfMissing('products', 'color', "TEXT NOT NULL DEFAULT 'Standard'");
   addColumnIfMissing('products', 'size', "TEXT NOT NULL DEFAULT 'Standard Spec'");
   addColumnIfMissing('products', 'deposit_type', "TEXT NOT NULL DEFAULT 'FIXED'");
   addColumnIfMissing('products', 'deposit_rate', 'REAL NOT NULL DEFAULT 0');
@@ -418,31 +428,37 @@ function migrateSchema() {
 
 
 function seedDatabase(force = false) {
-  if (force) {
-    db.exec(`
-      DROP TABLE IF EXISTS repair_orders;
-      DROP TABLE IF EXISTS return_inspections;
-      DROP TABLE IF EXISTS pickup_schedules;
-      DROP TABLE IF EXISTS activity_logs;
-      DROP TABLE IF EXISTS inspection_logs;
-      DROP TABLE IF EXISTS deposit_transactions;
-      DROP TABLE IF EXISTS rentals;
-      DROP TABLE IF EXISTS quotations;
-      DROP TABLE IF EXISTS rental_period_presets;
-      DROP TABLE IF EXISTS pricelists;
-      DROP TABLE IF EXISTS product_variants;
-      DROP TABLE IF EXISTS products;
-      DROP TABLE IF EXISTS categories;
-      DROP TABLE IF EXISTS users;
-      DROP TABLE IF EXISTS system_config;
-    `);
-    initSchema();
-  } else {
-    const existingConfig = db.prepare('SELECT COUNT(*) as count FROM system_config').get();
-    if (existingConfig && existingConfig.count > 0) {
-      return;
+  if (!force) {
+    try {
+      const check = db.prepare("SELECT id FROM categories WHERE id = 'electronics'").get();
+      if (check) return;
+    } catch (e) {
+      // Table missing, proceed to seed
     }
   }
+
+  db.exec('PRAGMA foreign_keys = OFF;');
+  db.exec(`
+    DROP TABLE IF EXISTS customer_reminders;
+    DROP TABLE IF EXISTS vehicle_telemetry;
+    DROP TABLE IF EXISTS repair_orders;
+    DROP TABLE IF EXISTS return_inspections;
+    DROP TABLE IF EXISTS pickup_schedules;
+    DROP TABLE IF EXISTS activity_logs;
+    DROP TABLE IF EXISTS inspection_logs;
+    DROP TABLE IF EXISTS deposit_transactions;
+    DROP TABLE IF EXISTS rentals;
+    DROP TABLE IF EXISTS quotations;
+    DROP TABLE IF EXISTS rental_period_presets;
+    DROP TABLE IF EXISTS pricelists;
+    DROP TABLE IF EXISTS product_variants;
+    DROP TABLE IF EXISTS products;
+    DROP TABLE IF EXISTS categories;
+    DROP TABLE IF EXISTS users;
+    DROP TABLE IF EXISTS system_config;
+  `);
+  db.exec('PRAGMA foreign_keys = ON;');
+  initSchema();
 
   // System Config
   db.prepare(`
@@ -453,11 +469,11 @@ function seedDatabase(force = false) {
       deposit_percentage_default, default_pricelist_id, min_rental_days, max_rental_days,
       pickup_location, contact_email, simulated_days_offset
     ) VALUES (
-      1, 'Leaseify Premier Fleet', '$', 'DAILY', 65.0,
+      1, 'Leaseify Multi-Category Rental Marketplace', '$', 'DAILY', 65.0,
       1.5, 2500.0, 8500.0,
       4, 5000.0, 1,
       20.0, 1, 1, 30,
-      'Leaseify Executive Lounge, 850 Sunset Blvd, West Hollywood', 'concierge@leaseify.io', 0
+      'Leaseify Marketplace Fulfillment Center, 850 Sunset Blvd, West Hollywood', 'concierge@leaseify.io', 0
     )
   `).run();
 
@@ -523,264 +539,336 @@ function seedDatabase(force = false) {
     'Gold Member'
   );
 
-  // Categories
+  // Categories & Subcategories
   const insertCategory = db.prepare(`
-    INSERT INTO categories (id, name, icon, description)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO categories (id, parent_category_id, name, icon, description)
+    VALUES (?, ?, ?, ?, ?)
   `);
 
-  insertCategory.run('supercars', 'Supercars & Exotics', 'gauge', 'V10 & V8 mid-engine hypercars and aerodynamic track weapons');
-  insertCategory.run('electric', 'Electric Performance', 'zap', 'Instant-torque electric hyper-GTs and luxury cruisers');
-  insertCategory.run('luxury-suv', 'Luxury & Armored SUVs', 'shield', 'High-riding executive off-roaders with ultimate comfort and road presence');
-  insertCategory.run('grand-touring', 'Grand Tourers & Coupes', 'compass', 'High-speed long-distance luxury coupes with bespoke leather interiors');
-  insertCategory.run('executive', 'Executive Luxury Sedans', 'briefcase', 'Chauffeur-grade flagships engineered for effortless quiet cruising');
+  // Main Categories
+  insertCategory.run('electronics', null, 'Electronics & Gadgets', 'laptop', 'Laptops, 4K cameras, lenses, drones & high-fidelity audio');
+  insertCategory.run('appliances', null, 'Home Appliances', 'tv', 'Smart refrigerators, washing machines, air conditioners & microwave ovens');
+  insertCategory.run('furniture', null, 'Furniture & Living', 'armchair', 'Ergonomic desk chairs, teak dining sets, luxury beds & leather sofas');
+  insertCategory.run('household', null, 'Household & Tools', 'wrench', 'Power tools, pressure washers, vacuum cleaners & kitchen appliances');
+  insertCategory.run('vehicles', null, 'Vehicles & Mobility', 'bike', 'Electric scooters, e-bikes, city commuters & luxury electric cars');
+  insertCategory.run('events', null, 'Event & Party Gear', 'sparkles', 'Stage lighting, DJ speakers, party furniture & event props');
 
-  // Products with Brand, Manufacturer, Color, Size
+  // Subcategories
+  insertCategory.run('electronics-laptops', 'electronics', 'Laptops & Workstations', 'laptop', 'High performance MacBooks & gaming laptops');
+  insertCategory.run('electronics-cameras', 'electronics', 'Cameras & Lenses', 'camera', 'Mirrorless 4K cameras & cinema lenses');
+  insertCategory.run('electronics-audio', 'electronics', 'Audio & Headphones', 'headphones', 'Wireless ANC headphones & studio monitors');
+
+  insertCategory.run('appliances-fridges', 'appliances', 'Refrigerators', 'snowflake', 'Double door inverter refrigerators & mini fridges');
+  insertCategory.run('appliances-ac', 'appliances', 'Air Conditioners', 'wind', 'Split ACs & portable air coolers');
+  insertCategory.run('appliances-washers', 'appliances', 'Washing Machines', 'washing-machine', 'Front load & top load automatic washers');
+
+  insertCategory.run('furniture-beds', 'furniture', 'Beds & Mattresses', 'bed', 'King/Queen beds & memory foam mattresses');
+  insertCategory.run('furniture-sofas', 'furniture', 'Sofas & Chairs', 'armchair', 'L-shape recliners & ergonomic office chairs');
+  insertCategory.run('furniture-tables', 'furniture', 'Tables & Desks', 'table', 'Standing motorized desks & teak dining tables');
+
+  insertCategory.run('household-tools', 'household', 'Power & Hand Tools', 'hammer', 'Cordless drills, saws & tool kits');
+  insertCategory.run('household-cleaning', 'household', 'Cleaning Equipment', 'sparkles', 'Vacuum cleaners & high pressure washers');
+  insertCategory.run('household-utensils', 'household', 'Kitchenware & Utensils', 'utensils', 'Induction cookware & catering sets');
+
+  insertCategory.run('vehicles-bikes', 'vehicles', 'Electric Bikes & Scooters', 'bike', 'Long-range electric scooters & city e-bikes');
+  insertCategory.run('vehicles-cars', 'vehicles', 'Rental Cars & Vans', 'car', 'Electric sedans, SUVs & cargo vans');
+
+  insertCategory.run('events-audio', 'events', 'DJ & Party Sound', 'speaker', '240W party speakers & wireless mic systems');
+  insertCategory.run('events-lighting', 'events', 'Stage Lighting', 'lamp', 'RGB LED flood lights & laser projectors');
+  insertCategory.run('events-furniture', 'events', 'Event Furniture', 'layout', 'Banquet chairs, foldable tables & photo backdrops');
+
+  // Products across Multi-Category Marketplace
   const insertProduct = db.prepare(`
     INSERT INTO products (
-      id, name, category_id, brand, manufacturer, color, size, model, image, daily_rate, weekly_rate,
-      deposit_type, deposit_rate, deposit_amount, replacement_value, total_stock, available_stock,
-      condition_status, description, features, accessories_included, serial_number,
-      top_speed, acceleration, horsepower, fuel_type
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      id, name, category_id, subcategory_id, brand, manufacturer, color, size, model, image,
+      hourly_rate, daily_rate, weekly_rate, deposit_type, deposit_rate, deposit_amount, replacement_value,
+      total_stock, available_stock, condition_status, description, features, accessories_included, attributes_json, serial_number
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  const carsData = [
+  const marketplaceProducts = [
     {
       id: 1,
-      name: 'Porsche 911 GT3 RS (992)',
-      category: 'supercars',
-      brand: 'Porsche',
-      manufacturer: 'Dr. Ing. h.c. F. Porsche AG (Stuttgart-Zuffenhausen, Germany)',
-      color: 'Speed Yellow / Weissach Carbon',
-      size: 'Track Widebody (2-Door Coupe)',
-      model: '911 GT3 RS',
-      image: 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200&auto=format&fit=crop&q=80',
-      daily_rate: 650.0,
-      weekly_rate: 3400.0,
+      name: 'MacBook Pro 16" M3 Max (32GB / 1TB SSD)',
+      category_id: 'electronics',
+      subcategory_id: 'electronics-laptops',
+      brand: 'Apple',
+      manufacturer: 'Apple Inc. (Cupertino, CA)',
+      color: 'Space Black',
+      size: '16.2-inch Display',
+      model: 'M3 Max 16-Core',
+      image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 18.0,
+      daily_rate: 45.0,
+      weekly_rate: 180.0,
       deposit_type: 'FIXED',
-      deposit_rate: 1500.0,
-      deposit_amount: 1500.0,
-      replacement_val: 285000.0,
-      total_stock: 3,
-      available_stock: 2,
-      condition: 'Pristine',
-      desc: 'Naturally aspirated 4.0-liter flat-six engine revving to 9,000 RPM with DRS active aerodynamics, Weissach package, and carbon fiber bucket seats.',
-      features: JSON.stringify(['Weissach Lightweight Pack', 'PDK 7-Speed Dual Clutch', 'Active DRS Aero Wing', 'Front Axle Lift System']),
-      accessories: JSON.stringify(['Telemetry Track Pack Key', 'Indoor Car Cover', 'Emergency Tire Kit', 'Fast Transponder']),
-      serial: 'VIN-WP0ZZZ99ZTS-8812',
-      top_speed: '296 km/h',
-      acceleration: '3.0s (0-100)',
-      horsepower: '525 HP',
-      fuel_type: 'Premium 98'
+      deposit_rate: 300.0,
+      deposit_amount: 300.0,
+      replacement_value: 3499.0,
+      total_stock: 8,
+      available_stock: 6,
+      condition_status: 'Pristine',
+      description: 'Apple M3 Max chip with 16-core CPU and 40-core GPU, 32GB Unified Memory, 1TB Liquid Retina XDR display, ideal for 8K video editing, 3D rendering and software development.',
+      features: JSON.stringify(['M3 Max 16-Core CPU / 40-Core GPU', '32GB Unified Memory', '16.2 Liquid Retina XDR 120Hz', 'HDMI 2.1 & 3x Thunderbolt 4']),
+      accessories_included: JSON.stringify(['140W USB-C Power Adapter', 'MagSafe 3 Braided Cable', 'Hard-Shell Travel Sleeve']),
+      attributes_json: JSON.stringify({ Processor: 'M3 Max 16-Core', RAM: '32GB Unified', Storage: '1TB SSD', Screen: '16.2" XDR 120Hz' }),
+      serial_number: 'SN-APL-MBP16M3-9081'
     },
     {
       id: 2,
-      name: 'Audi RS e-tron GT Carbon Black Edition',
-      category: 'electric',
-      brand: 'Audi',
-      manufacturer: 'Audi Sport GmbH (Neckarsulm, Germany)',
-      color: 'Electric Cyan Metallic',
-      size: '4-Door Grand Tourer (4-Seater)',
-      model: 'RS e-tron GT',
-      image: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=1200&auto=format&fit=crop&q=80',
-      daily_rate: 420.0,
-      weekly_rate: 2200.0,
-      deposit_type: 'PERCENTAGE',
-      deposit_rate: 25.0,
-      deposit_amount: 1050.0,
-      replacement_val: 165000.0,
-      total_stock: 4,
-      available_stock: 3,
-      condition: 'Pristine',
-      desc: 'Dual electric motors producing up to 637 HP in boost mode with 800-volt high-speed architecture, carbon ceramic brakes, and Bang & Olufsen 3D sound.',
-      features: JSON.stringify(['800V Ultra-Fast Charging', 'All-Wheel Steering', 'Carbon Ceramic Brakes', 'Head-Up Display with AR']),
-      accessories: JSON.stringify(['CCS Fast Charge Cable (350kW)', 'Audi KeyCard', 'Luggage Net']),
-      serial: 'VIN-WAUZZZF28N1-4491',
-      top_speed: '250 km/h',
-      acceleration: '3.1s (0-100)',
-      horsepower: '637 HP',
-      fuel_type: '100% Electric (93 kWh)'
+      name: 'Sony Alpha A7 IV Mirrorless 4K Camera + FE 24-70mm GM Lens',
+      category_id: 'electronics',
+      subcategory_id: 'electronics-cameras',
+      brand: 'Sony',
+      manufacturer: 'Sony Corporation (Tokyo, Japan)',
+      color: 'Matte Black',
+      size: 'Full-Frame Mirrorless',
+      model: 'ILCE-7M4',
+      image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 15.0,
+      daily_rate: 35.0,
+      weekly_rate: 140.0,
+      deposit_type: 'FIXED',
+      deposit_rate: 250.0,
+      deposit_amount: 250.0,
+      replacement_value: 2899.0,
+      total_stock: 6,
+      available_stock: 4,
+      condition_status: 'Pristine',
+      description: '33MP Full-Frame Exmor R CMOS sensor, 4K 60p 10-bit 4:2:2 recording, Real-time Eye AF, 5-axis IBIS image stabilization, paired with Sony G Master 24-70mm f/2.8 GM II lens.',
+      features: JSON.stringify(['33MP Full-Frame Sensor', '4K 60p 10-Bit Video', 'Real-Time Eye Autofocus', '5-Axis In-Body Stabilization']),
+      accessories_included: JSON.stringify(['FE 24-70mm f/2.8 GM II Lens', '2x NP-FZ100 Batteries', 'Dual Battery Charger', '128GB V90 SD Card', 'Padded Camera Bag']),
+      attributes_json: JSON.stringify({ Sensor: '33MP Full-Frame', Lens: 'FE 24-70mm f/2.8 GM II', Video: '4K 60p 10-Bit', Stabilization: '5-Axis IBIS' }),
+      serial_number: 'SN-SNY-A7M4-4412'
     },
     {
       id: 3,
-      name: 'Mercedes-AMG G63 Night Edition',
-      category: 'luxury-suv',
-      brand: 'Mercedes-Benz',
-      manufacturer: 'Mercedes-AMG GmbH (Affalterbach / Graz, Austria)',
-      color: 'Obsidian Black Matte',
-      size: 'Heavy-Duty 5-Door Armored SUV',
-      model: 'AMG G63',
-      image: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?w=1200&auto=format&fit=crop&q=80',
-      daily_rate: 580.0,
-      weekly_rate: 2950.0,
+      name: 'LG 450L Double Door Smart Inverter Refrigerator',
+      category_id: 'appliances',
+      subcategory_id: 'appliances-fridges',
+      brand: 'LG',
+      manufacturer: 'LG Electronics (Seoul, South Korea)',
+      color: 'Stainless Steel Silver',
+      size: '450 Liters (Double Door)',
+      model: 'GL-T432APZX',
+      image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 8.0,
+      daily_rate: 25.0,
+      weekly_rate: 110.0,
       deposit_type: 'FIXED',
-      deposit_rate: 1400.0,
-      deposit_amount: 1400.0,
-      replacement_val: 210000.0,
-      total_stock: 3,
-      available_stock: 1,
-      condition: 'Pristine',
-      desc: 'Handcrafted AMG 4.0L V8 Biturbo producing 577 hp and 627 lb-ft of torque with side-exit sport exhaust, 3 lockable differentials, and designo Nappa leather.',
-      features: JSON.stringify(['AMG Performance Exhaust', 'Burmester Surround Audio', '3 Independent Diff Locks', '22-inch Forged Wheels']),
-      accessories: JSON.stringify(['Night Edition Key Fob', 'Roof Crossbars', 'All-Weather Floor Liners']),
-      serial: 'VIN-WDB4632761X-9902',
-      top_speed: '240 km/h',
-      acceleration: '4.5s (0-100)',
-      horsepower: '577 HP',
-      fuel_type: 'Twin-Turbo V8'
+      deposit_rate: 150.0,
+      deposit_amount: 150.0,
+      replacement_value: 1250.0,
+      total_stock: 5,
+      available_stock: 3,
+      condition_status: 'Pristine',
+      description: 'Frost-free double door refrigerator with Smart Inverter Compressor, DoorCooling+ technology, Convertible 4-in-1 storage modes, and ultra-quiet energy efficient operation.',
+      features: JSON.stringify(['450L Net Capacity', 'Smart Inverter Compressor', 'DoorCooling+ & Multi Air Flow', 'Convertible 4-in-1 Mode']),
+      accessories_included: JSON.stringify(['Ice Maker Tray', 'Egg Tray Holder', 'User Guide & Power Cord']),
+      attributes_json: JSON.stringify({ Capacity: '450 Liters', Energy: '5 Star Inverter', Type: 'Double Door Frost Free', Noise: '38 dB Silent' }),
+      serial_number: 'SN-LGE-REF450L-7710'
     },
     {
       id: 4,
-      name: 'Ferrari F8 Tributo Spider',
-      category: 'supercars',
-      brand: 'Ferrari',
-      manufacturer: 'Ferrari N.V. (Maranello, Italy)',
-      color: 'Rosso Corsa Racing Red',
-      size: 'Mid-Engine Retractable Spider',
-      model: 'F8 Tributo',
-      image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&auto=format&fit=crop&q=80',
-      daily_rate: 890.0,
-      weekly_rate: 4600.0,
+      name: 'Dyson V15 Detect Cordless Vacuum Cleaner',
+      category_id: 'household',
+      subcategory_id: 'household-cleaning',
+      brand: 'Dyson',
+      manufacturer: 'Dyson Ltd (Malmesbury, UK)',
+      color: 'Nickel / Yellow',
+      size: 'Cordless Handheld / Stick',
+      model: 'V15 Detect Complete',
+      image: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 5.0,
+      daily_rate: 15.0,
+      weekly_rate: 60.0,
       deposit_type: 'FIXED',
-      deposit_rate: 2200.0,
-      deposit_amount: 2200.0,
-      replacement_val: 375000.0,
-      total_stock: 2,
-      available_stock: 1,
-      condition: 'Pristine',
-      desc: 'Award-winning 3.9-liter twin-turbo V8 pumping out 710 HP with retractable hardtop, Ferrari Dynamic Enhancer (FDE+), and Rosso Corsa paintwork.',
-      features: JSON.stringify(['Side Slip Angle Control 6.1', 'Retractable Hardtop (14s)', 'Carbon Steering Wheel with LEDs', 'Carbon Ceramic Brakes']),
-      accessories: JSON.stringify(['Ferrari Presentation Box', 'Battery Tender Kit', 'Toolkit']),
-      serial: 'VIN-ZFF88NHA000-7711',
-      top_speed: '340 km/h',
-      acceleration: '2.9s (0-100)',
-      horsepower: '710 HP',
-      fuel_type: '3.9L Twin-Turbo V8'
+      deposit_rate: 80.0,
+      deposit_amount: 80.0,
+      replacement_value: 749.0,
+      total_stock: 10,
+      available_stock: 8,
+      condition_status: 'Pristine',
+      description: 'Dyson Hyperdymium motor producing 230 AW suction power, laser illumination reveals invisible dust, piezo sensor measures dust particles in real time with LCD screen feedback.',
+      features: JSON.stringify(['Laser Dust Illumination', '230 AW Suction Power', 'Piezo Sensor Dust Particle Counter', '60 Minute Swappable Battery']),
+      accessories_included: JSON.stringify(['Digital Motorbar Cleaner Head', 'Fluffy Optic Cleaner Head', 'Hair Screw Tool', 'Crevice & Combination Tool', 'Wall Dock Station']),
+      attributes_json: JSON.stringify({ Suction: '230 AW', Runtime: '60 Minutes', Filtration: 'HEPA Whole-Machine', Weight: '3.0 kg' }),
+      serial_number: 'SN-DYS-V15DET-1029'
     },
     {
       id: 5,
-      name: 'BMW M8 Competition Gran Coupé',
-      category: 'grand-touring',
-      brand: 'BMW',
-      manufacturer: 'BMW M GmbH (Dingolfing, Germany)',
-      color: 'Isle of Man Green Metallic',
-      size: 'Executive 4-Door Gran Coupé',
-      model: 'M8 Competition',
-      image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1200&auto=format&fit=crop&q=80',
-      daily_rate: 390.0,
-      weekly_rate: 1980.0,
-      deposit_type: 'PERCENTAGE',
-      deposit_rate: 20.0,
-      deposit_amount: 900.0,
-      replacement_val: 148000.0,
-      total_stock: 4,
-      available_stock: 2,
-      condition: 'Excellent',
-      desc: '617-hp 4.4-liter M TwinPower Turbo V8 paired with M xDrive all-wheel drive with switchable 2WD mode and carbon fiber roof.',
-      features: JSON.stringify(['M xDrive with 2WD Track Mode', 'M Carbon Bucket Seats', 'Bowers & Wilkins Diamond Sound', 'Laserlight Headlights']),
-      accessories: JSON.stringify(['BMW Display Key', 'Tire Mobility Set', 'Travel Luggage Pack']),
-      serial: 'VIN-WBAAE0C05M-3329',
-      top_speed: '305 km/h',
-      acceleration: '3.2s (0-100)',
-      horsepower: '617 HP',
-      fuel_type: 'TwinPower Turbo V8'
+      name: 'Herman Miller Aeron Ergonomic Office Desk Chair',
+      category_id: 'furniture',
+      subcategory_id: 'furniture-sofas',
+      brand: 'Herman Miller',
+      manufacturer: 'Herman Miller, Inc. (Zeeland, MI)',
+      color: 'Graphite Black',
+      size: 'Size B (Medium Standard)',
+      model: 'Aeron Remastered Fully Loaded',
+      image: 'https://images.unsplash.com/photo-1580481072645-022f9a6d83d0?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 6.0,
+      daily_rate: 20.0,
+      weekly_rate: 75.0,
+      deposit_type: 'FIXED',
+      deposit_rate: 120.0,
+      deposit_amount: 120.0,
+      replacement_value: 1495.0,
+      total_stock: 12,
+      available_stock: 9,
+      condition_status: 'Pristine',
+      description: 'Iconic ergonomic chair with 8Z Pellicle breathable mesh, PostureFit SL adjustable sacral and lumbar support, fully adjustable vinyl arms, and forward tilt mechanism for 12+ hour comfort.',
+      features: JSON.stringify(['8Z Pellicle Breathable Mesh', 'PostureFit SL Dual Lumbar Support', 'Forward & Backward Tilt Limiter', 'Fully Adjustable 4D Armrests']),
+      accessories_included: JSON.stringify(['Quiet Carpet Casters', 'Headrest Extension Bracket']),
+      attributes_json: JSON.stringify({ Material: '8Z Pellicle Mesh', Size: 'Size B (Medium)', Adjustability: 'PostureFit SL & Forward Tilt', Warranty: 'Fleet QA Verified' }),
+      serial_number: 'SN-HMI-AERON-3011'
     },
     {
       id: 6,
-      name: 'Tesla Model S Plaid (Tri-Motor)',
-      category: 'electric',
-      brand: 'Tesla',
-      manufacturer: 'Tesla, Inc. (Fremont Factory, California, USA)',
-      color: 'Pearl White Multi-Coat',
-      size: '5-Passenger Performance Liftback',
-      model: 'Model S Plaid',
-      image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=1200&auto=format&fit=crop&q=80',
-      daily_rate: 350.0,
-      weekly_rate: 1800.0,
+      name: 'Solid Teak Wood 6-Seater Dining Table & Chair Set',
+      category_id: 'furniture',
+      subcategory_id: 'furniture-tables',
+      brand: 'TeakCraft',
+      manufacturer: 'TeakCraft Artisan Workshop',
+      color: 'Natural Honey Walnut',
+      size: '6 Feet x 3.5 Feet',
+      model: 'Royal Heritage 6-Seater',
+      image: 'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 10.0,
+      daily_rate: 30.0,
+      weekly_rate: 120.0,
       deposit_type: 'FIXED',
-      deposit_rate: 800.0,
-      deposit_amount: 800.0,
-      replacement_val: 110000.0,
-      total_stock: 5,
-      available_stock: 3,
-      condition: 'Pristine',
-      desc: 'Tri-motor all-wheel drive with carbon-sleeved rotors delivering 1,020 HP and unmatched straight-line acceleration with full Autopilot suite.',
-      features: JSON.stringify(['1,020 HP Tri-Motor AWD', 'Yoke Steering / Wheel', 'Full Self-Driving Computer', 'Gaming Computer (10 TFLOPs)']),
-      accessories: JSON.stringify(['Tesla Key Card', 'Mobile Charging Connector', 'J1772 Adapter']),
-      serial: 'VIN-5YJSA1E67N-1190',
-      top_speed: '322 km/h',
-      acceleration: '1.99s (0-100)',
-      horsepower: '1020 HP',
-      fuel_type: '100% Electric (100 kWh)'
+      deposit_rate: 200.0,
+      deposit_amount: 200.0,
+      replacement_value: 1850.0,
+      total_stock: 4,
+      available_stock: 2,
+      condition_status: 'Pristine',
+      description: 'Hand-carved 100% solid grade-A teak wood dining table with 6 cushioned ergonomic dining chairs finished in water-resistant matte varnish for indoor and semi-outdoor gatherings.',
+      features: JSON.stringify(['100% Solid Teak Wood Frame', 'Stain & Heat Resistant Varnish', '6 Ergonomic Cushioned Chairs', 'Scratch Resistant Base Pads']),
+      accessories_included: JSON.stringify(['6 Fabric Chair Cushions', 'Teak Wood Care Oil']),
+      attributes_json: JSON.stringify({ Material: 'Grade-A Solid Teak', Seating: '6 Persons', Dimensions: '72" L x 42" W x 30" H', Weight: '85 kg' }),
+      serial_number: 'SN-TKC-TAB6S-8821'
     },
     {
       id: 7,
-      name: 'Rolls-Royce Ghost Extended Series II',
-      category: 'executive',
-      brand: 'Rolls-Royce',
-      manufacturer: 'Rolls-Royce Motor Cars (Goodwood Estate, West Sussex, UK)',
-      color: 'Arctic White / Bespoke Silver Contrast',
-      size: 'Extended Long-Wheelbase (LWB Flagship)',
-      model: 'Ghost Extended',
-      image: 'https://images.unsplash.com/photo-1631295868223-63265b40d9e4?w=1200&auto=format&fit=crop&q=80',
-      daily_rate: 980.0,
-      weekly_rate: 5100.0,
+      name: 'Bosch Professional 18V Cordless Drill & Impact Driver Tool Kit',
+      category_id: 'household',
+      subcategory_id: 'household-tools',
+      brand: 'Bosch',
+      manufacturer: 'Bosch Power Tools (Leinfelden, Germany)',
+      color: 'Bosch Blue / Black',
+      size: '18V Heavy Duty Kit',
+      model: 'GSB 18V-55 + GDR 18V-200',
+      image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 4.0,
+      daily_rate: 12.0,
+      weekly_rate: 45.0,
       deposit_type: 'FIXED',
-      deposit_rate: 2500.0,
-      deposit_amount: 2500.0,
-      replacement_val: 450000.0,
-      total_stock: 2,
-      available_stock: 1,
-      condition: 'Pristine',
-      desc: '6.75-liter twin-turbocharged V12 with Planar suspension system, Shooting Star Starlight Headliner, and bespoke champagne cooler in rear lounge.',
-      features: JSON.stringify(['Starlight Headliner with Shooting Stars', 'Bespoke Audio System (1300W)', 'Effortless Automatic Doors', 'Champagne Chiller']),
-      accessories: JSON.stringify(['Bespoke Umbrellas (in doors)', 'Crystal Decanter Set', 'Lambswool Floor Mats']),
-      serial: 'VIN-SCA664S43M-9011',
-      top_speed: '250 km/h',
-      acceleration: '4.8s (0-100)',
-      horsepower: '563 HP',
-      fuel_type: '6.75L Twin-Turbo V12'
+      deposit_rate: 60.0,
+      deposit_amount: 60.0,
+      replacement_value: 450.0,
+      total_stock: 15,
+      available_stock: 12,
+      condition_status: 'Pristine',
+      description: 'Brushless 18V combi drill with 55 Nm torque + 200 Nm impact driver, 2x 4.0Ah ProCORE batteries, 35-piece screwdriver bit set, wood/metal drill bits, and L-BOXX carrying case.',
+      features: JSON.stringify(['Brushless Motor Technology', '55 Nm Combi Drill + 200 Nm Impact Driver', '2x 4.0Ah ProCORE18V Batteries', 'Heavy Duty All-Metal Chuck']),
+      accessories_included: JSON.stringify(['2x 4.0Ah Batteries', 'GAL 18V-40 Fast Charger', '35-Piece Bit Set', 'L-BOXX Carrying Case']),
+      attributes_json: JSON.stringify({ Voltage: '18V Lithium-Ion', Torque: '55 Nm Drill / 200 Nm Impact', Batteries: '2x 4.0Ah Included', Motor: 'Brushless EC' }),
+      serial_number: 'SN-BSH-18VKIT-5510'
     },
     {
       id: 8,
-      name: 'Range Rover SV Autobiography V8',
-      category: 'luxury-suv',
-      brand: 'Land Rover',
-      manufacturer: 'Jaguar Land Rover Special Vehicle Operations (Coventry, UK)',
-      color: 'Ligurian Black Satin',
-      size: 'Long Wheelbase Executive SUV (4-Seater Lounge)',
-      model: 'Range Rover SV',
-      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200&auto=format&fit=crop&q=80',
-      daily_rate: 490.0,
-      weekly_rate: 2500.0,
-      deposit_type: 'PERCENTAGE',
-      deposit_rate: 20.0,
-      deposit_amount: 1200.0,
-      replacement_val: 235000.0,
+      name: 'JBL PartyBox 310 Portable Wireless Speaker & Mic System',
+      category_id: 'events',
+      subcategory_id: 'events-audio',
+      brand: 'JBL',
+      manufacturer: 'Harman International (Stamford, CT)',
+      color: 'Party Black',
+      size: '240W High Power Unit',
+      model: 'JBL PartyBox 310',
+      image: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 9.0,
+      daily_rate: 28.0,
+      weekly_rate: 110.0,
+      deposit_type: 'FIXED',
+      deposit_rate: 120.0,
+      deposit_amount: 120.0,
+      replacement_value: 799.0,
+      total_stock: 8,
+      available_stock: 5,
+      condition_status: 'Pristine',
+      description: '240W RMS output sound with JBL Pro Sound, dynamic sync light show, built-in smooth-glide wheels and telescopic handle, IPX4 splashproof rating, 18-hour battery life and dual wireless mics.',
+      features: JSON.stringify(['240W RMS JBL Pro Sound', 'Dynamic RGB Beat Light Show', '18-Hour Battery & Wheels/Telescopic Handle', 'Dual Mic & Guitar Inputs']),
+      accessories_included: JSON.stringify(['2x JBL Wireless Microphones', 'AC Power Cord', 'AUX 3.5mm Cable', 'Protection Cover']),
+      attributes_json: JSON.stringify({ Power: '240W RMS', Battery: '18 Hours', Waterproof: 'IPX4 Splashproof', Connectivity: 'Bluetooth 5.1 & AUX' }),
+      serial_number: 'SN-JBL-PB310-9901'
+    },
+    {
+      id: 9,
+      name: 'Segway Ninebot Max G30P Electric Scooter (65km Range)',
+      category_id: 'vehicles',
+      subcategory_id: 'vehicles-bikes',
+      brand: 'Segway',
+      manufacturer: 'Segway-Ninebot (Bedford, NH)',
+      color: 'Dark Grey',
+      size: 'Adult Commuter EV',
+      model: 'Ninebot KickScooter MAX G30P',
+      image: 'https://images.unsplash.com/photo-1591637333184-19aa84b3e01f?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 8.0,
+      daily_rate: 22.0,
+      weekly_rate: 85.0,
+      deposit_type: 'FIXED',
+      deposit_rate: 100.0,
+      deposit_amount: 100.0,
+      replacement_value: 899.0,
+      total_stock: 8,
+      available_stock: 6,
+      condition_status: 'Pristine',
+      description: '350W motor with 700W peak power, 30 km/h top speed, 65 km max travel range on single charge, 10-inch self-healing pneumatic tires, built-in fast charger and dual braking system.',
+      features: JSON.stringify(['30 km/h Top Speed & 65 km Range', '10" Self-Healing Pneumatic Tires', 'Dual Regenerative Braking System', 'Built-in 3A Internal Fast Charger']),
+      accessories_included: JSON.stringify(['Safety Helmet', 'Heavy Duty Cable Lock', 'AC Power Charging Cord', 'Phone Mount']),
+      attributes_json: JSON.stringify({ Speed: '30 km/h', Range: '65 km', Motor: '350W Nominal / 700W Peak', Tires: '10" Pneumatic' }),
+      serial_number: 'SN-SGW-G30P-1182'
+    },
+    {
+      id: 10,
+      name: 'Tesla Model 3 Long Range EV Sedan',
+      category_id: 'vehicles',
+      subcategory_id: 'vehicles-cars',
+      brand: 'Tesla',
+      manufacturer: 'Tesla, Inc. (Fremont, CA)',
+      color: 'Pearl White Multi-Coat',
+      size: '5-Passenger Electric Sedan',
+      model: 'Model 3 Long Range Dual Motor',
+      image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=1200&auto=format&fit=crop&q=80',
+      hourly_rate: 25.0,
+      daily_rate: 85.0,
+      weekly_rate: 390.0,
+      deposit_type: 'FIXED',
+      deposit_rate: 500.0,
+      deposit_amount: 500.0,
+      replacement_value: 47000.0,
       total_stock: 3,
       available_stock: 2,
-      condition: 'Pristine',
-      desc: 'Flagship SV bespoke luxury SUV with 523 HP twin-turbo V8, rear executive class seating, active noise cancellation, and all-wheel steering.',
-      features: JSON.stringify(['SV Bespoke Ceramic Controls', '24-Way Heated/Cooled Hot Stone Massage Seats', 'Active Noise Cancelling Headrests', 'Electronic Air Suspension']),
-      accessories: JSON.stringify(['SV Key Pouch', 'Deployable Side Steps Remote', 'Luggage Cover']),
-      serial: 'VIN-SALWR2V45M-6623',
-      top_speed: '261 km/h',
-      acceleration: '4.4s (0-100)',
-      horsepower: '523 HP',
-      fuel_type: '4.4L Twin-Turbo V8'
+      condition_status: 'Pristine',
+      description: 'Dual Motor All-Wheel Drive, 576 km EPA estimated range, 0-100 km/h in 4.2 seconds, 15-inch touchscreen with Premium Audio and Autopilot included.',
+      features: JSON.stringify(['Dual Motor AWD', '576 km Range', 'Autopilot Included', '15-inch Touchscreen with Netflix & Spotify']),
+      accessories_included: JSON.stringify(['Tesla Key Card', 'Mobile Charging Cable Kit', 'J1772 Charger Adapter']),
+      attributes_json: JSON.stringify({ Range: '576 km', Acceleration: '4.2s (0-100)', Drive: 'Dual Motor AWD', Seating: '5 Passengers' }),
+      serial_number: 'VIN-5YJ3E1EA5MF-7710'
     }
   ];
 
-  for (const p of carsData) {
+  marketplaceProducts.forEach(p => {
     insertProduct.run(
-      p.id, p.name, p.category, p.brand, p.manufacturer, p.color, p.size, p.model, p.image,
-      p.daily_rate, p.weekly_rate, p.deposit_type, p.deposit_rate, p.deposit_amount, p.replacement_val,
-      p.total_stock, p.available_stock, p.condition, p.desc,
-      p.features, p.accessories, p.serial,
-      p.top_speed, p.acceleration, p.horsepower, p.fuel_type
+      p.id, p.name, p.category_id, p.subcategory_id, p.brand, p.manufacturer, p.color, p.size, p.model, p.image,
+      p.hourly_rate, p.daily_rate, p.weekly_rate, p.deposit_type, p.deposit_rate, p.deposit_amount, p.replacement_value,
+      p.total_stock, p.available_stock, p.condition_status, p.description, p.features, p.accessories_included, p.attributes_json, p.serial_number
     );
-  }
+  });
+
+
+
 
   // Seed Product Variants
   const insertVariant = db.prepare(`
@@ -790,26 +878,15 @@ function seedDatabase(force = false) {
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  // Porsche 911 GT3 RS Variants
-  insertVariant.run(1, 'VAR-911-YEL', 'Weissach Track Pack (Speed Yellow)', 'Porsche', 'Dr. Ing. h.c. F. Porsche AG', 'Speed Yellow', '#f59e0b', 'Track Widebody (Coupe)', 'Weissach Package & Carbon Aero', 650.0, 1500.0, 2, 1, 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200', 1);
-  insertVariant.run(1, 'VAR-911-RED', 'ClubSport Racing Edition (Guards Red)', 'Porsche', 'Dr. Ing. h.c. F. Porsche AG', 'Guards Red', '#ef4444', 'Track Widebody (Coupe)', 'ClubSport Rollcage & Magnesium Wheels', 680.0, 1600.0, 1, 1, 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200', 0);
-  insertVariant.run(1, 'VAR-911-BLK', 'Obsidian Touring Stealth (Jet Black)', 'Porsche', 'Dr. Ing. h.c. F. Porsche AG', 'Jet Black Metallic', '#1e293b', 'Track Widebody (Coupe)', 'Touring Package with Carbon Brakes', 650.0, 1500.0, 1, 1, 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=1200', 0);
+  // Seed Multi-Category Product Variants
+  insertVariant.run(1, 'VAR-MBP16-BLK', 'Space Black Edition', 'Apple', 'Apple Inc.', 'Space Black', '#1e293b', '16.2-inch Display', 'M3 Max 16-Core / 32GB RAM / 1TB SSD', 45.0, 300.0, 5, 4, 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200', 1);
+  insertVariant.run(1, 'VAR-MBP16-SLV', 'Silver Edition', 'Apple', 'Apple Inc.', 'Silver', '#e2e8f0', '16.2-inch Display', 'M3 Max 16-Core / 32GB RAM / 1TB SSD', 45.0, 300.0, 3, 2, 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200', 0);
 
-  // Audi RS e-tron GT Variants
-  insertVariant.run(2, 'VAR-ETRON-CYAN', 'Carbon Black Edition (Electric Cyan)', 'Audi', 'Audi Sport GmbH', 'Electric Cyan', '#06b6d4', '4-Door Grand Tourer', 'Carbon Aerodynamics & 21-inch Blades', 420.0, 1050.0, 2, 2, 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=1200', 1);
-  insertVariant.run(2, 'VAR-ETRON-GRY', 'Vorsprung Executive (Daytona Gray)', 'Audi', 'Audi Sport GmbH', 'Daytona Gray Pearl', '#64748b', '4-Door Grand Tourer', 'Vorsprung Luxury Pack with B&O 3D Sound', 450.0, 1100.0, 2, 1, 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200', 0);
+  insertVariant.run(2, 'VAR-A7M4-STD', 'Standard Kit (24-70mm GM II)', 'Sony', 'Sony Corporation', 'Matte Black', '#0f172a', 'Full-Frame', 'Sony FE 24-70mm f/2.8 GM II Lens', 35.0, 250.0, 4, 3, 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200', 1);
+  insertVariant.run(2, 'VAR-A7M4-RIG', 'Cinema Video Rig Pack', 'Sony', 'Sony Corporation', 'Matte Black', '#0f172a', 'Full-Frame', 'Rig Cage, Follow Focus & Monitor', 48.0, 320.0, 2, 1, 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1200', 0);
 
-  // Ferrari F8 Tributo Spider Variants
-  insertVariant.run(4, 'VAR-F8-ROSSO', 'Rosso Corsa Scuderia Spec', 'Ferrari', 'Ferrari N.V.', 'Rosso Corsa', '#ef4444', 'Mid-Engine Spider (2-Seater)', 'Carbon Driving Zone & Titanium Exhaust', 890.0, 2200.0, 1, 1, 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200', 1);
-  insertVariant.run(4, 'VAR-F8-GIALLO', 'Giallo Modena Track Spec', 'Ferrari', 'Ferrari N.V.', 'Giallo Modena', '#facc15', 'Mid-Engine Spider (2-Seater)', 'Forged Diamond Wheels & Carbon Splitter', 920.0, 2300.0, 1, 0, 'https://images.unsplash.com/photo-1592198084033-aade902d1aae?w=1200', 0);
-
-  // Mercedes-AMG G63 Variants
-  insertVariant.run(3, 'VAR-G63-MATTE', 'Night Edition Magno (Matte Black)', 'Mercedes-Benz', 'Mercedes-AMG GmbH', 'Obsidian Black Matte', 'Heavy-Duty 5-Door Armored SUV', 'Night Package II & 22-inch Cross-Spoke', 580.0, 1400.0, 2, 1, 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?w=1200', 1);
-  insertVariant.run(3, 'VAR-G63-WHITE', 'G Manufaktur Exclusive (Opalite White)', 'Mercedes-Benz', 'Mercedes-AMG GmbH', 'Opalite White Bright', '#f8fafc', 'Heavy-Duty 5-Door Armored SUV', 'G Manufaktur Saddle Brown Leather', 590.0, 1450.0, 1, 0, 'https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=1200', 0);
-
-  // Rolls-Royce Ghost Extended Variants
-  insertVariant.run(7, 'VAR-RR-WHITE', 'Goodwood Bespoke (Arctic White)', 'Rolls-Royce', 'Rolls-Royce Motor Cars', 'Arctic White', 'Extended Long-Wheelbase (LWB)', 'Starlight Headliner & Champagne Cooler', 980.0, 2500.0, 1, 1, 'https://images.unsplash.com/photo-1631295868223-63265b40d9e4?w=1200', 1);
-  insertVariant.run(7, 'VAR-RR-BLACK', 'Black Badge Ghost (Midnight Sapphire)', 'Rolls-Royce', 'Rolls-Royce Motor Cars', 'Midnight Sapphire / Black Badge', '#0f172a', 'Extended Long-Wheelbase (LWB)', 'Black Badge High-Power Spec (600 HP)', 1080.0, 2800.0, 1, 0, 'https://images.unsplash.com/photo-1563720223185-11003d516935?w=1200', 0);
+  insertVariant.run(5, 'VAR-AERON-BLK', 'Aeron Size B (Graphite)', 'Herman Miller', 'Herman Miller Inc.', 'Graphite Black', '#1e293b', 'Size B Medium', 'PostureFit SL & Forward Tilt', 20.0, 120.0, 8, 6, 'https://images.unsplash.com/photo-1580481072645-022f9a6d83d0?w=1200', 1);
+  insertVariant.run(5, 'VAR-AERON-SLV', 'Aeron Size B (Mineral Satin)', 'Herman Miller', 'Herman Miller Inc.', 'Mineral Satin Silver', '#cbd5e1', 'Size B Medium', 'PostureFit SL & Satin Frame', 22.0, 130.0, 4, 3, 'https://images.unsplash.com/photo-1580481072645-022f9a6d83d0?w=1200', 0);
 
   // Dynamic Pricelists with Condition Types & Time-Based Pricing Rules
   const insertPricelist = db.prepare(`

@@ -1,24 +1,76 @@
-// backend/controllers/productController.js - Product Catalog with Attributes & Variants Support
+// backend/controllers/productController.js - Multi-Category Rental Marketplace Catalog Controller
 const { db } = require('../config/database');
 
 function getCategories() {
-  const rows = db.prepare('SELECT * FROM categories ORDER BY name ASC').all();
-  return { status: 200, data: rows };
+  const rows = db.prepare('SELECT * FROM categories ORDER BY parent_category_id ASC, name ASC').all();
+  
+  // Group main categories and subcategories
+  const mainCategories = rows.filter(c => !c.parent_category_id);
+  const result = mainCategories.map(main => ({
+    ...main,
+    subcategories: rows.filter(sub => sub.parent_category_id === main.id)
+  }));
+
+  return { status: 200, data: result, raw: rows };
 }
 
-function getProducts(categoryId = null) {
+function createCategory(body) {
+  const { id, parent_category_id = null, name, icon = 'tag', description = '' } = body;
+  if (!id || !name) {
+    return { status: 400, data: { error: 'Category ID and Name are required.' } };
+  }
+
+  const cleanId = id.trim().toLowerCase().replace(/\s+/g, '-');
+  db.prepare(`
+    INSERT INTO categories (id, parent_category_id, name, icon, description)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(cleanId, parent_category_id || null, name.trim(), icon, description.trim());
+
+  return { status: 201, data: { id: cleanId, parent_category_id, name, icon, description } };
+}
+
+function updateCategory(id, body) {
+  const existing = db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
+  if (!existing) {
+    return { status: 404, data: { error: 'Category not found' } };
+  }
+
+  const { name = existing.name, icon = existing.icon, description = existing.description, parent_category_id = existing.parent_category_id } = body;
+  db.prepare(`
+    UPDATE categories
+    SET name = ?, icon = ?, description = ?, parent_category_id = ?
+    WHERE id = ?
+  `).run(name.trim(), icon, description.trim(), parent_category_id || null, id);
+
+  return { status: 200, data: { id, name, icon, description, parent_category_id } };
+}
+
+function deleteCategory(id) {
+  db.prepare('DELETE FROM categories WHERE id = ? OR parent_category_id = ?').run(id, id);
+  return { status: 200, data: { message: `Category ${id} deleted` } };
+}
+
+function getProducts(categoryId = null, subcategoryId = null) {
   let query = 'SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.id';
   const params = [];
+  const conditions = [];
 
   if (categoryId && categoryId !== 'all') {
-    query += ' WHERE p.category_id = ?';
+    conditions.push('p.category_id = ?');
     params.push(categoryId);
+  }
+
+  if (subcategoryId && subcategoryId !== 'all') {
+    conditions.push('p.subcategory_id = ?');
+    params.push(subcategoryId);
+  }
+
+  if (conditions.length > 0) {
+    query += ' WHERE ' + conditions.join(' AND ');
   }
 
   query += ' ORDER BY p.id ASC';
   const products = db.prepare(query).all(...params);
-
-  // Fetch all variants for each product
   const allVariants = db.prepare('SELECT * FROM product_variants ORDER BY is_default DESC, id ASC').all();
 
   const formatted = products.map(p => {
@@ -27,6 +79,7 @@ function getProducts(categoryId = null) {
       ...p,
       features: p.features ? JSON.parse(p.features) : [],
       accessories_included: p.accessories_included ? JSON.parse(p.accessories_included) : [],
+      attributes: p.attributes_json ? JSON.parse(p.attributes_json) : {},
       variants: variants.length > 0 ? variants : [
         {
           id: `def-${p.id}`,
@@ -35,10 +88,10 @@ function getProducts(categoryId = null) {
           variant_name: `${p.name} (Standard Specification)`,
           brand: p.brand,
           manufacturer: p.manufacturer || 'OEM Factory',
-          color: p.color || 'Obsidian Black',
+          color: p.color || 'Standard',
           color_hex: '#f59e0b',
           size: p.size || 'Standard Spec',
-          trim_package: 'Factory Standard Performance',
+          trim_package: 'Standard Marketplace Spec',
           daily_rate_override: p.daily_rate,
           deposit_amount_override: p.deposit_amount,
           stock_count: p.total_stock,
@@ -62,7 +115,7 @@ function getProductById(id) {
   `).get(id);
 
   if (!product) {
-    return { status: 404, data: { error: 'Vehicle not found' } };
+    return { status: 404, data: { error: 'Product not found' } };
   }
 
   const variants = db.prepare('SELECT * FROM product_variants WHERE product_id = ? ORDER BY is_default DESC, id ASC').all(id);
@@ -73,6 +126,7 @@ function getProductById(id) {
       ...product,
       features: product.features ? JSON.parse(product.features) : [],
       accessories_included: product.accessories_included ? JSON.parse(product.accessories_included) : [],
+      attributes: product.attributes_json ? JSON.parse(product.attributes_json) : {},
       variants: variants.length > 0 ? variants : [
         {
           id: `def-${product.id}`,
@@ -81,10 +135,10 @@ function getProductById(id) {
           variant_name: `${product.name} (Standard Specification)`,
           brand: product.brand,
           manufacturer: product.manufacturer || 'OEM Factory',
-          color: product.color || 'Obsidian Black',
+          color: product.color || 'Standard',
           color_hex: '#f59e0b',
           size: product.size || 'Standard Spec',
-          trim_package: 'Factory Standard Performance',
+          trim_package: 'Standard Marketplace Spec',
           daily_rate_override: product.daily_rate,
           deposit_amount_override: product.deposit_amount,
           stock_count: product.total_stock,
@@ -101,33 +155,32 @@ function createProduct(body) {
   const {
     name,
     category_id,
-    brand,
+    subcategory_id = null,
+    brand = 'Generic',
     manufacturer = 'OEM Factory',
-    color = 'Obsidian Black',
+    color = 'Standard',
     size = 'Standard Spec',
     model = '',
     image,
+    hourly_rate = 0,
     daily_rate,
     weekly_rate,
     deposit_type = 'FIXED',
-    deposit_rate = 1000.0,
+    deposit_rate = 100.0,
     deposit_amount,
-    replacement_value = 150000.0,
+    replacement_value = 500.0,
     total_stock = 1,
     condition_status = 'Pristine',
     description = '',
     features = [],
     accessories_included = [],
+    attributes = {},
     serial_number = '',
-    top_speed = '300 km/h',
-    acceleration = '3.2s (0-100)',
-    horsepower = '500 HP',
-    fuel_type = 'Premium 98',
     variants = []
   } = body;
 
-  if (!name || !category_id || !brand || !daily_rate) {
-    return { status: 400, data: { error: 'Name, category, brand, and daily rate are required.' } };
+  if (!name || !category_id || !daily_rate) {
+    return { status: 400, data: { error: 'Name, category, and daily rate are required.' } };
   }
 
   const effectiveDepositAmount = deposit_amount || (deposit_type === 'PERCENTAGE' ? (daily_rate * 3 * (deposit_rate / 100)) : deposit_rate);
@@ -135,27 +188,27 @@ function createProduct(body) {
 
   const insert = db.prepare(`
     INSERT INTO products (
-      name, category_id, brand, manufacturer, color, size, model, image, daily_rate, weekly_rate,
-      deposit_type, deposit_rate, deposit_amount, replacement_value, total_stock, available_stock,
-      condition_status, description, features, accessories_included, serial_number,
-      top_speed, acceleration, horsepower, fuel_type
+      name, category_id, subcategory_id, brand, manufacturer, color, size, model, image,
+      hourly_rate, daily_rate, weekly_rate, deposit_type, deposit_rate, deposit_amount, replacement_value,
+      total_stock, available_stock, condition_status, description, features, accessories_included, attributes_json, serial_number
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-      ?, ?, ?, ?, ?, ?,
-      ?, ?, ?, ?, ?,
-      ?, ?, ?, ?
+      ?, ?, ?, ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?, ?, ?
     )
   `);
 
   const result = insert.run(
     name.trim(),
     category_id,
+    subcategory_id,
     brand.trim(),
     manufacturer.trim(),
     color.trim(),
     size.trim(),
     model ? model.trim() : null,
-    image || 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200',
+    image || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200',
+    Number(hourly_rate),
     Number(daily_rate),
     Number(effectiveWeekly),
     deposit_type,
@@ -168,63 +221,11 @@ function createProduct(body) {
     description.trim(),
     JSON.stringify(features),
     JSON.stringify(accessories_included),
-    serial_number || `VIN-${brand.toUpperCase().substring(0, 3)}-${Math.floor(1000 + Math.random() * 9000)}`,
-    top_speed,
-    acceleration,
-    horsepower,
-    fuel_type
+    JSON.stringify(attributes),
+    serial_number || `SN-${brand.toUpperCase().substring(0, 3)}-${Math.floor(1000 + Math.random() * 9000)}`
   );
 
   const productId = result.lastInsertRowid;
-
-  // Insert default variant
-  const insertVariant = db.prepare(`
-    INSERT INTO product_variants (
-      product_id, sku, variant_name, brand, manufacturer, color, color_hex, size, trim_package,
-      daily_rate_override, deposit_amount_override, stock_count, available_stock, image_override, is_default
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  if (variants && variants.length > 0) {
-    for (const v of variants) {
-      insertVariant.run(
-        productId,
-        v.sku || `SKU-${productId}-${Math.floor(100 + Math.random() * 900)}`,
-        v.variant_name || `${name} (${v.color || color})`,
-        brand,
-        manufacturer,
-        v.color || color,
-        v.color_hex || '#f59e0b',
-        v.size || size,
-        v.trim_package || 'Performance Spec',
-        v.daily_rate_override ? Number(v.daily_rate_override) : Number(daily_rate),
-        v.deposit_amount_override ? Number(v.deposit_amount_override) : Number(effectiveDepositAmount),
-        v.stock_count || 1,
-        v.available_stock || 1,
-        v.image_override || image,
-        v.is_default ? 1 : 0
-      );
-    }
-  } else {
-    insertVariant.run(
-      productId,
-      `SKU-${productId}-STD`,
-      `${name} (${color})`,
-      brand,
-      manufacturer,
-      color,
-      '#f59e0b',
-      size,
-      'Standard Performance Spec',
-      Number(daily_rate),
-      Number(effectiveDepositAmount),
-      Number(total_stock),
-      Number(total_stock),
-      image,
-      1
-    );
-  }
-
   const created = getProductById(productId);
   return { status: 201, data: created.data };
 }
@@ -238,12 +239,14 @@ function updateProduct(id, body) {
   const {
     name = existing.name,
     category_id = existing.category_id,
+    subcategory_id = existing.subcategory_id,
     brand = existing.brand,
     manufacturer = existing.manufacturer,
     color = existing.color,
     size = existing.size,
     model = existing.model,
     image = existing.image,
+    hourly_rate = existing.hourly_rate,
     daily_rate = existing.daily_rate,
     weekly_rate = existing.weekly_rate,
     deposit_type = existing.deposit_type,
@@ -251,142 +254,79 @@ function updateProduct(id, body) {
     deposit_amount = existing.deposit_amount,
     replacement_value = existing.replacement_value,
     total_stock = existing.total_stock,
+    available_stock = existing.available_stock,
     condition_status = existing.condition_status,
     description = existing.description,
-    features = null,
-    accessories_included = null,
-    serial_number = existing.serial_number,
-    top_speed = existing.top_speed,
-    acceleration = existing.acceleration,
-    horsepower = existing.horsepower,
-    fuel_type = existing.fuel_type
+    features = existing.features ? JSON.parse(existing.features) : [],
+    accessories_included = existing.accessories_included ? JSON.parse(existing.accessories_included) : [],
+    attributes = existing.attributes_json ? JSON.parse(existing.attributes_json) : {},
+    serial_number = existing.serial_number
   } = body;
 
   db.prepare(`
-    UPDATE products SET
-      name = ?, category_id = ?, brand = ?, manufacturer = ?, color = ?, size = ?, model = ?,
-      image = ?, daily_rate = ?, weekly_rate = ?, deposit_type = ?, deposit_rate = ?, deposit_amount = ?,
-      replacement_value = ?, total_stock = ?, condition_status = ?, description = ?,
-      features = COALESCE(?, features), accessories_included = COALESCE(?, accessories_included),
-      serial_number = ?, top_speed = ?, acceleration = ?, horsepower = ?, fuel_type = ?
+    UPDATE products
+    SET name = ?, category_id = ?, subcategory_id = ?, brand = ?, manufacturer = ?, color = ?, size = ?, model = ?, image = ?,
+        hourly_rate = ?, daily_rate = ?, weekly_rate = ?, deposit_type = ?, deposit_rate = ?, deposit_amount = ?, replacement_value = ?,
+        total_stock = ?, available_stock = ?, condition_status = ?, description = ?, features = ?, accessories_included = ?, attributes_json = ?, serial_number = ?
     WHERE id = ?
   `).run(
-    name, category_id, brand, manufacturer, color, size, model,
-    image, Number(daily_rate), Number(weekly_rate), deposit_type, Number(deposit_rate), Number(deposit_amount),
-    Number(replacement_value), Number(total_stock), condition_status, description,
-    features ? JSON.stringify(features) : null,
-    accessories_included ? JSON.stringify(accessories_included) : null,
-    serial_number, top_speed, acceleration, horsepower, fuel_type,
+    name.trim(), category_id, subcategory_id, brand.trim(), manufacturer.trim(), color.trim(), size.trim(), model ? model.trim() : null, image,
+    Number(hourly_rate), Number(daily_rate), Number(weekly_rate), deposit_type, Number(deposit_rate), Number(deposit_amount), Number(replacement_value),
+    Number(total_stock), Number(available_stock), condition_status, description.trim(), JSON.stringify(features), JSON.stringify(accessories_included), JSON.stringify(attributes), serial_number,
     id
   );
 
-  const updated = getProductById(id);
-  return { status: 200, data: updated.data };
+  return getProductById(id);
 }
 
-// Product Variant CRUD
+function deleteProduct(id) {
+  db.prepare('DELETE FROM products WHERE id = ?').run(id);
+  db.prepare('DELETE FROM product_variants WHERE product_id = ?').run(id);
+  return { status: 200, data: { message: `Product #${id} deleted successfully` } };
+}
+
+// Product Variants CRUD
 function createProductVariant(productId, body) {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(productId);
-  if (!product) {
-    return { status: 404, data: { error: 'Product not found' } };
-  }
+  if (!product) return { status: 404, data: { error: 'Parent product not found' } };
 
   const {
-    sku,
-    variant_name,
-    color,
-    color_hex = '#f59e0b',
-    size = product.size,
-    trim_package = 'Custom Performance Trim',
-    daily_rate_override,
-    deposit_amount_override,
-    stock_count = 1,
-    image_override,
-    is_default = 0
+    sku, variant_name, brand = product.brand, manufacturer = product.manufacturer,
+    color = product.color, color_hex = '#f59e0b', size = product.size, trim_package = 'Standard Spec',
+    daily_rate_override = product.daily_rate, deposit_amount_override = product.deposit_amount,
+    stock_count = 1, available_stock = 1, image_override = product.image, is_default = 0
   } = body;
 
-  if (!variant_name || !color) {
-    return { status: 400, data: { error: 'Variant name and color are required.' } };
-  }
-
-  const uniqueSku = sku || `SKU-${productId}-${color.toUpperCase().substring(0, 3)}-${Math.floor(100 + Math.random() * 900)}`;
-
-  const result = db.prepare(`
+  const generatedSku = sku || `SKU-${productId}-${Math.floor(100 + Math.random() * 900)}`;
+  const info = db.prepare(`
     INSERT INTO product_variants (
       product_id, sku, variant_name, brand, manufacturer, color, color_hex, size, trim_package,
       daily_rate_override, deposit_amount_override, stock_count, available_stock, image_override, is_default
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    productId,
-    uniqueSku,
-    variant_name,
-    product.brand,
-    product.manufacturer,
-    color,
-    color_hex,
-    size,
-    trim_package,
-    daily_rate_override ? Number(daily_rate_override) : product.daily_rate,
-    deposit_amount_override ? Number(deposit_amount_override) : product.deposit_amount,
-    Number(stock_count),
-    Number(stock_count),
-    image_override || product.image,
-    is_default ? 1 : 0
+    productId, generatedSku, variant_name || `${product.name} (${color})`, brand, manufacturer,
+    color, color_hex, size, trim_package, Number(daily_rate_override), Number(deposit_amount_override),
+    Number(stock_count), Number(available_stock), image_override, is_default ? 1 : 0
   );
 
-  const variant = db.prepare('SELECT * FROM product_variants WHERE id = ?').get(result.lastInsertRowid);
-  return { status: 201, data: variant };
-}
-
-function updateProductVariant(variantId, body) {
-  const existing = db.prepare('SELECT * FROM product_variants WHERE id = ?').get(variantId);
-  if (!existing) {
-    return { status: 404, data: { error: 'Variant not found' } };
-  }
-
-  const {
-    variant_name = existing.variant_name,
-    color = existing.color,
-    color_hex = existing.color_hex,
-    size = existing.size,
-    trim_package = existing.trim_package,
-    daily_rate_override = existing.daily_rate_override,
-    deposit_amount_override = existing.deposit_amount_override,
-    stock_count = existing.stock_count,
-    available_stock = existing.available_stock,
-    image_override = existing.image_override,
-    is_default = existing.is_default
-  } = body;
-
-  db.prepare(`
-    UPDATE product_variants SET
-      variant_name = ?, color = ?, color_hex = ?, size = ?, trim_package = ?,
-      daily_rate_override = ?, deposit_amount_override = ?, stock_count = ?,
-      available_stock = ?, image_override = ?, is_default = ?
-    WHERE id = ?
-  `).run(
-    variant_name, color, color_hex, size, trim_package,
-    Number(daily_rate_override), Number(deposit_amount_override), Number(stock_count),
-    Number(available_stock), image_override, is_default ? 1 : 0,
-    variantId
-  );
-
-  const updated = db.prepare('SELECT * FROM product_variants WHERE id = ?').get(variantId);
-  return { status: 200, data: updated };
+  return { status: 201, data: { id: info.lastInsertRowid, product_id: productId, sku: generatedSku, variant_name } };
 }
 
 function deleteProductVariant(variantId) {
   db.prepare('DELETE FROM product_variants WHERE id = ?').run(variantId);
-  return { status: 200, data: { message: 'Variant deleted successfully' } };
+  return { status: 200, data: { message: `Variant #${variantId} deleted successfully` } };
 }
 
 module.exports = {
   getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
   getProducts,
   getProductById,
   createProduct,
   updateProduct,
+  deleteProduct,
   createProductVariant,
-  updateProductVariant,
   deleteProductVariant
 };

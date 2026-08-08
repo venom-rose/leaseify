@@ -114,15 +114,33 @@ async function handleApiRequest(req, res, pathname, query, body, user) {
     }
 
     // ----------------------------------------------------
-    // PRODUCTS, ATTRIBUTES & VARIANTS ROUTES
+    // PRODUCTS, CATEGORIES & SUB-CATEGORIES
     // ----------------------------------------------------
     if (pathname === '/api/categories' && req.method === 'GET') {
       return productController.getCategories();
     }
 
+    if (pathname === '/api/categories' && req.method === 'POST') {
+      if (!user || user.role !== 'admin') return { status: 403, data: { error: 'Admin role required' } };
+      return productController.createCategory(body);
+    }
+
+    if (pathname.startsWith('/api/categories/') && req.method === 'PUT') {
+      if (!user || user.role !== 'admin') return { status: 403, data: { error: 'Admin role required' } };
+      const catId = pathname.split('/')[3];
+      return productController.updateCategory(catId, body);
+    }
+
+    if (pathname.startsWith('/api/categories/') && req.method === 'DELETE') {
+      if (!user || user.role !== 'admin') return { status: 403, data: { error: 'Admin role required' } };
+      const catId = pathname.split('/')[3];
+      return productController.deleteCategory(catId);
+    }
+
     if (pathname === '/api/products' && req.method === 'GET') {
-      const categoryId = query.get('category');
-      return productController.getProducts(categoryId);
+      const categoryId = query.category || null;
+      const subcategoryId = query.subcategory || null;
+      return productController.getProducts(categoryId, subcategoryId);
     }
 
     if (pathname.startsWith('/api/products/') && !pathname.includes('/variants') && req.method === 'GET') {

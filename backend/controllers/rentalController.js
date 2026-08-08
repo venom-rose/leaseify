@@ -61,6 +61,8 @@ function createRental(payload) {
     product_id,
     start_date,
     end_date,
+    quantity = 1,
+    rate_unit = 'DAY',
     fulfillment_type = 'PICKUP',
     delivery_address = '',
     payment_method = 'CREDIT_CARD',
@@ -73,11 +75,13 @@ function createRental(payload) {
 
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(product_id);
   if (!product) {
-    return { status: 404, data: { error: 'Vehicle not found' } };
+    return { status: 404, data: { error: 'Product not found in rental catalog' } };
   }
 
-  if (product.available_stock <= 0) {
-    return { status: 400, data: { error: 'Vehicle is currently out of stock or reserved' } };
+  const qty = parseInt(quantity, 10) || 1;
+
+  if (product.available_stock < qty) {
+    return { status: 400, data: { error: `Insufficient stock! Only ${product.available_stock} unit(s) available for rental.` } };
   }
 
   const start = new Date(start_date);
@@ -89,13 +93,13 @@ function createRental(payload) {
   if (durationDays >= 7 && product.weekly_rate > 0) {
     const weeks = Math.floor(durationDays / 7);
     const remDays = durationDays % 7;
-    baseRentalFee = (weeks * product.weekly_rate) + (remDays * product.daily_rate);
+    baseRentalFee = ((weeks * product.weekly_rate) + (remDays * product.daily_rate)) * qty;
   } else {
-    baseRentalFee = durationDays * product.daily_rate;
+    baseRentalFee = durationDays * product.daily_rate * qty;
   }
 
   // Support FIXED vs PERCENTAGE deposit
-  let depositAmount = product.deposit_amount;
+  let depositAmount = product.deposit_amount * qty;
   const depositType = product.deposit_type || 'FIXED';
   const depositRate = product.deposit_rate || product.deposit_amount;
 
@@ -103,7 +107,7 @@ function createRental(payload) {
     depositAmount = Math.round((baseRentalFee * (depositRate / 100)) * 100) / 100;
   }
 
-  const deliveryFee = fulfillment_type === 'DELIVERY' ? 150.0 : 0.0;
+  const deliveryFee = fulfillment_type === 'DELIVERY' ? 45.0 : 0.0;
   const totalPaidToday = baseRentalFee + depositAmount + deliveryFee;
 
   const randomNum = Math.floor(1000 + Math.random() * 9000);
@@ -114,14 +118,14 @@ function createRental(payload) {
   const insert = db.prepare(`
     INSERT INTO rentals (
       rental_code, invoice_number, user_id, product_id, quotation_id,
-      start_date, end_date, duration_days, daily_rate, base_rental_fee,
+      start_date, end_date, duration_days, quantity, rate_unit, daily_rate, base_rental_fee,
       deposit_type, deposit_rate_applied, deposit_amount, deposit_status,
       damage_fee, late_hours_count, late_days_count, late_penalty_fee, deposit_refunded_amount,
       deposit_held_at, status, fulfillment_type, delivery_address, delivery_fee,
       payment_method, paid_at, customer_notes, created_at
     ) VALUES (
       ?, ?, ?, ?, ?,
-      ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?, ?, ?,
       ?, ?, ?, 'HELD',
       0, 0, 0, 0, 0,
       ?, 'PENDING_APPROVAL', ?, ?, ?,
@@ -138,6 +142,8 @@ function createRental(payload) {
     start_date,
     end_date,
     durationDays,
+    qty,
+    rate_unit,
     product.daily_rate,
     baseRentalFee,
     depositType,
@@ -145,13 +151,16 @@ function createRental(payload) {
     depositAmount,
     nowStr,
     fulfillment_type,
-    delivery_address || (fulfillment_type === 'PICKUP' ? 'Leaseify Executive Lounge' : 'Client Delivery Destination'),
+    delivery_address || (fulfillment_type === 'PICKUP' ? 'Leaseify Marketplace Center' : 'Client Delivery Address'),
     deliveryFee,
     payment_method,
     nowStr,
-    customer_notes ?? null,
+    customer_notes,
     nowStr
   );
+
+  // Decrement stock
+  db.prepare('UPDATE products SET available_stock = available_stock - ? WHERE id = ?').run(qty, product_id);
 
   const rentalId = result.lastInsertRowid;
 

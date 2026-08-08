@@ -2,8 +2,8 @@
 const { db } = require('../config/database');
 
 function getQuotations(searchParams) {
-  const status = searchParams.get('status');
-  const search = searchParams.get('search');
+  const status = searchParams?.get ? searchParams.get('status') : (searchParams?.status || null);
+  const search = searchParams?.get ? searchParams.get('search') : (searchParams?.search || null);
 
   let query = `
     SELECT q.*,

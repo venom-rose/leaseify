@@ -3,8 +3,8 @@ const { db } = require('../config/database');
 const { generateSalt, hashPassword } = require('../services/authService');
 
 function getUsers(searchParams) {
-  const role = searchParams.get('role');
-  const search = searchParams.get('search');
+  const role = searchParams?.get ? searchParams.get('role') : (searchParams?.role || null);
+  const search = searchParams?.get ? searchParams.get('search') : (searchParams?.search || null);
 
   let query = `
     SELECT u.id, u.name, u.email, u.role, u.avatar, u.address, u.phone, u.membership_tier, u.created_at,

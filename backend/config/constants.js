@@ -1,11 +1,13 @@
-// backend/config/constants.js
 const path = require('node:path');
+const fs = require('node:fs');
 
 module.exports = {
   PORT: process.env.PORT || 3000,
   JWT_SECRET: process.env.JWT_SECRET || 'leaseify-super-secret-luxury-jwt-key-2026',
   TOKEN_EXPIRY_MS: 24 * 60 * 60 * 1000, // 24 hours
-  PUBLIC_DIR: path.join(__dirname, '..', '..', 'public'),
+  PUBLIC_DIR: fs.existsSync(path.join(__dirname, '..', '..', 'frontend', 'public'))
+    ? path.join(__dirname, '..', '..', 'frontend', 'public')
+    : path.join(__dirname, '..', '..', 'public'),
   MIME_TYPES: {
     '.html': 'text/html; charset=utf-8',
     '.css': 'text/css; charset=utf-8',

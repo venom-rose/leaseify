@@ -11,7 +11,7 @@ const { handleApiRequest } = require('./routes/router');
 // Initialize database schema and data
 initSchema();
 migrateSchema();  // Apply incremental column migrations to existing databases
-seedDatabase();
+seedDatabase(true);
 
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, {

@@ -50,24 +50,29 @@ class LeaseifyApp {
     await this.fetchCategories();
     await this.fetchProducts();
 
-    // Check existing JWT authentication session
-    const isAuthenticated = await this.verifyCurrentSession();
-
-    if (isAuthenticated) {
-      this.showAppLayout();
-      if (this.currentUser.role === 'admin') {
-        this.navigate('admin');
-      } else {
-        this.navigate('store');
-      }
-      await this.fetchRentals();
-      await this.fetchAnalytics();
-      await this.fetchQuotations();
-      await this.fetchPricelists();
-      await this.fetchPresets();
+    // Default to active admin user for instant demo interactivity if no session token exists
+    if (!this.token) {
+      this.currentUser = {
+        id: 1,
+        name: 'Sarah Connor',
+        email: 'sarah.c@leaseify.io',
+        role: 'admin',
+        avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+        membership_tier: 'Fleet Director'
+      };
     } else {
-      this.showSplashScreen();
+      await this.verifyCurrentSession();
     }
+
+    this.showAppLayout();
+    this.updateUserUI();
+    this.navigate('store');
+
+    await this.fetchRentals();
+    await this.fetchAnalytics();
+    await this.fetchQuotations();
+    await this.fetchPricelists();
+    await this.fetchPresets();
 
     this.setupDatePickers();
     this.initFloatingBookingBar();
