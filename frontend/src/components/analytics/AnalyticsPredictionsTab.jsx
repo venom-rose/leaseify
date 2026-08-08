@@ -229,12 +229,12 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
             <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-semibold text-[11px] uppercase tracking-wider flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Predictive AI & Inventory Intelligence
             </span>
-            <span className="text-xs text-warm-500">Risk Assessment Engine</span>
+            <span className="text-xs text-warm-300">Risk Assessment Engine</span>
           </div>
-          <h2 className="text-2xl font-black text-warm-900 tracking-tight mt-1">
+          <h2 className="text-2xl font-black text-white tracking-tight mt-1">
             Overdue Risk Predictions & Inventory Utilization
           </h2>
-          <p className="text-xs text-warm-500 mt-1">
+          <p className="text-xs text-warm-200 mt-1">
             AI-driven probability models to predict late returns, trigger automated email reminders, and optimize product availability.
           </p>
         </div>

@@ -26,15 +26,15 @@ export const TenantPortalTab = ({ onNavigateTab }) => {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="glass-panel p-6 rounded-3xl border border-warm-200 bg-gradient-to-r from-slate-900 via-slate-900 to-sky-950/40 relative overflow-hidden">
+      <div className="p-6 rounded-3xl border border-warm-200 bg-gradient-to-r from-slate-900 via-slate-900 to-sky-950/40 relative overflow-hidden">
         <div className="relative z-10 max-w-xl">
           <Badge variant="user" className="mb-3">
             Tenant Resident Portal
           </Badge>
-          <h2 className="text-2xl font-bold text-warm-900 tracking-tight">
+          <h2 className="text-2xl font-bold text-white tracking-tight">
             Welcome home, {user?.name?.split(' ')[0] || 'Alex'}!
           </h2>
-          <p className="text-sm text-warm-600 mt-2 leading-relaxed">
+          <p className="text-sm text-warm-200 mt-2 leading-relaxed">
             Your resident dashboard for Skyline Luxury Penthouse (Suite 44B). Manage monthly rent, request repairs, and view your lease terms.
           </p>
         </div>

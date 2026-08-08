@@ -75,23 +75,52 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true };
     }
-    return { success: false, message: res.message || 'Login failed' };
+    return { 
+      success: false, 
+      message: res.message || 'Login failed',
+      isUnverified: res.isUnverified,
+      userId: res.userId,
+      email: res.email
+    };
   };
 
   const register = async (data) => {
     const res = await api.register(data);
+    if (res.success) {
+      if (res.demoMode) {
+        setUser(res.user);
+        setToken(res.token);
+        setIsAuthenticated(true);
+        localStorage.setItem('leaseify_user', JSON.stringify(res.user));
+        localStorage.setItem('leaseify_token', res.token);
+        setCurrentTab('tenant-portal');
+        return { success: true, demoMode: true };
+      }
+      return { success: true, needsOtp: true, email: data.email };
+    }
+    return { success: false, message: res.message || 'Registration failed' };
+  };
+
+  const verifyOtp = async (email, otp, signupData) => {
+    const res = await api.verifyOtp(email, otp, signupData);
     if (res.success) {
       setUser(res.user);
       setToken(res.token);
       setIsAuthenticated(true);
       localStorage.setItem('leaseify_user', JSON.stringify(res.user));
       localStorage.setItem('leaseify_token', res.token);
-
-      // Public registration is always user role -> redirect to tenant portal
       setCurrentTab('tenant-portal');
       return { success: true };
     }
-    return { success: false, message: res.message || 'Registration failed' };
+    return { success: false, message: res.message || 'OTP Verification failed' };
+  };
+
+  const resendOtp = async (email) => {
+    const res = await api.resendOtp(email);
+    if (res.success) {
+      return { success: true, message: res.message };
+    }
+    return { success: false, message: res.message };
   };
 
   const logout = () => {
@@ -132,6 +161,8 @@ export const AuthProvider = ({ children }) => {
         setCurrentTab,
         login,
         register,
+        verifyOtp,
+        resendOtp,
         logout,
         switchRole,
       }}

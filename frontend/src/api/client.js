@@ -385,25 +385,32 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      if (res.ok) return await res.json();
-    } catch {}
-
-    // Mock Login response
-    const isAdmin = email.toLowerCase().includes('admin');
-    return {
-      success: true,
-      token: 'demo-jwt-token-mock',
-      user: {
-        id: isAdmin ? 'user-1' : 'user-2',
-        name: isAdmin ? 'Sarah Jenkins (Property Manager)' : 'Alex Rivera',
-        email,
-        role: isAdmin ? 'admin' : 'user',
-        phone: '+1 (555) 234-5678',
-        avatar: isAdmin
-          ? 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'
-          : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      },
-    };
+      const data = await res.json();
+      if (res.ok) return data;
+      return {
+        success: false,
+        message: data.message || 'Login failed',
+        isUnverified: data.isUnverified,
+        userId: data.userId,
+      };
+    } catch {
+      // Mock Login response
+      const isAdmin = email.toLowerCase().includes('admin');
+      return {
+        success: true,
+        token: 'demo-jwt-token-mock',
+        user: {
+          id: isAdmin ? 'user-1' : 'user-2',
+          name: isAdmin ? 'Sarah Jenkins (Property Manager)' : 'Alex Rivera',
+          email,
+          role: isAdmin ? 'admin' : 'user',
+          phone: '+1 (555) 234-5678',
+          avatar: isAdmin
+            ? 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80'
+            : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+        },
+      };
+    }
   },
 
   register: async (data) => {
@@ -413,21 +420,77 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (res.ok) return await res.json();
-    } catch {}
+      const resData = await res.json();
+      if (res.ok) return resData;
+      return {
+        success: false,
+        message: resData.message || 'Registration failed',
+      };
+    } catch {
+      return {
+        success: true,
+        demoMode: true,
+        token: 'demo-jwt-token-mock',
+        user: {
+          id: 'user-' + Date.now(),
+          name: data.name,
+          email: data.email,
+          role: data.role || 'user',
+          phone: data.phone || '',
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+        },
+      };
+    }
+  },
 
-    return {
-      success: true,
-      token: 'demo-jwt-token-mock',
-      user: {
-        id: 'user-' + Date.now(),
-        name: data.name,
-        email: data.email,
-        role: data.role || 'user',
-        phone: data.phone || '',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      },
-    };
+  verifyOtp: async (email, otp, signupData = {}) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp, ...signupData }),
+      });
+      const data = await res.json();
+      if (res.ok) return data;
+      return {
+        success: false,
+        message: data.message || 'OTP verification failed',
+      };
+    } catch {
+      return {
+        success: true,
+        token: 'demo-jwt-token-mock',
+        user: {
+          id: 'mock-user-id',
+          name: signupData.name || 'Demo Tenant (Alex)',
+          email: email || 'tenant@leaseify.com',
+          role: 'user',
+          phone: signupData.phone || '+1 (555) 876-5432',
+          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+        },
+      };
+    }
+  },
+
+  resendOtp: async (email) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok) return data;
+      return {
+        success: false,
+        message: data.message || 'Failed to resend OTP',
+      };
+    } catch {
+      return {
+        success: true,
+        message: 'Mock OTP resent successfully',
+      };
+    }
   },
 
   // Properties
@@ -777,18 +840,24 @@ export const api = {
     );
   },
 
-  processReturn: async (id, returnDate) => {
+  processReturn: async (id, returnData) => {
+    const payload = typeof returnData === 'object' && returnData !== null
+      ? returnData
+      : { returnDate: returnData };
+
+    const rawReturnDate = payload.returnDate;
+
     return safeFetch(
       `/rentals/${id}/return`,
       {
         method: 'POST',
-        body: JSON.stringify({ returnDate }),
+        body: JSON.stringify(payload),
       },
       () => {
         const rental = initialMockData.rentals.find((r) => r._id === id);
         if (!rental) return { success: false, message: 'Rental not found' };
 
-        const actualReturn = returnDate ? new Date(returnDate) : new Date();
+        const actualReturn = rawReturnDate ? new Date(rawReturnDate) : new Date();
         const scheduledEnd = new Date(rental.endDate);
         const timeDiff = actualReturn.getTime() - scheduledEnd.getTime();
         const isLate = timeDiff > 0 && Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) > 0;

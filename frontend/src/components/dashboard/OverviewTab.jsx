@@ -149,12 +149,12 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
             <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-600 font-semibold text-[11px] uppercase tracking-wider flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> Admin Operations Hub
             </span>
-            <span className="text-xs text-warm-500">Live Aggregation Engine</span>
+            <span className="text-xs text-warm-300">Live Aggregation Engine</span>
           </div>
-          <h2 className="text-2xl lg:text-3xl font-black text-warm-900 tracking-tight">
+          <h2 className="text-2xl lg:text-3xl font-black text-white tracking-tight">
             Rental Executive Dashboard
           </h2>
-          <p className="text-xs text-warm-600 max-w-xl">
+          <p className="text-xs text-warm-200 max-w-xl">
             Real-time analytics for active leases, upcoming returns, overdue penalties, and escrowed security deposits.
           </p>
         </div>

@@ -128,12 +128,12 @@ export const RentalsTab = () => {
             <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-600 font-semibold text-[11px] uppercase tracking-wider">
               Pickup & Return Workflow
             </span>
-            <span className="text-xs text-warm-500">Escrow & Logistics Hub</span>
+            <span className="text-xs text-warm-300">Escrow & Logistics Hub</span>
           </div>
-          <h2 className="text-2xl font-black text-warm-900 tracking-tight mt-1">
+          <h2 className="text-2xl font-black text-white tracking-tight mt-1">
             Rental Status & Handover Management
           </h2>
-          <p className="text-xs text-warm-500 mt-1">
+          <p className="text-xs text-warm-200 mt-1">
             Track order lifecycle from <strong>Booked ➔ Picked ➔ Returned</strong> with condition checks and deposit refunds.
           </p>
         </div>
