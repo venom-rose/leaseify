@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/leaseify', {
+    const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://debjeet-kundu:debjeet%4014072022@leaseify.wnloexf.mongodb.net/?appName=Leaseify', {
       serverSelectionTimeoutMS: 5000,
     });
 

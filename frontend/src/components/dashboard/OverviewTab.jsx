@@ -125,9 +125,9 @@ export const OverviewTab = ({ onNavigateTab, onAddPropertyClick }) => {
       { month: 'Aug', revenue: metrics.revenue || 82400, deposits: metrics.securityDepositsHeld || 18500, bookings: 41 },
     ],
     statusDistribution: [
-      { name: 'Active Rentals', value: metrics.activeRentals || 3, color: '#38bdf8' },
-      { name: 'Due Today', value: metrics.dueTodayRentals || 1, color: '#f59e0b' },
-      { name: 'Overdue', value: metrics.overdueRentals || 1, color: '#f43f5e' },
+      { name: 'Active Rentals', value: metrics.activeRentals ?? 3, color: '#38bdf8' },
+      { name: 'Due Today', value: metrics.dueTodayRentals ?? 1, color: '#f59e0b' },
+      { name: 'Overdue', value: metrics.overdueRentals ?? 1, color: '#f43f5e' },
       { name: 'Returned & Settled', value: 5, color: '#10b981' },
     ],
     categoryBreakdown: [

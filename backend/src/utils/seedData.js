@@ -10,7 +10,7 @@ const Rental = require('../models/Rental');
 
 const seedDB = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/leaseify';
+    const mongoUri = process.env.MONGO_URI || 'mongodb+srv://debjeet-kundu:debjeet%4014072022@leaseify.wnloexf.mongodb.net/?appName=Leaseify';
     await mongoose.connect(mongoUri);
     console.log('[Seed] Connected to MongoDB for seeding...');
 

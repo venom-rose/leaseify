@@ -60,7 +60,7 @@ exports.getDashboardStats = async (req, res, next) => {
 
         // B. Rentals Due Today: active bookings where scheduled endDate falls today
         Rental.countDocuments({
-          status: 'active',
+          status: { $in: ['active', 'picked'] },
           endDate: { $gte: todayStart, $lte: todayEnd },
         }),
 
@@ -75,7 +75,7 @@ exports.getDashboardStats = async (req, res, next) => {
               activeDepositsHeld: {
                 $sum: {
                   $cond: [
-                    { $in: ['$status', ['active', 'overdue']] },
+                    { $in: ['$status', ['active', 'picked', 'overdue', 'late']] },
                     '$depositTotal',
                     0,
                   ],
@@ -132,7 +132,7 @@ exports.getDashboardStats = async (req, res, next) => {
           .lean(),
 
         Rental.find({
-          status: 'active',
+          status: { $in: ['active', 'picked'] },
           endDate: { $gte: todayStart, $lte: todayEnd },
         })
           .populate('user', 'name email phone')
@@ -141,8 +141,8 @@ exports.getDashboardStats = async (req, res, next) => {
 
         Rental.find({
           $or: [
-            { status: 'overdue' },
-            { status: 'active', endDate: { $lt: now } },
+            { status: { $in: ['overdue', 'late'] } },
+            { status: { $in: ['active', 'picked'] }, endDate: { $lt: now } },
           ],
         })
           .populate('user', 'name email phone')
@@ -156,9 +156,9 @@ exports.getDashboardStats = async (req, res, next) => {
       let returnedRentalsCount = 0;
 
       rentalStatusCounts.forEach((st) => {
-        if (st._id === 'active') activeRentalsCount = st.count;
-        if (st._id === 'overdue') overdueRentalsCount = st.count;
-        if (st._id === 'returned' || st._id === 'completed') returnedRentalsCount = st.count;
+        if (st._id === 'active' || st._id === 'picked') activeRentalsCount += st.count;
+        if (st._id === 'overdue' || st._id === 'late') overdueRentalsCount += st.count;
+        if (st._id === 'returned' || st._id === 'completed') returnedRentalsCount += st.count;
       });
 
       const financials = rentalFinancials[0] || {
@@ -195,10 +195,10 @@ exports.getDashboardStats = async (req, res, next) => {
           { month: 'Jul', revenue: 74000, deposits: 51000, target: 65000, bookings: 34 },
           {
             month: 'Aug',
-            revenue: totalRevenue > 0 ? Math.max(totalRevenue, 82000) : 82000,
-            deposits: financials.activeDepositsHeld > 0 ? financials.activeDepositsHeld : 58000,
+            revenue: totalRevenue,
+            deposits: financials.activeDepositsHeld,
             target: 75000,
-            bookings: Math.max(activeRentalsCount + returnedRentalsCount, 41),
+            bookings: activeRentalsCount + returnedRentalsCount,
           },
         ];
         formattedMonthlyTrends = baseline;
@@ -206,10 +206,10 @@ exports.getDashboardStats = async (req, res, next) => {
 
       // Status Breakdown Donut
       const statusDistribution = [
-        { name: 'Active Rentals', value: Math.max(activeRentalsCount, 3), color: '#38bdf8' },
-        { name: 'Due Today', value: Math.max(rentalDueTodayCount, 1), color: '#f59e0b' },
-        { name: 'Overdue', value: Math.max(overdueRentalsCount, 1), color: '#f43f5e' },
-        { name: 'Returned & Settled', value: Math.max(returnedRentalsCount, 4), color: '#10b981' },
+        { name: 'Active Rentals', value: activeRentalsCount, color: '#38bdf8' },
+        { name: 'Due Today', value: rentalDueTodayCount, color: '#f59e0b' },
+        { name: 'Overdue', value: overdueRentalsCount, color: '#f43f5e' },
+        { name: 'Returned & Settled', value: returnedRentalsCount, color: '#10b981' },
       ];
 
       // Category Breakdown Bar Data
@@ -233,19 +233,19 @@ exports.getDashboardStats = async (req, res, next) => {
         data: {
           metrics: {
             // Core Required KPIs:
-            activeRentals: activeRentalsCount > 0 ? activeRentalsCount : 3,
-            dueTodayRentals: rentalDueTodayCount > 0 ? rentalDueTodayCount : 1,
-            overdueRentals: overdueRentalsCount > 0 ? overdueRentalsCount : 1,
-            revenue: totalRevenue > 0 ? totalRevenue : 82400,
-            securityDepositsHeld: financials.activeDepositsHeld > 0 ? financials.activeDepositsHeld : 18500,
+            activeRentals: activeRentalsCount,
+            dueTodayRentals: rentalDueTodayCount,
+            overdueRentals: overdueRentalsCount,
+            revenue: totalRevenue,
+            securityDepositsHeld: financials.activeDepositsHeld,
             
             // Secondary metrics
-            totalDepositsRefunded: financials.totalDepositsRefunded || 12400,
-            totalPenalties: financials.totalPenalties || 1200,
-            totalProducts: totalProducts || 8,
-            totalProperties: totalProperties || 5,
-            activeLeases: activeLeases || 2,
-            pendingMaintenance: pendingMaintenance || 2,
+            totalDepositsRefunded: financials.totalDepositsRefunded || 0,
+            totalPenalties: financials.totalPenalties || 0,
+            totalProducts: totalProducts || 0,
+            totalProperties: totalProperties || 0,
+            activeLeases: activeLeases || 0,
+            pendingMaintenance: pendingMaintenance || 0,
           },
           charts: {
             revenueTimeline: formattedMonthlyTrends,
