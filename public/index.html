@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaseify — Premier Car & Luxury Fleet Rental</title>
+  <meta name="description" content="Experience high-performance supercar, luxury SUV, and electric hypercar rentals with automated escrow deposit reconciliation and real-time operations dashboard.">
+  
+  <!-- Premium Fonts from Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-luxury">
+  <div id="app" class="app-root">
+    
+    <!-- ======================================================== -->
+    <!-- VIEW 0: SPLASH SCREEN / WELCOME LANDING -->
+    <!-- ======================================================== -->
+    <section id="view-splash" class="view-section splash-view">
+      <div class="splash-overlay">
+        <div class="splash-content">
+          <div class="splash-badge">
+            <i data-lucide="gauge"></i> EXOTIC & PERFORMANCE FLEET ON DEMAND
+          </div>
+          <h1 class="splash-title">
+            LEASEIFY<span class="brand-gold">.FLEET</span>
+          </h1>
+          <p class="splash-subtitle">
+            The next-generation luxury automotive rental platform. Secure deposit escrow, automated return penalty intelligence, and seamless fleet operations.
+          </p>
+
+          <div class="splash-car-preview">
+            <img src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200&auto=format&fit=crop&q=80" alt="Porsche 911 GT3 RS" class="splash-car-img">
+          </div>
+
+          <div class="splash-actions">
+            <button class="btn btn-gold btn-lg" onclick="app.showAuthModal('login')">
+              <i data-lucide="log-in"></i> Sign In to Account
+            </button>
+            <button class="btn btn-secondary btn-lg" onclick="app.showAuthModal('signup')">
+              <i data-lucide="user-plus"></i> Create Client Profile
+            </button>
+            <button class="btn btn-ghost" onclick="app.continueAsGuest()">
+              <span>Explore Fleet as Guest &rarr;</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Luxury Navigation Header -->
+    <header class="top-nav" id="main-navbar" style="display: none;">
+      <div class="nav-left">
+        <div class="brand-logo" onclick="app.navigate('store')">
+          <div class="logo-badge">
+            <i data-lucide="gauge"></i>
+          </div>
+          <div class="logo-text">
+            <span class="brand-name">LEASEIFY<span class="brand-accent">.FLEET</span></span>
+            <span class="brand-tagline">Exotic & Luxury Car Rentals</span>
+          </div>
+        </div>
+
+        <nav class="nav-links">
+          <button class="nav-link active" id="nav-store" onclick="app.navigate('store')">
+            <i data-lucide="car"></i> Fleet Showroom
+          </button>
+          <button class="nav-link" id="nav-my-rentals" onclick="app.navigate('my-rentals')">
+            <i data-lucide="key-round"></i> My Bookings
+            <span class="badge-counter" id="my-rentals-count">0</span>
+          </button>
+          <button class="nav-link admin-only" id="nav-admin" onclick="app.navigate('admin')">
+            <i data-lucide="layout-dashboard"></i> Fleet Ops Hub
+          </button>
+          <button class="nav-link admin-only" id="nav-inventory" onclick="app.navigate('inventory')">
+            <i data-lucide="boxes"></i> Vehicle Fleet
+          </button>
+          <button class="nav-link admin-only" id="nav-settings" onclick="app.navigate('settings')">
+            <i data-lucide="sliders"></i> Rate & Policies
+          </button>
+        </nav>
+      </div>
+
+      <div class="nav-right">
+        <!-- Time Machine Simulation Pill -->
+        <div class="time-machine-pill" title="Fast-forward days to simulate overdue vehicle penalties">
+          <div class="tm-label">
+            <i data-lucide="clock" class="tm-icon"></i>
+            <span id="simulated-time-display">Today (Live)</span>
+          </div>
+          <div class="tm-actions">
+            <button class="btn-tm" onclick="app.simulateTimeOffset(1)" title="+1 Day">+1d</button>
+            <button class="btn-tm" onclick="app.simulateTimeOffset(3)" title="+3 Days">+3d</button>
+            <button class="btn-tm" onclick="app.simulateTimeOffset(7)" title="+7 Days">+7d</button>
+            <button class="btn-tm-reset" onclick="app.simulateTimeOffset(0)" title="Reset to Real Time">
+              <i data-lucide="rotate-ccw"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Role Badge -->
+        <div class="role-badge-pill" id="nav-role-badge">
+          <i data-lucide="shield"></i> <span id="nav-role-text">Client Access</span>
+        </div>
+
+        <!-- User Profile Pill & Actions -->
+        <div class="user-profile-menu" onclick="app.openProfileModal()">
+          <img id="user-avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="User" class="avatar-img">
+          <div class="user-details">
+            <span class="user-name" id="user-name-display">Alex Rivera</span>
+            <span class="user-role-badge" id="user-tier-display">Black Card Elite</span>
+          </div>
+        </div>
+
+        <!-- Logout Button -->
+        <button class="btn-logout" onclick="app.logout()" title="Sign Out">
+          <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Container Body -->
+    <main class="main-content" id="main-container" style="display: none;">
+      
+      <!-- ======================================================== -->
+      <!-- VIEW 1: CONCEPTZILLA / SHAKURO LUXURY SHOWROOM -->
+      <!-- ======================================================== -->
+      <section id="view-store" class="view-section">
+        
+        <!-- Hero Section with Spotlight Car Showcase -->
+        <div class="concept-hero">
+          <div class="hero-glow-bg"></div>
+          
+          <div class="hero-left">
+            <div class="hero-badge">
+              <i data-lucide="sparkles"></i> PREMIER LUXURY & SUPERCARS FLEET
+            </div>
+            <h1 class="hero-headline">
+              DRIVE THE <br><span class="gradient-text">EXTRAORDINARY.</span>
+            </h1>
+            <p class="hero-description">
+              Experience the pinnacle of automotive engineering with instant verification, transparent escrow deposit protection, and automated return reconciliations.
+            </p>
+
+            <div class="hero-quick-cta">
+              <button class="btn btn-gold btn-lg" onclick="document.getElementById('floating-booking-bar').scrollIntoView({ behavior: 'smooth' })">
+                <i data-lucide="compass"></i> Explore Showroom
+              </button>
+              <div class="hero-trust-proof">
+                <div class="trust-stars">★★★★★</div>
+                <span>4.98/5 Rated by 2,400+ Drivers</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Spotlight Featured Car Card -->
+          <div class="hero-spotlight-card">
+            <div class="spotlight-header">
+              <div>
+                <span class="spotlight-tag">FEATURED VEHICLE</span>
+                <h2 class="spotlight-car-name" id="spotlight-name">Porsche 911 GT3 RS</h2>
+                <div class="spotlight-price" id="spotlight-price">$650 <span class="per-day">/ day</span></div>
+              </div>
+              <div class="spotlight-badge-pristine">
+                <i data-lucide="shield-check"></i> Track Certified
+              </div>
+            </div>
+
+            <!-- Spotlight Car Image with Color Glow -->
+            <div class="spotlight-img-container" id="spotlight-img-box">
+              <img id="spotlight-car-img" src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200&auto=format&fit=crop&q=80" alt="Porsche 911 GT3 RS" class="spotlight-image">
+            </div>
+
+            <!-- Live Performance Telemetry Grid -->
+            <div class="spotlight-telemetry-grid">
+              <div class="telemetry-item">
+                <span class="tele-val" id="spotlight-accel">3.0s</span>
+                <span class="tele-lbl">0-100 KM/H</span>
+              </div>
+              <div class="telemetry-item">
+                <span class="tele-val" id="spotlight-speed">296 KM/H</span>
+                <span class="tele-lbl">TOP SPEED</span>
+              </div>
+              <div class="telemetry-item">
+                <span class="tele-val" id="spotlight-hp">525 HP</span>
+                <span class="tele-lbl">HORSEPOWER</span>
+              </div>
+              <div class="telemetry-item">
+                <span class="tele-val" id="spotlight-fuel">PDK-7</span>
+                <span class="tele-lbl">TRANSMISSION</span>
+              </div>
+            </div>
+
+            <!-- Color Customizer & Action Bar -->
+            <div class="spotlight-actions-bar">
+              <div class="color-palette-group">
+                <span class="palette-lbl">Color:</span>
+                <button class="color-dot color-gold active" onclick="app.setHeroColor('#f59e0b', 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200&auto=format&fit=crop&q=80', 'Speed Yellow / Gold')"></button>
+                <button class="color-dot color-red" onclick="app.setHeroColor('#ef4444', 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&auto=format&fit=crop&q=80', 'Guards Red')"></button>
+                <button class="color-dot color-cyan" onclick="app.setHeroColor('#06b6d4', 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?w=1200&auto=format&fit=crop&q=80', 'Electric Cyan')"></button>
+                <button class="color-dot color-dark" onclick="app.setHeroColor('#3b82f6', 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?w=1200&auto=format&fit=crop&q=80', 'Obsidian Black')"></button>
+              </div>
+
+              <button class="btn btn-gold btn-sm" onclick="app.openBookingModal(1)">
+                <i data-lucide="zap"></i> Instant Reservation
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Quick-Booking Search Bar -->
+        <div class="floating-booking-bar" id="floating-booking-bar">
+          <div class="booking-field">
+            <label><i data-lucide="map-pin"></i> Pick-up & Drop Location</label>
+            <select id="bar-location" class="field-select">
+              <option>Leaseify VIP Lounge (Beverly Hills)</option>
+              <option>LAX Private Flight Terminal</option>
+              <option>West Hollywood Executive Hub</option>
+              <option>Miami South Beach Harbor</option>
+              <option>Direct Concierge Delivery</option>
+            </select>
+          </div>
+
+          <div class="field-separator"></div>
+
+          <div class="booking-field">
+            <label><i data-lucide="calendar"></i> Pick-up Date</label>
+            <input type="date" id="bar-pickup-date" class="field-input" onchange="app.syncBookingBar()">
+          </div>
+
+          <div class="field-separator"></div>
+
+          <div class="booking-field">
+            <label><i data-lucide="calendar-check"></i> Return Date</label>
+            <input type="date" id="bar-return-date" class="field-input" onchange="app.syncBookingBar()">
+          </div>
+
+          <div class="field-separator"></div>
+
+          <div class="booking-field">
+            <label><i data-lucide="filter"></i> Vehicle Category</label>
+            <select id="bar-category-select" class="field-select" onchange="app.selectCategoryFromBar(this.value)">
+              <option value="all">All Vehicles (8)</option>
+              <option value="supercars">Supercars & Exotics</option>
+              <option value="electric">Electric Performance</option>
+              <option value="luxury-suv">Luxury & Armored SUVs</option>
+              <option value="grand-touring">Grand Tourers & Coupes</option>
+              <option value="executive">Executive Sedans</option>
+            </select>
+          </div>
+
+          <button class="btn btn-gold btn-search" onclick="app.filterProducts()">
+            <i data-lucide="search"></i> Find Cars
+          </button>
+        </div>
+
+        <!-- Category Showcase Filter Pills -->
+        <div class="showroom-header-bar">
+          <div>
+            <span class="section-tag">AVAILABLE FLEET</span>
+            <h2 class="section-title">Select Your Vehicle</h2>
+          </div>
+
+          <div class="category-pills" id="category-pills-container">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Vehicle Fleet Cards Grid -->
+        <div class="fleet-grid" id="products-grid">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Trust & Value Badges Strip -->
+        <div class="trust-banner-strip">
+          <div class="trust-item">
+            <div class="trust-icon"><i data-lucide="shield-check"></i></div>
+            <div>
+              <h4>100% Escrow Protection</h4>
+              <p>Security deposit held safely in escrow and auto-refunded upon clean return.</p>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-icon"><i data-lucide="clock-4"></i></div>
+            <div>
+              <h4>4-Hour Flexible Grace</h4>
+              <p>Generous buffer time before late return engine applies transparent fee multipliers.</p>
+            </div>
+          </div>
+          <div class="trust-item">
+            <div class="trust-icon"><i data-lucide="sparkles"></i></div>
+            <div>
+              <h4>Pristine Fleet Guarantee</h4>
+              <p>Each vehicle undergoes a 40-point diagnostic check and ceramic detailing.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 2: CUSTOMER "MY BOOKINGS" -->
+      <!-- ======================================================== -->
+      <section id="view-my-rentals" class="view-section">
+        <div class="page-header">
+          <div>
+            <span class="section-tag">CLIENT PORTAL</span>
+            <h1 class="page-title">My Vehicle Bookings</h1>
+            <p class="page-subtitle">Manage ongoing rentals, access VIP digital pickup passes, track return deadlines, and review deposit refunds.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="app.navigate('store')">
+              <i data-lucide="plus"></i> Reserve Another Vehicle
+            </button>
+          </div>
+        </div>
+
+        <!-- Customer Summary Cards -->
+        <div class="kpi-grid customer-kpi-grid">
+          <div class="stat-card glass-card">
+            <div class="stat-icon-wrapper bg-gold">
+              <i data-lucide="car"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Active & Reserved Vehicles</span>
+              <span class="stat-value" id="cust-active-count">0</span>
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-icon-wrapper bg-amber">
+              <i data-lucide="lock"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Security Deposits in Escrow</span>
+              <span class="stat-value" id="cust-escrow-held">$0.00</span>
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-icon-wrapper bg-emerald">
+              <i data-lucide="receipt"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Total Refunded Deposits</span>
+              <span class="stat-value" id="cust-refunded-deposits">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Rentals List -->
+        <div class="rentals-list-container" id="customer-rentals-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 3: ADMIN CENTRAL OPERATIONS DASHBOARD -->
+      <!-- ======================================================== -->
+      <section id="view-admin" class="view-section">
+        <div class="page-header">
+          <div>
+            <div class="admin-badge-pill">
+              <i data-lucide="shield-check"></i> Executive Fleet Control Center
+            </div>
+            <h1 class="page-title">Fleet Operations Dashboard</h1>
+            <p class="page-subtitle">Real-time vehicle telemetry, automated late penalty tracking, multi-stage workflow pipeline, and deposit escrow reconciliation.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-secondary" onclick="app.refreshAnalytics()">
+              <i data-lucide="refresh-cw"></i> Refresh Telemetry
+            </button>
+            <button class="btn btn-gold" onclick="app.navigate('inventory')">
+              <i data-lucide="plus-circle"></i> Add Vehicle to Fleet
+            </button>
+          </div>
+        </div>
+
+        <!-- Executive KPI Metrics Grid -->
+        <div class="kpi-grid">
+          <div class="stat-card glass-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Active Fleet on Road</span>
+              <div class="stat-icon-wrapper bg-gold">
+                <i data-lucide="activity"></i>
+              </div>
+            </div>
+            <div class="stat-value" id="kpi-active-rentals">0</div>
+            <div class="stat-subtext text-gold">
+              <span id="kpi-ready-pickup">0</span> ready for handover • <span id="kpi-pending-approval">0</span> pending
+            </div>
+          </div>
+
+          <div class="stat-card glass-card border-danger-subtle">
+            <div class="stat-card-header">
+              <span class="stat-label">Overdue Returns</span>
+              <div class="stat-icon-wrapper bg-rose">
+                <i data-lucide="alert-triangle"></i>
+              </div>
+            </div>
+            <div class="stat-value text-rose" id="kpi-overdue-rentals">0</div>
+            <div class="stat-subtext text-rose" id="kpi-overdue-penalties">
+              $0.00 accrued penalties
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Gross Revenue</span>
+              <div class="stat-icon-wrapper bg-emerald">
+                <i data-lucide="dollar-sign"></i>
+              </div>
+            </div>
+            <div class="stat-value text-emerald" id="kpi-gross-revenue">$0.00</div>
+            <div class="stat-subtext text-muted">
+              Base: <span id="kpi-base-rev">$0.00</span> | Penalties: <span id="kpi-penalties-rev">$0.00</span>
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Deposits in Escrow</span>
+              <div class="stat-icon-wrapper bg-amber">
+                <i data-lucide="lock"></i>
+              </div>
+            </div>
+            <div class="stat-value text-amber" id="kpi-escrow-held">$0.00</div>
+            <div class="stat-subtext text-muted">
+              Refunded: <span id="kpi-escrow-refunded">$0.00</span>
+            </div>
+          </div>
+
+          <div class="stat-card glass-card">
+            <div class="stat-card-header">
+              <span class="stat-label">Fleet Utilization</span>
+              <div class="stat-icon-wrapper bg-cyan">
+                <i data-lucide="pie-chart"></i>
+              </div>
+            </div>
+            <div class="stat-value" id="kpi-utilization-rate">0%</div>
+            <div class="stat-subtext text-muted">
+              <span id="kpi-rented-items">0</span> of <span id="kpi-total-items">0</span> vehicles rented
+            </div>
+          </div>
+        </div>
+
+        <!-- Overdue Action Alert Banner -->
+        <div class="overdue-banner" id="overdue-alert-banner" style="display: none;">
+          <div class="overdue-banner-icon">
+            <i data-lucide="alert-octagon"></i>
+          </div>
+          <div class="overdue-banner-text">
+            <h4>Attention: <span id="overdue-count-banner">0</span> Vehicles are Currently Overdue</h4>
+            <p>Automated penalty engine has applied late fees based on configured multiplier. Review items below for return intake or customer follow-up.</p>
+          </div>
+          <button class="btn btn-sm btn-danger" onclick="app.filterAdminTable('OVERDUE')">
+            View Overdue Queue
+          </button>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="admin-charts-grid">
+          <div class="glass-card chart-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i data-lucide="git-merge"></i> Rental Workflow Funnel
+              </div>
+              <span class="badge-soft">Live Status</span>
+            </div>
+            <div class="funnel-bars" id="funnel-bars-container">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <div class="glass-card chart-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i data-lucide="bar-chart-3"></i> Fleet Category Share
+              </div>
+              <span class="badge-soft">Fleet Distribution</span>
+            </div>
+            <div class="category-bars" id="category-distribution-container">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="glass-card table-panel">
+          <div class="table-toolbar">
+            <div class="table-title-group">
+              <h3>Vehicle Rentals & Lifecycle Pipeline</h3>
+              <span class="badge-count" id="admin-orders-count">0 Orders</span>
+            </div>
+
+            <div class="table-filters">
+              <div class="status-tabs">
+                <button class="status-tab active" onclick="app.filterAdminTable('ALL')">All</button>
+                <button class="status-tab tab-pending" onclick="app.filterAdminTable('PENDING_APPROVAL')">Pending</button>
+                <button class="status-tab tab-ready" onclick="app.filterAdminTable('READY_FOR_PICKUP')">Ready for Pickup</button>
+                <button class="status-tab tab-active" onclick="app.filterAdminTable('ACTIVE')">Active On Road</button>
+                <button class="status-tab tab-overdue" onclick="app.filterAdminTable('OVERDUE')">Overdue</button>
+                <button class="status-tab tab-return" onclick="app.filterAdminTable('RETURN_SUBMITTED')">Return Intake</button>
+                <button class="status-tab tab-completed" onclick="app.filterAdminTable('INSPECTED_COMPLETED')">Completed</button>
+              </div>
+
+              <div class="table-search">
+                <i data-lucide="search"></i>
+                <input type="text" id="admin-table-search" placeholder="Search order code, driver, car..." oninput="app.searchAdminTable()">
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Order Code</th>
+                  <th>Driver / Client</th>
+                  <th>Vehicle & VIN</th>
+                  <th>Rental Period</th>
+                  <th>Rental Fee / Escrow</th>
+                  <th>Penalty / Damage</th>
+                  <th>Status</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-rentals-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Live Activity Audit Trail -->
+        <div class="glass-card activity-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i data-lucide="file-clock"></i> Live Fleet Audit Trail & Telemetry Events
+            </div>
+            <span class="badge-soft">Real-Time</span>
+          </div>
+          <div class="activity-feed" id="activity-feed-container">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 4: ADMIN INVENTORY MANAGEMENT -->
+      <!-- ======================================================== -->
+      <section id="view-inventory" class="view-section">
+        <div class="page-header">
+          <div>
+            <span class="section-tag">FLEET MANAGEMENT</span>
+            <h1 class="page-title">Fleet Vehicles & Stock</h1>
+            <p class="page-subtitle">Add new supercars, manage rates, track maintenance status, and update telemetry specs.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-gold" onclick="app.openAddProductModal()">
+              <i data-lucide="plus"></i> Add Vehicle to Fleet
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card table-panel">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Vehicle / VIN</th>
+                  <th>Category</th>
+                  <th>Daily Rate</th>
+                  <th>Weekly Rate</th>
+                  <th>Escrow Deposit</th>
+                  <th>Stock Available</th>
+                  <th>Condition</th>
+                  <th class="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-inventory-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 5: ADMIN CONFIGURATION & POLICIES -->
+      <!-- ======================================================== -->
+      <section id="view-settings" class="view-section">
+        <div class="page-header">
+          <div>
+            <span class="section-tag">ENGINE CONFIGURATION</span>
+            <h1 class="page-title">Fleet Policies & Penalty Rules</h1>
+            <p class="page-subtitle">Configure late return penalty multipliers, grace periods, escrow deposit defaults, and hub locations.</p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <div class="glass-card settings-card">
+            <div class="settings-header">
+              <div class="settings-icon">
+                <i data-lucide="shield-alert"></i>
+              </div>
+              <div>
+                <h3>Late Return & Penalty Automation Engine</h3>
+                <p>Automate penalty accrual on overdue vehicles.</p>
+              </div>
+            </div>
+
+            <form id="settings-form" onsubmit="app.saveSettings(event)" class="settings-form">
+              <div class="form-group">
+                <label for="cfg-late-multiplier">
+                  Late Return Daily Multiplier
+                  <span class="label-help">(Applied on daily rate for every 24h past scheduled return)</span>
+                </label>
+                <div class="range-input-group">
+                  <input type="range" id="cfg-late-multiplier" min="1.0" max="3.0" step="0.1" value="1.5" oninput="document.getElementById('cfg-late-val').innerText = this.value + 'x'">
+                  <span class="range-badge" id="cfg-late-val">1.5x</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="cfg-grace-period">
+                  Grace Period (Hours)
+                  <span class="label-help">(Buffer time before overdue penalty engine engages)</span>
+                </label>
+                <div class="range-input-group">
+                  <input type="range" id="cfg-grace-period" min="0" max="24" step="1" value="4" oninput="document.getElementById('cfg-grace-val').innerText = this.value + ' Hours'">
+                  <span class="range-badge" id="cfg-grace-val">4 Hours</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="cfg-deposit-percent">
+                  Default Security Deposit Rule (% of Daily Value / Value)
+                </label>
+                <div class="range-input-group">
+                  <input type="range" id="cfg-deposit-percent" min="10" max="50" step="5" value="20" oninput="document.getElementById('cfg-deposit-val').innerText = this.value + '%'">
+                  <span class="range-badge" id="cfg-deposit-val">20%</span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cfg-min-days">Min Rental Days</label>
+                  <input type="number" id="cfg-min-days" min="1" max="10" value="1" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label for="cfg-max-days">Max Rental Days</label>
+                  <input type="number" id="cfg-max-days" min="7" max="90" value="30" class="form-input">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="cfg-pickup-location">Executive Lounge Pickup Address</label>
+                <input type="text" id="cfg-pickup-location" value="Leaseify Executive Lounge, 850 Sunset Blvd, West Hollywood" class="form-input">
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-gold">
+                  <i data-lucide="check"></i> Save Rate & Policy Settings
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="glass-card settings-card">
+            <div class="settings-header">
+              <div class="settings-icon bg-gold">
+                <i data-lucide="flask-conical"></i>
+              </div>
+              <div>
+                <h3>Interactive Engine Sandbox & Time Machine</h3>
+                <p>Simulate operations and trigger overdue states instantly.</p>
+              </div>
+            </div>
+
+            <div class="sandbox-instructions">
+              <div class="sandbox-step">
+                <div class="step-num">1</div>
+                <div>
+                  <strong>Simulate Days Forward</strong>
+                  <p>Click <code>+1d</code>, <code>+3d</code>, or <code>+7d</code> in the top navigation bar to advance the system clock.</p>
+                </div>
+              </div>
+
+              <div class="sandbox-step">
+                <div class="step-num">2</div>
+                <div>
+                  <strong>Automatic Penalty Accrual</strong>
+                  <p>Active vehicle rentals crossing their scheduled return + grace period are immediately marked <code>OVERDUE</code> and penalties accrue dynamically.</p>
+                </div>
+              </div>
+
+              <div class="sandbox-step">
+                <div class="step-num">3</div>
+                <div>
+                  <strong>Escrow Deposit Reconciliation</strong>
+                  <p>Technicians perform vehicle diagnostic return inspections, deduct damages & late fees, and release net escrow refund with a digital ledger.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="sandbox-actions">
+              <button class="btn btn-secondary btn-full" onclick="app.simulateTimeOffset(3)">
+                <i data-lucide="fast-forward"></i> Fast Forward +3 Days (Trigger Overdue Test)
+              </button>
+              <button class="btn btn-secondary btn-full" onclick="app.simulateTimeOffset(0)">
+                <i data-lucide="rotate-ccw"></i> Reset Time to Today
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- AUTH MODAL: LOGIN / SIGNUP / PROFILE -->
+    <!-- ======================================================== -->
+    
+    <!-- Modal: Login -->
+    <div id="login-modal" class="modal-overlay">
+      <div class="modal-card auth-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Member Portal</span>
+            <h2>Sign In to Leaseify</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('login-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <form id="login-form" onsubmit="app.handleLogin(event)" class="modal-body auth-modal-body">
+          
+          <!-- One-click Demo Credentials Quick-Fill -->
+          <div class="demo-accounts-box">
+            <span class="demo-box-lbl">Quick Demo Login:</span>
+            <div class="demo-btn-group">
+              <button type="button" class="btn-demo btn-demo-admin" onclick="app.fillDemoCredentials('admin')">
+                <i data-lucide="shield-check"></i> Admin (Sarah Connor)
+              </button>
+              <button type="button" class="btn-demo btn-demo-client" onclick="app.fillDemoCredentials('customer')">
+                <i data-lucide="user"></i> Client (Alex Rivera)
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <input type="email" id="login-email" required class="form-input" placeholder="name@domain.com">
+          </div>
+
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required class="form-input" placeholder="••••••••">
+          </div>
+
+          <button type="submit" class="btn btn-gold btn-lg btn-full" id="btn-login-submit">
+            <i data-lucide="log-in"></i> Sign In to Dashboard
+          </button>
+
+          <div class="auth-switch-prompt">
+            Don't have a profile? <a href="javascript:void(0)" onclick="app.switchAuthModal('signup')">Create Client Account</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Signup -->
+    <div id="signup-modal" class="modal-overlay">
+      <div class="modal-card auth-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">New Client Onboarding</span>
+            <h2>Create Client Profile</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('signup-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <form id="signup-form" onsubmit="app.handleSignup(event)" class="modal-body auth-modal-body">
+          
+          <div class="security-role-notice">
+            <i data-lucide="shield"></i>
+            <div>
+              <strong>Client Registration</strong>
+              <p>Creates a customer rental profile. Admin credentials are strictly managed by fleet operations.</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-name">Full Legal Name</label>
+            <input type="text" id="signup-name" required class="form-input" placeholder="e.g. Jordan Sterling">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="signup-email">Email Address</label>
+              <input type="email" id="signup-email" required class="form-input" placeholder="jordan@example.com">
+            </div>
+            <div class="form-group">
+              <label for="signup-password">Password</label>
+              <input type="password" id="signup-password" required minlength="6" class="form-input" placeholder="Min. 6 chars">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="signup-address">Billing & Delivery Address</label>
+            <input type="text" id="signup-address" required class="form-input" placeholder="e.g. 742 Evergreen Terrace, Beverly Hills, CA">
+          </div>
+
+          <div class="form-group">
+            <label for="signup-avatar">Profile Image URL</label>
+            <input type="url" id="signup-avatar" class="form-input" value="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" placeholder="https://...">
+          </div>
+
+          <button type="submit" class="btn btn-gold btn-lg btn-full" id="btn-signup-submit">
+            <i data-lucide="user-check"></i> Register & Enter Showroom
+          </button>
+
+          <div class="auth-switch-prompt">
+            Already registered? <a href="javascript:void(0)" onclick="app.switchAuthModal('login')">Sign In</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: User Profile Management -->
+    <div id="profile-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Account Settings</span>
+            <h2>My Profile & Credentials</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('profile-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <form id="profile-form" onsubmit="app.handleProfileUpdate(event)" class="modal-body">
+          <div class="profile-header-preview">
+            <img id="prof-img-preview" src="" alt="Profile" class="profile-avatar-lg">
+            <div>
+              <h3 id="prof-name-title" style="color: #fff; font-size: 1.25rem;">-</h3>
+              <span class="badge-soft" id="prof-tier-badge">Black Card Elite</span>
+              <div id="prof-email-sub" style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.25rem;">-</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prof-name">Full Name</label>
+            <input type="text" id="prof-name" required class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label for="prof-email">Email Address (Read-Only)</label>
+            <input type="email" id="prof-email" readonly class="form-input" style="opacity: 0.7; cursor: not-allowed;">
+          </div>
+
+          <div class="form-group">
+            <label for="prof-address">Delivery & Billing Address</label>
+            <input type="text" id="prof-address" required class="form-input">
+          </div>
+
+          <div class="form-group">
+            <label for="prof-avatar">Profile Image URL</label>
+            <input type="url" id="prof-avatar" class="form-input" oninput="document.getElementById('prof-img-preview').src = this.value">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="app.logout()">
+              <i data-lucide="log-out"></i> Log Out
+            </button>
+            <button type="submit" class="btn btn-gold">
+              <i data-lucide="save"></i> Update Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL 1: VEHICLE BOOKING & INSTANT PRICING CALCULATOR -->
+    <!-- ======================================================== -->
+    <div id="booking-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">Vehicle Reservation & Deposit Lock</span>
+            <h2 id="modal-booking-title">Porsche 911 GT3 RS</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('booking-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body booking-modal-grid">
+          <div class="booking-product-summary">
+            <img id="modal-booking-img" src="" alt="Car" class="booking-img">
+            <div class="booking-specs-list">
+              <div class="spec-row">
+                <span class="spec-lbl">Brand / Model</span>
+                <span class="spec-val" id="modal-booking-brand">-</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-lbl">Condition</span>
+                <span class="spec-val text-emerald" id="modal-booking-condition">Pristine</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-lbl">Daily Rate</span>
+                <span class="spec-val text-gold" id="modal-booking-daily-rate">$0.00 / day</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-lbl">Weekly Discounted Rate</span>
+                <span class="spec-val" id="modal-booking-weekly-rate">$0.00 / week</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-lbl">Refundable Escrow Deposit</span>
+                <span class="spec-val text-amber" id="modal-booking-deposit">$0.00</span>
+              </div>
+            </div>
+
+            <div class="pickup-location-box">
+              <i data-lucide="map-pin"></i>
+              <div>
+                <strong>VIP Pickup Location</strong>
+                <p id="modal-pickup-location">Leaseify Executive Lounge, 850 Sunset Blvd</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="booking-calculator-panel">
+            <h3>Rental Period & Pricing Calculator</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="book-start-date">Pick-up Date</label>
+                <input type="date" id="book-start-date" class="form-input" onchange="app.calculateBookingEstimate()">
+              </div>
+              <div class="form-group">
+                <label for="book-end-date">Return Date</label>
+                <input type="date" id="book-end-date" class="form-input" onchange="app.calculateBookingEstimate()">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="book-customer-notes">Trip Destination / Special Requests</label>
+              <input type="text" id="book-customer-notes" placeholder="e.g. Pacific Coast Highway tour, VIP airport transfer..." class="form-input">
+            </div>
+
+            <div class="price-ledger">
+              <div class="ledger-row">
+                <span class="ledger-lbl">Rental Duration</span>
+                <span class="ledger-val" id="ledger-duration">1 Day(s)</span>
+              </div>
+              <div class="ledger-row">
+                <span class="ledger-lbl">Base Vehicle Rental Fee</span>
+                <span class="ledger-val" id="ledger-base-fee">$0.00</span>
+              </div>
+              <div class="ledger-row">
+                <span class="ledger-lbl">
+                  Security Deposit (Escrow)
+                  <span class="badge-escrow">100% Refundable</span>
+                </span>
+                <span class="ledger-val text-amber" id="ledger-deposit">$0.00</span>
+              </div>
+              <div class="ledger-divider"></div>
+              <div class="ledger-row ledger-total">
+                <span>Total Due Today</span>
+                <span class="total-amount text-gold" id="ledger-total">$0.00</span>
+              </div>
+            </div>
+
+            <div class="deposit-guarantee-note">
+              <i data-lucide="shield-check"></i>
+              <span>Your security deposit is locked in escrow and automatically refunded upon satisfactory diagnostic return inspection.</span>
+            </div>
+
+            <button class="btn btn-gold btn-lg btn-full" onclick="app.submitBooking()">
+              <i data-lucide="check-circle"></i> Confirm & Book Vehicle
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL 2: PICKUP & RETURN INSPECTION WORKFLOW -->
+    <!-- ======================================================== -->
+    <div id="inspection-modal" class="modal-overlay">
+      <div class="modal-card modal-lg">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-amber">Workflow Stage: Vehicle Diagnostic Return & Escrow Settlement</span>
+            <h2 id="inspect-modal-title">Inspect & Settle Rental RNT-0000</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('inspection-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="modal-body inspection-modal-grid">
+          <div class="inspect-order-summary">
+            <h4>Rental Details</h4>
+            <div class="spec-row">
+              <span class="spec-lbl">Driver / Client</span>
+              <span class="spec-val" id="inspect-customer-name">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-lbl">Vehicle</span>
+              <span class="spec-val" id="inspect-product-name">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-lbl">Scheduled Return</span>
+              <span class="spec-val" id="inspect-end-date">-</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-lbl">Deposit Held in Escrow</span>
+              <span class="spec-val text-amber" id="inspect-deposit-held">$0.00</span>
+            </div>
+
+            <div class="penalty-status-box" id="inspect-penalty-box">
+              <div class="penalty-header">
+                <i data-lucide="clock-alert"></i>
+                <span>Automated Late Penalty Status</span>
+              </div>
+              <div class="penalty-details">
+                <div class="spec-row">
+                  <span class="spec-lbl">Overdue Days</span>
+                  <span class="spec-val text-rose" id="inspect-overdue-days">0 Days</span>
+                </div>
+                <div class="spec-row">
+                  <span class="spec-lbl">Late Return Penalty</span>
+                  <span class="spec-val text-rose" id="inspect-late-fee">$0.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="inspect-form-panel">
+            <h4>Technician Inspection Assessment</h4>
+
+            <div class="form-group">
+              <label>Vehicle Condition Rating</label>
+              <div class="condition-selector-group">
+                <label class="condition-radio">
+                  <input type="radio" name="inspect-condition" value="Pristine" checked onchange="app.recalcInspectionSettlement()">
+                  <span class="condition-chip pristine">Pristine</span>
+                </label>
+                <label class="condition-radio">
+                  <input type="radio" name="inspect-condition" value="Good" onchange="app.recalcInspectionSettlement()">
+                  <span class="condition-chip good">Good</span>
+                </label>
+                <label class="condition-radio">
+                  <input type="radio" name="inspect-condition" value="Minor Scuffs" onchange="app.recalcInspectionSettlement()">
+                  <span class="condition-chip scuffs">Minor Scuffs</span>
+                </label>
+                <label class="condition-radio">
+                  <input type="radio" name="inspect-condition" value="Damaged" onchange="app.recalcInspectionSettlement()">
+                  <span class="condition-chip damaged">Damaged</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Return Diagnostic Checklist</label>
+              <div class="checklist-items">
+                <label class="check-item">
+                  <input type="checkbox" id="chk-parts" checked>
+                  <span>All keys, charging kit, & telemetry keyfobs returned</span>
+                </label>
+                <label class="check-item">
+                  <input type="checkbox" id="chk-power" checked>
+                  <span>OBD-II engine diagnostic passed & fuel/battery full</span>
+                </label>
+                <label class="check-item">
+                  <input type="checkbox" id="chk-clean" checked>
+                  <span>Exterior paintwork & interior leather spotless</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inspect-damage-fee">Damage / Detailing Assessment Fee ($)</label>
+              <input type="number" id="inspect-damage-fee" value="0" min="0" step="25" class="form-input" oninput="app.recalcInspectionSettlement()">
+            </div>
+
+            <div class="form-group">
+              <label for="inspect-notes">Technician Notes</label>
+              <textarea id="inspect-notes" rows="2" class="form-textarea" placeholder="Note rim condition, tire tread wear, or detailing notes..."></textarea>
+            </div>
+
+            <div class="settlement-reconciliation-card">
+              <h5>Deposit Escrow Settlement</h5>
+              <div class="settle-row">
+                <span>Original Escrow Deposit Held:</span>
+                <span id="settle-original-deposit">$0.00</span>
+              </div>
+              <div class="settle-row text-rose">
+                <span>Less Damage Deductions:</span>
+                <span id="settle-damage-deduction">-$0.00</span>
+              </div>
+              <div class="settle-row text-rose">
+                <span>Less Late Return Penalties:</span>
+                <span id="settle-late-deduction">-$0.00</span>
+              </div>
+              <div class="settle-divider"></div>
+              <div class="settle-row settle-final">
+                <span>Net Refund to Driver:</span>
+                <span class="refund-badge" id="settle-refund-total">$0.00</span>
+              </div>
+              <div class="settle-status-tag" id="settle-status-tag">Status: Full Refund</div>
+            </div>
+
+            <button class="btn btn-emerald btn-lg btn-full" onclick="app.submitInspectionSettlement()">
+              <i data-lucide="check-check"></i> Authorize Refund & Close Rental
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL 3: ADD/EDIT VEHICLE MODAL -->
+    <!-- ======================================================== -->
+    <div id="product-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2 id="product-modal-title">Add Vehicle to Fleet</h2>
+          <button class="modal-close-btn" onclick="app.closeModal('product-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <form id="product-form" onsubmit="app.saveProduct(event)" class="modal-body">
+          <input type="hidden" id="prod-id">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-name">Vehicle Name</label>
+              <input type="text" id="prod-name" required class="form-input" placeholder="e.g. McLaren 720S Spider">
+            </div>
+            <div class="form-group">
+              <label for="prod-category">Category</label>
+              <select id="prod-category" class="form-select" required>
+                <option value="supercars">Supercars & Exotics</option>
+                <option value="electric">Electric Performance</option>
+                <option value="luxury-suv">Luxury & Armored SUVs</option>
+                <option value="grand-touring">Grand Tourers & Coupes</option>
+                <option value="executive">Executive Luxury Sedans</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-brand">Brand</label>
+              <input type="text" id="prod-brand" required class="form-input" placeholder="e.g. McLaren / Porsche">
+            </div>
+            <div class="form-group">
+              <label for="prod-model">Model</label>
+              <input type="text" id="prod-model" class="form-input" placeholder="e.g. 720S">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-daily-rate">Daily Rate ($)</label>
+              <input type="number" id="prod-daily-rate" required min="1" step="10" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="prod-weekly-rate">Weekly Rate ($)</label>
+              <input type="number" id="prod-weekly-rate" required min="1" step="10" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="prod-deposit">Deposit Amount ($)</label>
+              <input type="number" id="prod-deposit" required min="1" step="10" class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prod-stock">Total Fleet Units</label>
+              <input type="number" id="prod-stock" required min="1" value="2" class="form-input">
+            </div>
+            <div class="form-group">
+              <label for="prod-condition">Condition Rating</label>
+              <select id="prod-condition" class="form-select">
+                <option value="Pristine" selected>Pristine</option>
+                <option value="Excellent">Excellent</option>
+                <option value="Good">Good</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prod-image">Image URL</label>
+            <input type="url" id="prod-image" class="form-input" value="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?w=1200">
+          </div>
+
+          <div class="form-group">
+            <label for="prod-desc">Vehicle Description & Specifications</label>
+            <textarea id="prod-desc" rows="2" class="form-textarea" placeholder="Engine, horsepower, aerodynamics, and bespoke luxury options..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="app.closeModal('product-modal')">Cancel</button>
+            <button type="submit" class="btn btn-gold">Save Vehicle</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL 4: DIGITAL RECEIPT & VIP PASS VIEW -->
+    <!-- ======================================================== -->
+    <div id="receipt-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge-soft badge-gold">VIP Vehicle Rental Pass & Escrow Proof</span>
+            <h2 id="receipt-code-title">Pass #RNT-0000</h2>
+          </div>
+          <button class="modal-close-btn" onclick="app.closeModal('receipt-modal')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="modal-body receipt-modal-body" id="receipt-content">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+  </div>
+
+  <!-- Main Application Logic Script -->
+  <script src="app.js"></script>
+</body>
+</html>

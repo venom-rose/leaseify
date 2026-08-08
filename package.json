@@ -1,0 +1,19 @@
+{
+  "name": "leaseify",
+  "version": "1.0.0",
+  "description": "Full-Stack Enterprise Rental & Operations Management Web Application",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "node -e \"const { db } = require('./server/db'); console.log('Products:', db.prepare('SELECT count(*) as c FROM products').get().c);\""
+  },
+  "keywords": [
+    "rental-management",
+    "deposit-escrow",
+    "late-penalty-automation",
+    "inventory-tracking",
+    "equipment-booking"
+  ],
+  "author": "Leaseify Core Team",
+  "license": "MIT"
+}
