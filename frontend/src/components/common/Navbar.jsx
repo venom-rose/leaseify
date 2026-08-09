@@ -1,5 +1,4 @@
-import React from 'react';
-import { Menu, Wifi, WifiOff, LogOut, Plus, ShoppingBag } from 'lucide-react';
+import { Menu, LogOut, Plus, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
@@ -16,23 +15,6 @@ export const Navbar = ({ onMenuClick, onNewPropertyClick, onCartClick, onNotific
         >
           <Menu className="w-5 h-5" />
         </button>
-
-        <div className="flex items-center gap-2">
-          {isBackendConnected ? (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs font-medium">
-              <Wifi className="w-3.5 h-3.5" />
-              <span>Backend Connected</span>
-            </div>
-          ) : (
-            <div
-              title="Running on interactive client demo mode"
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600 text-xs font-medium"
-            >
-              <WifiOff className="w-3.5 h-3.5" />
-              <span>Standalone Demo Mode</span>
-            </div>
-          )}
-        </div>
       </div>
 
       <div className="flex items-center gap-2.5">

@@ -39,6 +39,47 @@ export const ProfileModal = ({ isOpen, onClose }) => {
     }
   }, [isOpen, user]);
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size should be less than 5MB.');
+      return;
+    }
+
+    setError('');
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Create canvas to crop/resize image to 150x150 (perfect for avatar)
+        const canvas = document.createElement('canvas');
+        canvas.width = 150;
+        canvas.height = 150;
+        const ctx = canvas.getContext('2d');
+
+        // Crop/Resize to square center
+        const size = Math.min(img.width, img.height);
+        const sx = (img.width - size) / 2;
+        const sy = (img.height - size) / 2;
+
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, 150, 150);
+
+        // Get optimized base64 jpeg representation
+        const base64Url = canvas.toDataURL('image/jpeg', 0.85);
+        setAvatar(base64Url);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -75,26 +116,61 @@ export const ProfileModal = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose} title="Edit Profile Settings" maxWidth="max-w-lg">
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Profile Picture Preview & Input */}
-        <div className="flex flex-col items-center gap-3 bg-warm-50 p-4 rounded-2xl border border-warm-200">
-          <img
-            src={avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'}
-            alt="Profile Preview"
-            className="w-20 h-20 rounded-full object-cover border-2 border-amber-500 ring-4 ring-amber-100/50 shadow-md"
-            onError={(e) => {
-              e.target.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
-            }}
-          />
-          <div className="w-full">
-            <label className="block text-xs font-semibold text-warm-650 mb-1">
-              Profile Photo URL
-            </label>
+        <div className="flex flex-col items-center gap-4 bg-warm-50 p-4 rounded-2xl border border-warm-200">
+          <div className="relative">
+            <img
+              src={avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'}
+              alt="Profile Preview"
+              className="w-24 h-24 rounded-full object-cover border-2 border-amber-500 ring-4 ring-amber-100/50 shadow-md"
+              onError={(e) => {
+                e.target.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80';
+              }}
+            />
+          </div>
+
+          <div className="w-full space-y-3">
+            <div className="flex items-center gap-2">
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                id="profile-upload"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <label
+                htmlFor="profile-upload"
+                className="flex-1 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 text-warm-900 font-bold rounded-xl text-xs text-center shadow-md shadow-amber/25 cursor-pointer transition-all flex items-center justify-center gap-2"
+              >
+                <ImageIcon className="w-4 h-4" />
+                Upload Local Photo
+              </label>
+
+              {avatar && avatar.startsWith('data:') && (
+                <button
+                  type="button"
+                  onClick={() => setAvatar(user.avatar || '')}
+                  className="px-3 py-2 bg-white border border-warm-200 text-warm-650 hover:bg-warm-100 rounded-xl text-xs font-semibold transition-all"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+
+            <div className="relative flex items-center justify-center">
+              <div className="border-t border-warm-200 w-full" />
+              <span className="bg-warm-50 px-2 text-[10px] text-warm-400 uppercase tracking-wider absolute">
+                Or paste image URL
+              </span>
+            </div>
+
             <div className="relative">
               <ImageIcon className="absolute left-3 top-2.5 w-4 h-4 text-warm-400" />
               <input
                 type="url"
-                value={avatar}
+                value={avatar.startsWith('data:') ? '' : avatar}
                 onChange={(e) => setAvatar(e.target.value)}
-                placeholder="Paste an Unsplash image URL or any web link..."
+                placeholder="https://example.com/photo.jpg"
                 className="w-full pl-9 pr-3 py-2 bg-white border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
               />
             </div>
