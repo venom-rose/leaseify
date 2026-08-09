@@ -493,6 +493,19 @@ export const api = {
     }
   },
 
+  updateProfile: async (profileData) => {
+    return safeFetch(
+      '/auth/updatedetails',
+      {
+        method: 'PUT',
+        body: JSON.stringify(profileData),
+      },
+      () => {
+        return { success: true, data: profileData };
+      }
+    );
+  },
+
   // Properties
   getProperties: async (filters = {}) => {
     const params = new URLSearchParams(filters).toString();
@@ -513,7 +526,21 @@ export const api = {
             p.address.street.toLowerCase().includes(s)
         );
       }
-      return { success: true, count: data.length, data };
+      
+      // Mock Pagination
+      const page = parseInt(filters.page) || 1;
+      const limit = parseInt(filters.limit) || 6;
+      const total = data.length;
+      const skip = (page - 1) * limit;
+      const paginatedData = data.slice(skip, skip + limit);
+
+      return { 
+        success: true, 
+        data: paginatedData,
+        currentPage: page,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total
+      };
     });
   },
 

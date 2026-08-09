@@ -55,7 +55,7 @@ export const ProductDetailsModal = ({ product, isOpen, onClose, onNavigateToCart
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute top-3 left-3">
-              <span className="px-2.5 py-1 rounded-lg bg-black/20 backdrop-blur-md border border-white/10 text-xs font-semibold text-warm-900">
+              <span className="px-2.5 py-1 rounded-lg bg-black/30 backdrop-blur-md border border-white/15 text-xs font-semibold text-white">
                 {product.category}
               </span>
             </div>
@@ -101,10 +101,10 @@ export const ProductDetailsModal = ({ product, isOpen, onClose, onNavigateToCart
             <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 to-slate-900 border border-warm-200">
               <div className="flex items-baseline justify-between">
                 <div>
-                  <span className="text-3xl font-black text-warm-900">
+                  <span className="text-3xl font-black text-white">
                     ₹{Number(product.pricePerDay || 0).toLocaleString('en-IN')}
                   </span>
-                  <span className="text-xs text-warm-500"> / day</span>
+                  <span className="text-xs text-slate-300"> / day</span>
                 </div>
                 <div className="text-right">
                   <span className="text-xs text-warm-500">Security Deposit</span>

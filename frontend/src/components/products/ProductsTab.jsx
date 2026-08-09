@@ -114,6 +114,38 @@ export const ProductsTab = ({ onNavigateToCart }) => {
     }
   };
 
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (page <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      } else if (page >= totalPages - 3) {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        pageNumbers.push(page - 1);
+        pageNumbers.push(page);
+        pageNumbers.push(page + 1);
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    return pageNumbers;
+  };
+
   const categories = ['all', 'Furniture', 'Appliances', 'Electronics', 'Tools', 'Home Decor'];
 
   return (
@@ -268,7 +300,7 @@ export const ProductsTab = ({ onNavigateToCart }) => {
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80" />
 
                   <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 rounded-lg bg-black/20 backdrop-blur-md border border-white/10 text-xs font-semibold text-warm-900">
+                    <span className="px-2.5 py-1 rounded-lg bg-black/30 backdrop-blur-md border border-white/15 text-xs font-semibold text-white">
                       {product.category}
                     </span>
                   </div>
@@ -290,10 +322,10 @@ export const ProductsTab = ({ onNavigateToCart }) => {
 
                   <div className="absolute bottom-3 left-3 right-3 flex items-baseline justify-between">
                     <div>
-                      <span className="text-2xl font-black text-warm-900 tracking-tight font-mono">
+                      <span className="text-2xl font-black text-white tracking-tight font-mono">
                         ₹{Number(product.pricePerDay || 0).toLocaleString('en-IN')}
                       </span>
-                      <span className="text-xs text-warm-600"> / day</span>
+                      <span className="text-xs text-slate-200"> / day</span>
                     </div>
                     <div className="flex items-center gap-1 text-[11px] text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-200">
                       <ShieldCheck className="w-3 h-3" />
@@ -373,19 +405,28 @@ export const ProductsTab = ({ onNavigateToCart }) => {
                 </button>
 
                 {/* Page numbers */}
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
-                      page === pageNum
-                        ? 'bg-amber-500 text-warm-900 shadow-md shadow-amber'
-                        : 'bg-white border border-warm-200 text-warm-600 hover:bg-warm-50 hover:text-warm-900 shadow-sm'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                ))}
+                {getPageNumbers().map((pageNum, index) => {
+                  if (pageNum === '...') {
+                    return (
+                      <span key={`ellipsis-${index}`} className="px-1.5 text-warm-400 font-bold select-none">
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={`page-${pageNum}`}
+                      onClick={() => setPage(pageNum)}
+                      className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
+                        page === pageNum
+                          ? 'bg-amber-500 text-warm-900 shadow-md shadow-amber'
+                          : 'bg-white border border-warm-200 text-warm-600 hover:bg-warm-50 hover:text-warm-900 shadow-sm'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
 
                 {/* Next button */}
                 <button

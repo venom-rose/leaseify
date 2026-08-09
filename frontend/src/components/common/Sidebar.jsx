@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen }) => {
+export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen, onProfileClick }) => {
   const { user, role, logout } = useAuth();
 
   const adminNav = [
@@ -145,15 +145,21 @@ export const Sidebar = ({ currentTab, setCurrentTab, isOpen, setIsOpen }) => {
         {/* User Card & Logout */}
         <div className="p-4 border-t border-warm-200 bg-warm-50">
           <div className="flex items-center gap-3">
-            <img
-              src={user?.avatar}
-              alt={user?.name}
-              className="h-10 w-10 rounded-full object-cover border border-warm-300 ring-2 ring-amber-200/50"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-warm-900 truncate">{user?.name}</p>
-              <p className="text-xs text-warm-500 truncate">{user?.email}</p>
-            </div>
+            <button
+              onClick={onProfileClick}
+              className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-all text-left focus:outline-none"
+              title="Edit Profile Settings"
+            >
+              <img
+                src={user?.avatar}
+                alt={user?.name}
+                className="h-10 w-10 rounded-full object-cover border border-warm-300 ring-2 ring-amber-200/50 shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-warm-900 truncate">{user?.name}</p>
+                <p className="text-xs text-warm-500 truncate">{user?.email}</p>
+              </div>
+            </button>
             <button
               onClick={logout}
               title="Sign Out"

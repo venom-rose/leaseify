@@ -315,6 +315,7 @@ exports.updateDetails = async (req, res, next) => {
       name: req.body.name,
       phone: req.body.phone,
       avatar: req.body.avatar,
+      dob: req.body.dob,
       emergencyContact: req.body.emergencyContact,
     };
 

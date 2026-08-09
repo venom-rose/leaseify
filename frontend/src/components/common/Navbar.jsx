@@ -3,7 +3,7 @@ import { Menu, Wifi, WifiOff, LogOut, Plus, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
-export const Navbar = ({ onMenuClick, onNewPropertyClick, onCartClick, onNotificationClick }) => {
+export const Navbar = ({ onMenuClick, onNewPropertyClick, onCartClick, onNotificationClick, onProfileClick }) => {
   const { user, role, isBackendConnected, logout } = useAuth();
   const { totalItemCount } = useCart();
 
@@ -93,17 +93,21 @@ export const Navbar = ({ onMenuClick, onNewPropertyClick, onCartClick, onNotific
 
         <div className="h-8 w-px bg-warm-200 mx-1 hidden sm:block" />
 
-        <div className="flex items-center gap-2.5 pl-1">
+        <button
+          onClick={onProfileClick}
+          className="flex items-center gap-2.5 pl-1 hover:opacity-80 transition-all text-left focus:outline-none"
+          title="Edit Profile Settings"
+        >
           <img
             src={user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'}
             alt={user?.name || 'User Avatar'}
             className="h-8 w-8 rounded-full object-cover border border-warm-300 ring-2 ring-amber-200/40"
           />
-          <div className="hidden md:block text-left">
+          <div className="hidden md:block">
             <p className="text-xs font-semibold text-warm-900 leading-none">{user?.name?.split(' ')[0] || 'User'}</p>
             <p className="text-[10px] text-warm-500 capitalize">{role}</p>
           </div>
-        </div>
+        </button>
       </div>
     </header>
   );

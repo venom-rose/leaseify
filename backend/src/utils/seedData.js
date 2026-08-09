@@ -33,6 +33,15 @@ const seedDB = async () => {
       phone: '+1 (555) 234-5678',
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
     });
+    
+    await User.create({
+      name: 'Debjeet Kundu (Admin)',
+      email: 'kundujeet255@gmail.com',
+      password: 'password123',
+      role: 'admin',
+      phone: '+1 (555) 123-4567',
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+    });
 
     const tenant1 = await User.create({
       name: 'Alex Rivera',
@@ -191,7 +200,71 @@ const seedDB = async () => {
       },
     ];
 
-    const properties = await Property.insertMany(propertiesData);
+    const indianCities = [
+      { name: 'Bangalore', state: 'KA', zip: '560001', localities: ['Indiranagar', 'Whitefield', 'Koramangala', 'HSR Layout', 'Jayanagar'] },
+      { name: 'Mumbai', state: 'MH', zip: '400001', localities: ['Bandra West', 'Andheri West', 'Juhu', 'Powai', 'Worli'] },
+      { name: 'Delhi NCR', state: 'DL', zip: '110001', localities: ['DLF Phase 5 Gurgaon', 'Vasant Kunj', 'Saket', 'Noida Sector 62', 'Greater Kailash'] },
+      { name: 'Chennai', state: 'TN', zip: '600001', localities: ['Adyar', 'Mylapore', 'OMR Road', 'Velachery', 'Besant Nagar'] },
+      { name: 'Hyderabad', state: 'TG', zip: '500001', localities: ['Gachibowli', 'Jubilee Hills', 'Banjara Hills', 'Kondapur', 'Madhapur'] },
+      { name: 'Pune', state: 'MH', zip: '411001', localities: ['Koregaon Park', 'Kalyani Nagar', 'Baner', 'Hinjewadi', 'Viman Nagar'] }
+    ];
+
+    const propTypes = ['Apartment', 'Single Family Home', 'Condo', 'Townhouse', 'Studio'];
+    const propPrefixes = ['Elegant 3BHK', 'Spacious 2BHK', 'Luxury Penthouse Loft', 'Cozy 1BHK Studio', 'Premium Townhouse'];
+    const propDescriptions = [
+      'Stunning modern residence featuring high ceilings, premium Italian marble flooring, high-speed fiber internet, and 24/7 power backup in a gated community.',
+      'Sleek and contemporary home situated in a prime locality, equipped with fully fitted modular kitchen, high-quality sanitary fixtures, and beautiful balcony views.',
+      'Luxury high-rise residence offering gorgeous sky views, private elevator access, double parking slot, smart lock entry, and close proximity to IT hubs.',
+      'Magnificent gated villa built with architectural perfection, featuring a private terrace garden, dedicated study/office room, and world-class society amenities.'
+    ];
+
+    const propertyImages = [
+      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=80'
+    ];
+
+    const extraPropertiesData = [];
+    for (let i = 0; i < 50; i++) {
+      const cityData = indianCities[i % indianCities.length];
+      const locality = cityData.localities[(i * 3) % cityData.localities.length];
+      const type = propTypes[i % propTypes.length];
+      const prefix = propPrefixes[(i * 7) % propPrefixes.length];
+      const description = propDescriptions[(i * 11) % propDescriptions.length];
+      const image = propertyImages[(i * 13) % propertyImages.length];
+
+      const rentAmount = Math.floor(18000 + ((i * 4500) % 85000));
+      const securityDeposit = rentAmount * 3;
+
+      extraPropertiesData.push({
+        title: `${prefix} at ${locality}`,
+        description: `${description} Conveniently located in ${locality}, ${cityData.name}. Ready to move in.`,
+        type,
+        address: {
+          street: `${100 + i * 4}, Block ${String.fromCharCode(65 + (i % 6))}, ${locality}`,
+          city: cityData.name,
+          state: cityData.state,
+          zipCode: cityData.zip,
+          country: 'India'
+        },
+        rentAmount,
+        securityDeposit,
+        bedrooms: Math.floor(1 + (i % 4)),
+        bathrooms: Math.floor(1 + ((i * 2) % 3)),
+        areaSqFt: Math.floor(650 + ((i * 45) % 2200)),
+        status: i % 10 === 0 ? 'rented' : 'available',
+        amenities: ['Power Backup', '24/7 Security', 'Covered Parking', 'Elevator', 'Gated Community', 'Swimming Pool', 'Gym'].slice(0, 3 + (i % 5)),
+        images: [image],
+        yearBuilt: 2015 + (i % 10),
+        petFriendly: i % 3 !== 0,
+        createdBy: admin._id
+      });
+    }
+
+    const properties = await Property.insertMany([...propertiesData, ...extraPropertiesData]);
     console.log(`[Seed] Created ${properties.length} properties.`);
 
     // 3. Create Leases
@@ -437,7 +510,93 @@ const seedDB = async () => {
       },
     ];
 
-    const products = await Product.insertMany(sampleProducts);
+    const categoriesList = ['Furniture', 'Electronics', 'Appliances', 'Tools', 'Fitness', 'Home Decor'];
+    const adjectivesList = ['Premium', 'Luxury', 'Ultra-Comfort', 'Smart', 'Ergonomic', 'Professional', 'Elite', 'Heavy-Duty', 'Compact', 'Pro-Series', 'Wireless', 'High-Fidelity', 'Eco-Friendly', 'Vintage', 'Modern'];
+    const brandsList = {
+      'Furniture': ['Herman Miller', 'West Elm', 'IKEA', 'Steelcase', 'Wayfair'],
+      'Electronics': ['Sony', 'LG', 'Samsung', 'Apple', 'Bose', 'Dell', 'HP', 'Sennheiser'],
+      'Appliances': ['Dyson', 'Breville', 'LG', 'Samsung', 'KitchenAid', 'Philips', 'Panasonic'],
+      'Tools': ['DeWalt', 'Bosch', 'Makita', 'Milwaukee', 'Black & Decker', 'Ryobi'],
+      'Fitness': ['Peloton', 'Bowflex', 'NordicTrack', 'Rogue Fitness', 'Theragun', 'Fitbit'],
+      'Home Decor': ['West Elm Decor', 'Crate & Barrel', 'Target Home', 'CB2', 'Pottery Barn', 'Zara Home']
+    };
+    const productNounsList = {
+      'Furniture': ['Velvet Sofa', 'Standing Desk', 'Ergonomic Chair', 'Dining Table', 'Bookshelf', 'Recliner', 'Bed Frame', 'Coffee Table'],
+      'Electronics': ['4K OLED TV', 'Noise Cancelling Headphones', 'Soundbar System', 'Laptop Pro', 'Smart Projector', 'Bluetooth Speaker', 'Monitor 34"', 'Tablet Duo'],
+      'Appliances': ['Air Purifier', 'Espresso Machine', 'Smart Refrigerator', 'Air Fryer', 'Microwave Oven', 'Robotic Vacuum', 'Blender Professional'],
+      'Tools': ['Drill Combo Kit', 'Circular Saw', 'Toolbox Organizer', 'Laser Level', 'Pressure Washer', 'Power Sanders Set'],
+      'Fitness': ['Stationary Bike', 'Adjustable Dumbbells', 'Treadmill Elite', 'Yoga Set Pro', 'Massage Gun', 'Rowing Machine'],
+      'Home Decor': ['Abstract Painting', 'Luxury Floor Rug', 'Minimalist Vase', 'Ceramic Table Lamp', 'Scented Candle Set', 'Floating Wall Shelves']
+    };
+    const imageTemplatesList = {
+      'Furniture': [
+        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&auto=format&fit=crop&q=80'
+      ],
+      'Electronics': [
+        'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80'
+      ],
+      'Appliances': [
+        'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=800&auto=format&fit=crop&q=80'
+      ],
+      'Tools': [
+        'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1530124560676-10551d5b3db0?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1581147036324-c17ac41dfa6c?w=800&auto=format&fit=crop&q=80'
+      ],
+      'Fitness': [
+        'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800&auto=format&fit=crop&q=80'
+      ],
+      'Home Decor': [
+        'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1537225228614-56cc3556d7ed?w=800&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1533873984035-25970ab07461?w=800&auto=format&fit=crop&q=80'
+      ]
+    };
+
+    const extraProducts = [];
+    for (let i = 0; i < 300; i++) {
+      const category = categoriesList[i % categoriesList.length];
+      const adj = adjectivesList[(i * 7) % adjectivesList.length];
+      const brandList = brandsList[category];
+      const brand = brandList[(i * 11) % brandList.length];
+      const nounList = productNounsList[category];
+      const noun = nounList[(i * 13) % nounList.length];
+      const imagesList = imageTemplatesList[category];
+      const image = imagesList[(i * 17) % imagesList.length];
+
+      const name = `${adj} ${brand} ${noun} (Model #${1001 + i})`;
+      const pricePerDay = Math.floor(5 + ((i * 3) % 25));
+      const securityDeposit = pricePerDay * Math.floor(10 + ((i * 2) % 15));
+
+      extraProducts.push({
+        name,
+        description: `This is a high-quality ${name} designed for maximum efficiency and durability. Enjoy premium features and industry-leading performance.`,
+        category,
+        pricePerDay,
+        securityDeposit,
+        stockQuantity: Math.floor(2 + (i % 15)),
+        isAvailable: true,
+        images: [image],
+        features: [`${adj} build quality`, `From trusted brand ${brand}`, 'Easy setup & deployment'],
+        specifications: {
+          brand,
+          model: `MDL-${2026 + i}`,
+          condition: i % 2 === 0 ? 'Brand New' : 'Like New',
+          dimensions: 'Standard size'
+        },
+        createdBy: admin._id
+      });
+    }
+
+    const products = await Product.insertMany([...sampleProducts, ...extraProducts]);
     console.log(`[Seed] Created ${products.length} rental products.`);
 
     // 7. Create Sample Rental Booking

@@ -35,13 +35,24 @@ exports.getProperties = async (req, res, next) => {
       if (req.query.maxRent) queryObj.rentAmount.$lte = Number(req.query.maxRent);
     }
 
+    // Pagination logic
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const skip = (page - 1) * limit;
+
     const properties = await Property.find(queryObj)
       .populate('currentTenant', 'name email phone avatar')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Property.countDocuments(queryObj);
 
     res.status(200).json({
       success: true,
-      count: properties.length,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
       data: properties,
     });
   } catch (err) {

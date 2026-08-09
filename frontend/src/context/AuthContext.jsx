@@ -149,6 +149,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (profileData) => {
+    const res = await api.updateProfile(profileData);
+    if (res.success) {
+      const updatedUser = {
+        ...user,
+        ...res.data,
+      };
+      setUser(updatedUser);
+      localStorage.setItem('leaseify_user', JSON.stringify(updatedUser));
+      return { success: true };
+    }
+    return { success: false, message: res.message || 'Profile update failed' };
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -165,6 +179,7 @@ export const AuthProvider = ({ children }) => {
         resendOtp,
         logout,
         switchRole,
+        updateProfile,
       }}
     >
       {children}

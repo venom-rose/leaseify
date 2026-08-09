@@ -81,15 +81,7 @@ export const LoginPage = ({ onNavigateToSignup }) => {
     setLoading(false);
   };
 
-  const handleQuickFill = (type) => {
-    if (type === 'admin') {
-      setEmail('admin@leaseify.com');
-      setPassword('password123');
-    } else {
-      setEmail('tenant@leaseify.com');
-      setPassword('password123');
-    }
-  };
+
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #FBF9F5 0%, #F5F0E8 100%)' }}>
@@ -126,44 +118,7 @@ export const LoginPage = ({ onNavigateToSignup }) => {
                 </p>
               </div>
 
-              {/* Quick Demo Credentials Autofill */}
-              <div className="p-3.5 rounded-2xl bg-warm-100 border border-warm-200 space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-warm-500">
-                  ⚡ Demo Accounts (Autofill Credentials)
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickFill('admin')}
-                    className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 hover:bg-amber-100 text-left transition-all group"
-                  >
-                    <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-warm-900 group-hover:text-amber-700 truncate">Manager (Admin)</p>
-                      <p className="text-[10px] text-warm-500 truncate">admin@leaseify.com</p>
-                    </div>
-                  </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleQuickFill('user')}
-                    className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-left transition-all group"
-                  >
-                    <UserCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-warm-900 group-hover:text-emerald-700 truncate">Tenant (Resident)</p>
-                      <p className="text-[10px] text-warm-500 truncate">tenant@leaseify.com</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              <div className="relative flex items-center justify-center">
-                <div className="border-t border-warm-200 w-full" />
-                <span className="bg-white px-3 text-[11px] text-warm-400 uppercase tracking-wider absolute">
-                  Or Sign In with Email
-                </span>
-              </div>
 
               {error && (
                 <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-500 text-xs flex items-center gap-2">

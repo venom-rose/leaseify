@@ -34,6 +34,7 @@ import {
   HelpCircle,
   ArrowUpRight,
   ShieldAlert,
+  Search,
 } from 'lucide-react';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -69,6 +70,14 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
   const [selectedRentalForEmail, setSelectedRentalForEmail] = useState(null);
   const [selectedRentalForReturn, setSelectedRentalForReturn] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all'); // all, high_risk, medium_risk, low_risk
+
+  // Product Availability filter, sort, search and page states
+  const [availSearch, setAvailSearch] = useState('');
+  const [availCategory, setAvailCategory] = useState('all');
+  const [availStatus, setAvailStatus] = useState('all');
+  const [availSort, setAvailSort] = useState('name-asc');
+  const [availPage, setAvailPage] = useState(1);
+  const [availLimit] = useState(8);
 
   useEffect(() => {
     loadPredictions();
@@ -211,6 +220,82 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
   const riskDistribution = data?.riskDistribution || [];
   const revenueForecast = data?.revenueForecast || [];
   const summary = data?.summary || { highRiskCount: 1, mediumRiskCount: 1, lowRiskCount: 1, avgFleetUtilization: 56 };
+
+  // Process Product Availability list with Search, Category filter, Status tag filter, Sort, and Pagination
+  let processedAvailability = [...productAvailability];
+
+  if (availSearch) {
+    const searchLow = availSearch.toLowerCase();
+    processedAvailability = processedAvailability.filter(
+      (p) =>
+        p.name.toLowerCase().includes(searchLow) ||
+        p.category.toLowerCase().includes(searchLow)
+    );
+  }
+
+  if (availCategory !== 'all') {
+    processedAvailability = processedAvailability.filter((p) => p.category === availCategory);
+  }
+
+  if (availStatus !== 'all') {
+    processedAvailability = processedAvailability.filter((p) => p.statusTag === availStatus);
+  }
+
+  processedAvailability.sort((a, b) => {
+    const [field, direction] = availSort.split('-');
+    const multiplier = direction === 'asc' ? 1 : -1;
+
+    if (field === 'name') {
+      return a.name.localeCompare(b.name) * multiplier;
+    }
+    if (field === 'utilization') {
+      return (a.utilizationRate - b.utilizationRate) * multiplier;
+    }
+    if (field === 'price') {
+      return (a.pricePerDay - b.pricePerDay) * multiplier;
+    }
+    if (field === 'inventory') {
+      return (a.totalInventory - b.totalInventory) * multiplier;
+    }
+    return 0;
+  });
+
+  const totalAvailItems = processedAvailability.length;
+  const totalAvailPages = Math.ceil(totalAvailItems / availLimit);
+  const availSkip = (availPage - 1) * availLimit;
+  const paginatedAvailability = processedAvailability.slice(availSkip, availSkip + availLimit);
+
+  const getAvailPageNumbers = () => {
+    const pageNumbers = [];
+    if (totalAvailPages <= 7) {
+      for (let i = 1; i <= totalAvailPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (availPage <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalAvailPages);
+      } else if (availPage >= totalAvailPages - 3) {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalAvailPages - 4; i <= totalAvailPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        pageNumbers.push(availPage - 1);
+        pageNumbers.push(availPage);
+        pageNumbers.push(availPage + 1);
+        pageNumbers.push('...');
+        pageNumbers.push(totalAvailPages);
+      }
+    }
+    return pageNumbers;
+  };
 
   const filteredPredictions = predictions.filter((p) => {
     if (activeFilter === 'all') return true;
@@ -511,70 +596,214 @@ export const AnalyticsPredictionsTab = ({ onNavigateTab }) => {
 
       {/* 2. Product Inventory Availability Heatmap */}
       <div className="glass-panel p-6 rounded-3xl border border-warm-200 space-y-4">
-        <div>
-          <h3 className="text-base font-bold text-warm-900 tracking-tight">
-            Live Product Availability & Stock Fleet Tracking
-          </h3>
-          <p className="text-xs text-warm-500">
-            Real-time ratio of units in warehouse vs units actively generating daily revenue
-          </p>
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div>
+            <h3 className="text-base font-bold text-warm-900 tracking-tight">
+              Live Product Availability & Stock Fleet Tracking
+            </h3>
+            <p className="text-xs text-warm-500">
+              Real-time ratio of units in warehouse vs units actively generating daily revenue
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {productAvailability.map((p) => {
-            const isFullyLeased = p.inStock === 0;
-            const isLowStock = p.inStock <= 2 && !isFullyLeased;
+        {/* Filter Panel */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-black/5 p-4 rounded-2xl border border-warm-200">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-warm-500" />
+            <input
+              type="text"
+              placeholder="Search by product name..."
+              value={availSearch}
+              onChange={(e) => {
+                setAvailSearch(e.target.value);
+                setAvailPage(1);
+              }}
+              className="w-full pl-10 pr-3 py-2 bg-white border border-warm-200 rounded-xl text-xs text-warm-900 focus:outline-none focus:border-amber-500"
+            />
+          </div>
 
-            return (
-              <div
-                key={p._id}
-                className={`p-4 rounded-2xl border space-y-3 bg-warm-50/70 transition-all ${
-                  isFullyLeased
-                    ? 'border-red-200 bg-red-500/5'
-                    : isLowStock
-                    ? 'border-amber-500/30 bg-amber-500/5'
-                    : 'border-warm-200'
+          {/* Category */}
+          <div>
+            <select
+              value={availCategory}
+              onChange={(e) => {
+                setAvailCategory(e.target.value);
+                setAvailPage(1);
+              }}
+              className="w-full px-3 py-2 bg-white border border-warm-200 rounded-xl text-xs text-warm-650 cursor-pointer focus:outline-none focus:border-amber-500"
+            >
+              <option value="all">All Categories</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Appliances">Appliances</option>
+              <option value="Tools">Tools</option>
+              <option value="Fitness">Fitness</option>
+              <option value="Home Decor">Home Decor</option>
+            </select>
+          </div>
+
+          {/* Status */}
+          <div>
+            <select
+              value={availStatus}
+              onChange={(e) => {
+                setAvailStatus(e.target.value);
+                setAvailPage(1);
+              }}
+              className="w-full px-3 py-2 bg-white border border-warm-200 rounded-xl text-xs text-warm-650 cursor-pointer focus:outline-none focus:border-amber-500"
+            >
+              <option value="all">All Statuses</option>
+              <option value="High Availability">High Availability</option>
+              <option value="Low Stock Alert">Low Stock Alert</option>
+              <option value="Fully Leased Out">Fully Leased Out</option>
+            </select>
+          </div>
+
+          {/* Sort */}
+          <div>
+            <select
+              value={availSort}
+              onChange={(e) => {
+                setAvailSort(e.target.value);
+                setAvailPage(1);
+              }}
+              className="w-full px-3 py-2 bg-white border border-warm-200 rounded-xl text-xs text-warm-650 cursor-pointer focus:outline-none focus:border-amber-500"
+            >
+              <option value="name-asc">Sort by: Name (A-Z)</option>
+              <option value="name-desc">Sort by: Name (Z-A)</option>
+              <option value="utilization-desc">Sort by: Utilization (Highest)</option>
+              <option value="utilization-asc">Sort by: Utilization (Lowest)</option>
+              <option value="price-desc">Sort by: Price (Highest)</option>
+              <option value="price-asc">Sort by: Price (Lowest)</option>
+              <option value="inventory-desc">Sort by: Total Stock (Highest)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Cards list */}
+        {paginatedAvailability.length === 0 ? (
+          <div className="text-center py-12 border border-dashed border-warm-200 rounded-2xl">
+            <p className="text-xs text-warm-500 font-semibold">No matching availability records found</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {paginatedAvailability.map((p) => {
+              const isFullyLeased = p.inStock === 0;
+              const isLowStock = p.inStock <= 2 && !isFullyLeased;
+
+              return (
+                <div
+                  key={p._id}
+                  className={`p-4 rounded-2xl border space-y-3 bg-warm-50/70 transition-all ${
+                    isFullyLeased
+                      ? 'border-red-200 bg-red-500/5'
+                      : isLowStock
+                      ? 'border-amber-500/30 bg-amber-500/5'
+                      : 'border-warm-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-bold text-amber-600">{p.category}</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                        isFullyLeased
+                          ? 'bg-red-500/20 text-red-400'
+                          : isLowStock
+                          ? 'bg-amber-500/20 text-amber-300'
+                          : 'bg-emerald-50 text-emerald-600'
+                      }`}
+                    >
+                      {p.statusTag}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-bold text-warm-900 truncate max-w-[220px]">{p.name}</h4>
+                    <p className="text-[11px] text-emerald-600 mt-0.5">₹{p.pricePerDay} / day rate</p>
+                  </div>
+
+                  {/* Utilization Progress Bar */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] text-warm-500">
+                      <span>In Stock: {p.inStock}</span>
+                      <span>Rented: {p.rentedUnits} / {p.totalInventory}</span>
+                    </div>
+                    <div className="w-full h-2 bg-white rounded-full overflow-hidden border border-warm-200">
+                      <div
+                        style={{ width: `${p.utilizationRate}%` }}
+                        className={`h-full ${
+                          isFullyLeased ? 'bg-red-500' : isLowStock ? 'bg-amber-500' : 'bg-amber-500'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {totalAvailPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between border-t border-warm-200 pt-5 mt-4 gap-4">
+            <div className="text-xs text-warm-500">
+              Showing page <span className="font-semibold text-warm-900">{availPage}</span> of <span className="font-semibold text-warm-900">{totalAvailPages}</span> ({totalAvailItems} items found)
+            </div>
+            <div className="flex items-center gap-1.5">
+              {/* Previous */}
+              <button
+                onClick={() => setAvailPage((prev) => Math.max(prev - 1, 1))}
+                disabled={availPage === 1}
+                className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
+                  availPage === 1
+                    ? 'bg-warm-100 border-warm-200 text-warm-400 cursor-not-allowed'
+                    : 'bg-white border-warm-200 text-warm-700 hover:bg-warm-50 hover:text-warm-900 shadow-sm'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold text-amber-600">{p.category}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                      isFullyLeased
-                        ? 'bg-red-500/20 text-red-400'
-                        : isLowStock
-                        ? 'bg-amber-500/20 text-amber-300'
-                        : 'bg-emerald-50 text-emerald-600'
+                Previous
+              </button>
+
+              {/* Numbers */}
+              {getAvailPageNumbers().map((pageNum, index) => {
+                if (pageNum === '...') {
+                  return (
+                    <span key={`ellipsis-${index}`} className="px-1 text-warm-400 font-bold select-none">
+                      ...
+                    </span>
+                  );
+                }
+                return (
+                  <button
+                    key={`page-${pageNum}`}
+                    onClick={() => setAvailPage(pageNum)}
+                    className={`w-7 h-7 rounded-xl text-[11px] font-bold transition-all ${
+                      availPage === pageNum
+                        ? 'bg-amber-500 text-warm-900 shadow-md shadow-amber'
+                        : 'bg-white border border-warm-200 text-warm-650 hover:bg-warm-50 hover:text-warm-900 shadow-sm'
                     }`}
                   >
-                    {p.statusTag}
-                  </span>
-                </div>
+                    {pageNum}
+                  </button>
+                );
+              })}
 
-                <div>
-                  <h4 className="text-xs font-bold text-warm-900 truncate max-w-[220px]">{p.name}</h4>
-                  <p className="text-[11px] text-emerald-600 mt-0.5">₹{p.pricePerDay} / day rate</p>
-                </div>
-
-                {/* Utilization Progress Bar */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-warm-500">
-                    <span>In Stock: {p.inStock}</span>
-                    <span>Rented: {p.rentedUnits} / {p.totalInventory}</span>
-                  </div>
-                  <div className="w-full h-2 bg-white rounded-full overflow-hidden border border-warm-200">
-                    <div
-                      style={{ width: `${p.utilizationRate}%` }}
-                      className={`h-full ${
-                        isFullyLeased ? 'bg-red-500' : isLowStock ? 'bg-amber-500' : 'bg-amber-500'
-                      }`}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              {/* Next */}
+              <button
+                onClick={() => setAvailPage((prev) => Math.min(prev + 1, totalAvailPages))}
+                disabled={availPage === totalAvailPages}
+                className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all ${
+                  availPage === totalAvailPages
+                    ? 'bg-warm-100 border-warm-200 text-warm-400 cursor-not-allowed'
+                    : 'bg-white border-warm-200 text-warm-700 hover:bg-warm-50 hover:text-warm-900 shadow-sm'
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Email Reminder Modal */}

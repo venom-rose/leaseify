@@ -27,6 +27,10 @@ export const PropertiesTab = ({ isAddModalOpen, setIsAddModalOpen }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedProperty, setSelectedProperty] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(6);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Form State for Add Property
   const [formData, setFormData] = useState({
@@ -50,19 +54,55 @@ export const PropertiesTab = ({ isAddModalOpen, setIsAddModalOpen }) => {
 
   useEffect(() => {
     fetchProperties();
-  }, [search, statusFilter, typeFilter]);
+  }, [page, search, statusFilter, typeFilter]);
 
   const fetchProperties = async () => {
     setLoading(true);
     const res = await api.getProperties({
+      page,
+      limit,
       search,
       status: statusFilter,
       type: typeFilter,
     });
     if (res.success) {
-      setProperties(res.data);
+      setProperties(res.data || []);
+      setTotalPages(res.totalPages || 1);
+      setTotalItems(res.totalItems || 0);
     }
     setLoading(false);
+  };
+
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (page <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      } else if (page >= totalPages - 3) {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push('...');
+        pageNumbers.push(page - 1);
+        pageNumbers.push(page);
+        pageNumbers.push(page + 1);
+        pageNumbers.push('...');
+        pageNumbers.push(totalPages);
+      }
+    }
+    return pageNumbers;
   };
 
   const handleAddSubmit = async (e) => {
@@ -133,7 +173,7 @@ export const PropertiesTab = ({ isAddModalOpen, setIsAddModalOpen }) => {
             type="text"
             placeholder="Search by title, city, street..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="w-full pl-10 pr-4 py-2 bg-black/20 border border-warm-200 rounded-xl text-xs text-warm-900 placeholder-warm-400 focus:outline-none focus:border-amber-500"
           />
         </div>
@@ -144,7 +184,7 @@ export const PropertiesTab = ({ isAddModalOpen, setIsAddModalOpen }) => {
             <Filter className="w-3.5 h-3.5 text-warm-500" />
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
               className="bg-transparent text-xs text-warm-600 focus:outline-none cursor-pointer"
             >
               <option value="all" className="bg-white">All Statuses</option>
@@ -158,7 +198,7 @@ export const PropertiesTab = ({ isAddModalOpen, setIsAddModalOpen }) => {
             <Building2 className="w-3.5 h-3.5 text-warm-500" />
             <select
               value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
+              onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
               className="bg-transparent text-xs text-warm-600 focus:outline-none cursor-pointer"
             >
               <option value="all" className="bg-white">All Types</option>
@@ -240,6 +280,66 @@ export const PropertiesTab = ({ isAddModalOpen, setIsAddModalOpen }) => {
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-warm-200 pt-6 mt-4 gap-4">
+          <div className="text-xs text-warm-500">
+            Showing page <span className="font-semibold text-warm-900">{page}</span> of <span className="font-semibold text-warm-900">{totalPages}</span> ({totalItems} total items)
+          </div>
+          <div className="flex items-center gap-1.5">
+            {/* Previous button */}
+            <button
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                page === 1
+                  ? 'bg-warm-100 border-warm-200 text-warm-400 cursor-not-allowed'
+                  : 'bg-white border-warm-200 text-warm-700 hover:bg-warm-50 hover:text-warm-900 shadow-sm'
+              }`}
+            >
+              Previous
+            </button>
+
+            {/* Page numbers */}
+            {getPageNumbers().map((pageNum, index) => {
+              if (pageNum === '...') {
+                return (
+                  <span key={`ellipsis-${index}`} className="px-1.5 text-warm-400 font-bold select-none">
+                    ...
+                  </span>
+                );
+              }
+              return (
+                <button
+                  key={`page-${pageNum}`}
+                  onClick={() => setPage(pageNum)}
+                  className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
+                    page === pageNum
+                      ? 'bg-amber-500 text-warm-900 shadow-md shadow-amber'
+                      : 'bg-white border border-warm-200 text-warm-600 hover:bg-warm-50 hover:text-warm-900 shadow-sm'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            {/* Next button */}
+            <button
+              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={page === totalPages}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                page === totalPages
+                  ? 'bg-warm-100 border-warm-200 text-warm-400 cursor-not-allowed'
+                  : 'bg-white border-warm-200 text-warm-700 hover:bg-warm-50 hover:text-warm-900 shadow-sm'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Property Details Modal */}
       {selectedProperty && (

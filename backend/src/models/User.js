@@ -36,6 +36,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    dob: {
+      type: Date,
+    },
     isVerified: {
       type: Boolean,
       default: false,

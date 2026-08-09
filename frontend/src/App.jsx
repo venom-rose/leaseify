@@ -16,6 +16,7 @@ import { AnalyticsPredictionsTab } from './components/analytics/AnalyticsPredict
 import { NotificationDrawer } from './components/notifications/NotificationDrawer';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
+import { ProfileModal } from './components/common/ProfileModal';
 
 // Robust UI Error Boundary to prevent any blank screen
 class ErrorBoundary extends Component {
@@ -72,6 +73,7 @@ const MainApp = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isAddPropertyModalOpen, setIsAddPropertyModalOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // If not authenticated, present dedicated Login or Signup page
   if (!isAuthenticated) {
@@ -102,6 +104,7 @@ const MainApp = () => {
         setCurrentTab={setCurrentTab}
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
+        onProfileClick={() => setIsProfileOpen(true)}
       />
 
       {/* Smart Notifications Drawer */}
@@ -117,6 +120,7 @@ const MainApp = () => {
           onMenuClick={() => setSidebarOpen(true)}
           onCartClick={() => setCurrentTab('cart')}
           onNotificationClick={() => setIsNotificationOpen(true)}
+          onProfileClick={() => setIsProfileOpen(true)}
           onNewPropertyClick={
             role === 'admin'
               ? () => {
@@ -196,6 +200,11 @@ const MainApp = () => {
           )}
         </main>
       </div>
+      {/* Profile Settings Modal */}
+      <ProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
     </div>
   );
 };
