@@ -1,4 +1,6 @@
 const MaintenanceRequest = require('../models/MaintenanceRequest');
+const Lease = require('../models/Lease');
+const Property = require('../models/Property');
 
 // @desc    Get maintenance requests (Admin gets all, Tenant gets own)
 // @route   GET /api/maintenance
@@ -39,6 +41,38 @@ exports.createMaintenanceRequest = async (req, res, next) => {
   try {
     if (req.user.role !== 'admin') {
       req.body.tenant = req.user.id;
+      
+      // Auto-assign property based on tenant's active lease if not already provided
+      if (!req.body.property) {
+        const lease = await Lease.findOne({ tenant: req.user.id, status: 'active' });
+        if (lease) {
+          req.body.property = lease.property;
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: 'You do not have an active lease. Cannot file a maintenance request without an associated property.',
+          });
+        }
+      }
+    } else {
+      // If admin, check if property is specified in the request
+      if (!req.body.property) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please specify a property for the maintenance request.',
+        });
+      }
+      
+      // If tenant is not specified, try to find the tenant currently renting the property
+      if (!req.body.tenant) {
+        const property = await Property.findById(req.body.property);
+        if (property && property.currentTenant) {
+          req.body.tenant = property.currentTenant;
+        } else {
+          // If no current tenant (vacant), set it to the admin (req.user.id) so the required field is satisfied
+          req.body.tenant = req.user.id;
+        }
+      }
     }
 
     const request = await MaintenanceRequest.create(req.body);

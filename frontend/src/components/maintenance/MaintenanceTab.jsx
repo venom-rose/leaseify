@@ -19,17 +19,39 @@ export const MaintenanceTab = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isNewTicketModalOpen, setIsNewTicketModalOpen] = useState(false);
+  const [properties, setProperties] = useState([]);
+  const [userLease, setUserLease] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
     category: 'Plumbing',
     priority: 'medium',
     description: '',
+    property: '',
   });
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+    if (role === 'admin') {
+      fetchProperties();
+    } else {
+      fetchUserLease();
+    }
+  }, [role]);
+
+  const fetchProperties = async () => {
+    const res = await api.getProperties({ limit: 100 });
+    if (res.success) setProperties(res.data);
+  };
+
+  const fetchUserLease = async () => {
+    const res = await api.getLeases();
+    if (res.success && res.data.length > 0) {
+      const active = res.data.find((l) => l.status === 'active') || res.data[0];
+      setUserLease(active);
+      setFormData((prev) => ({ ...prev, property: active.property?._id || '' }));
+    }
+  };
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -58,6 +80,7 @@ export const MaintenanceTab = () => {
         category: 'Plumbing',
         priority: 'medium',
         description: '',
+        property: role === 'admin' ? '' : (userLease?.property?._id || ''),
       });
     }
   };
@@ -152,6 +175,43 @@ export const MaintenanceTab = () => {
         maxWidth="max-w-lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {role === 'admin' ? (
+            <div>
+              <label className="block text-xs font-medium text-warm-600 mb-1">Property</label>
+              <select
+                required
+                value={formData.property}
+                onChange={(e) => setFormData({ ...formData, property: e.target.value })}
+                className="w-full px-3 py-2 bg-warm-50 border border-warm-200 rounded-xl text-xs text-warm-900 focus:border-amber-500 focus:outline-none"
+              >
+                <option value="">Select Property...</option>
+                {properties.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.title} {p.currentTenant ? `(Tenant: ${p.currentTenant.name})` : '(Vacant)'}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            userLease ? (
+              <div className="p-3 bg-amber-50/50 border border-amber-200/60 rounded-xl">
+                <span className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider block mb-0.5">
+                  Submitting For Your Leased Unit
+                </span>
+                <span className="text-xs font-bold text-warm-900">
+                  {userLease.property?.title || 'Skyline Luxury Penthouse'}
+                </span>
+                <span className="text-[11px] text-warm-500 block">
+                  {userLease.property?.address?.street}, {userLease.property?.address?.city}
+                </span>
+              </div>
+            ) : (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium">
+                ⚠️ You do not have an active lease associated with a property. You cannot submit a maintenance request.
+              </div>
+            )
+          )}
+
           <div>
             <label className="block text-xs font-medium text-warm-600 mb-1">Issue Title</label>
             <input
@@ -210,7 +270,8 @@ export const MaintenanceTab = () => {
 
           <button
             type="submit"
-            className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 text-warm-900 font-semibold rounded-xl text-xs shadow-lg shadow-amber transition-all"
+            disabled={role !== 'admin' && !userLease}
+            className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-sky-400 hover:to-indigo-500 text-warm-900 font-semibold rounded-xl text-xs shadow-lg shadow-amber transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Dispatch Ticket to Maintenance
           </button>
